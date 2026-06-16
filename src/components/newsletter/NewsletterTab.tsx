@@ -124,7 +124,7 @@ export async function NewsletterTab({ date }: { date?: string }) {
         />
       )}
 
-      <BlogArticle title={article?.title} content={article?.content} />
+      <BlogArticle title={article?.title} content={article?.content} date={targetDate} />
 
       {rawNews.length > 0 && <RawNewsSection news={rawNews} />}
     </div>
