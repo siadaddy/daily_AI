@@ -1,0 +1,43 @@
+import type { Metadata } from 'next'
+import { Inter, Noto_Sans_KR } from 'next/font/google'
+import { ThemeProvider } from '@/components/layout/ThemeProvider'
+import './globals.css'
+
+const inter = Inter({
+  variable: '--font-inter',
+  subsets: ['latin'],
+  display: 'swap',
+})
+
+const notoSansKR = Noto_Sans_KR({
+  variable: '--font-noto-kr',
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '700'],
+  display: 'swap',
+})
+
+export const metadata: Metadata = {
+  title: {
+    default: '시아아빠의 AI 데일리',
+    template: '%s | 시아아빠의 AI 데일리',
+  },
+  description: 'AI가 매일 자동 생성하는 뉴스레터 · 트렌드 리포트 · 음악 유니버스',
+}
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode
+}>) {
+  return (
+    <html
+      lang="ko"
+      className={`${inter.variable} ${notoSansKR.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="flex min-h-screen flex-col antialiased">
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
+    </html>
+  )
+}
