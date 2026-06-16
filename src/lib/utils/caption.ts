@@ -13,15 +13,20 @@ export function highlightCaption(text: string): string {
 
 /**
  * 마크다운 → HTML 변환 (블로그 아티클용)
- * # h1 / ## h2 / ### h3 / - li / **bold** 지원
+ * # h1 / ## h2 / ### h3 / - li / **bold** / > blockquote / #태그 지원
  */
 export function mdToHtml(md: string): string {
-  const lines = md.split('\n')
+  const normalized = md.replace(/\\n/g, '\n')
+  const lines = normalized.split('\n')
   let html = ''
   let inList = false
 
+  const isHashtagLine = (s: string) =>
+    s.length > 0 && s.split(/\s+/).every((w) => w.startsWith('#'))
+
   for (const line of lines) {
     const l = line.trim()
+
     if (l.startsWith('### ')) {
       if (inList) { html += '</ul>'; inList = false }
       html += `<h3>${l.slice(4)}</h3>`
@@ -31,9 +36,18 @@ export function mdToHtml(md: string): string {
     } else if (l.startsWith('# ')) {
       if (inList) { html += '</ul>'; inList = false }
       html += `<h1>${l.slice(2)}</h1>`
+    } else if (l.startsWith('> ')) {
+      if (inList) { html += '</ul>'; inList = false }
+      html += `<blockquote>${l.slice(2)}</blockquote>`
     } else if (l.startsWith('- ')) {
       if (!inList) { html += '<ul>'; inList = true }
       html += `<li>${l.slice(2)}</li>`
+    } else if (isHashtagLine(l)) {
+      if (inList) { html += '</ul>'; inList = false }
+      const tags = l.split(/\s+/).map((t) =>
+        `<span class="article-tag">${t}</span>`
+      ).join('')
+      html += `<div class="article-tags">${tags}</div>`
     } else if (l) {
       if (inList) { html += '</ul>'; inList = false }
       html += `<p>${l}</p>`
@@ -42,4 +56,9 @@ export function mdToHtml(md: string): string {
   if (inList) html += '</ul>'
 
   return html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+}
+
+/** 한국어 기준 읽기 예상 시간 (분) */
+export function readingMinutes(text: string): number {
+  return Math.max(1, Math.round(text.replace(/\s/g, '').length / 350))
 }
