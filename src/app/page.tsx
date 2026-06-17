@@ -35,10 +35,12 @@ export default async function Home({
 
   return (
     <>
-      <Header />
-      <Suspense>
-        <TabNav />
-      </Suspense>
+      <div className="top-bar-fixed">
+        <Header />
+        <Suspense>
+          <TabNav />
+        </Suspense>
+      </div>
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 pt-3 pb-6">
         {tab === 'newsletter' && (
           <Suspense fallback={<LoadingSkeleton />}>

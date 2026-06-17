@@ -389,11 +389,15 @@ body {
   word-break: break-word;
 }
 
-/* ── Site Header ───────────────────────────────────── */
-.site-header {
+/* ── Top Bar (Header + TabNav 통합 고정) ───────────── */
+.top-bar-fixed {
   position: sticky;
   top: 0;
   z-index: 50;
+}
+
+/* ── Site Header ───────────────────────────────────── */
+.site-header {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
 }

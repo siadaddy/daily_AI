@@ -27,8 +27,8 @@ export function TabNav() {
 
   return (
     <nav
-      className="sticky border-b"
-      style={{ top: 'var(--header-h)', zIndex: 40, background: 'var(--surface)', borderColor: 'var(--border)' }}
+      className="border-b"
+      style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
     >
       <div className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-4">
         {TABS.map((tab) => {
