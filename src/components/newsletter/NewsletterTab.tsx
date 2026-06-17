@@ -9,7 +9,7 @@ import { DateNav } from './DateNav'
 import type { ContentCard, NewsCard as NewsCardType, NewsTrend } from '@/lib/types'
 import { Suspense } from 'react'
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 function getToday() {
   return new Date()
