@@ -389,11 +389,23 @@ body {
   word-break: break-word;
 }
 
-/* ── Top Bar (Header + TabNav 통합 고정) ───────────── */
+/* ── Top Bar (Header + TabNav + DashboardBar + DateNav 통합 고정) */
 .top-bar-fixed {
   position: sticky;
   top: 0;
   z-index: 50;
+  background: var(--bg);
+}
+.top-bar-content {
+  border-top: 1px solid var(--border);
+  padding: 6px 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+  padding-bottom: 6px;
 }
 
 /* ── Site Header ───────────────────────────────────── */

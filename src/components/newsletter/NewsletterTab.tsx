@@ -1,11 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
-import { DashboardBar } from '@/components/dashboard/DashboardBar'
 import { FeaturedCard } from './FeaturedCard'
 import { NewsCard } from './NewsCard'
 import { BlogArticle } from './BlogArticle'
 import { RawNewsSection } from './RawNewsSection'
 import { AiPicksSection } from './AiPicksSection'
-import { DateNav } from './DateNav'
 import type { ContentCard, NewsCard as NewsCardType, NewsTrend } from '@/lib/types'
 import { Suspense } from 'react'
 import nextDynamic from 'next/dynamic'
@@ -133,12 +131,6 @@ export async function NewsletterTab({ date }: { date?: string }) {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="sticky-nav-bar">
-        <DashboardBar />
-        <Suspense>
-          <DateNav selectedDate={targetDate} />
-        </Suspense>
-      </div>
 
       {cards.length === 0 && (
         <div
