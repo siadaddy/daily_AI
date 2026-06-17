@@ -10,14 +10,6 @@ import { MusicUniverse } from '@/components/music/MusicUniverse'
 import { PortfolioSection } from '@/components/portfolio/PortfolioCard'
 import type { TabId } from '@/lib/types'
 
-const CommunityTab = dynamic(
-  () =>
-    import('@/components/community/CommunityTab').then((m) => ({
-      default: m.CommunityTab,
-    })),
-  { loading: () => <LoadingSkeleton /> }
-)
-
 function LoadingSkeleton() {
   return (
     <div className="flex flex-col gap-4">
@@ -60,7 +52,6 @@ export default async function Home({
         )}
         {tab === 'music' && <MusicUniverse />}
         {tab === 'office' && <OfficeTab />}
-        {tab === 'community' && <CommunityTab />}
 
         {/* Portfolio — 항상 하단에 표시 */}
         <div className="mt-12">

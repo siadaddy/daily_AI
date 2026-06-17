@@ -2,6 +2,7 @@
 
 import { useTheme } from '@/components/layout/ThemeProvider'
 import { NewsTicker } from '@/components/dashboard/NewsTicker'
+import { UserButton } from '@/components/layout/UserButton'
 import { Suspense } from 'react'
 
 export function Header() {
@@ -25,8 +26,9 @@ export function Header() {
             </div>
           </div>
 
-          {/* 우측: 배지 + 테마 토글 */}
+          {/* 우측: 로그인 + 배지 + 테마 토글 */}
           <div className="flex items-center gap-2">
+            <UserButton />
             <div className="header-stats">
               <span>60일 아카이브</span>
             </div>

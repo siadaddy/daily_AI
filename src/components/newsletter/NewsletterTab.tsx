@@ -8,6 +8,12 @@ import { AiPicksSection } from './AiPicksSection'
 import { DateNav } from './DateNav'
 import type { ContentCard, NewsCard as NewsCardType, NewsTrend } from '@/lib/types'
 import { Suspense } from 'react'
+import nextDynamic from 'next/dynamic'
+
+const ContentInteraction = nextDynamic(
+  () => import('./ContentInteraction').then((m) => ({ default: m.ContentInteraction })),
+  { loading: () => null }
+)
 
 export const dynamic = 'force-dynamic'
 
@@ -146,6 +152,7 @@ export async function NewsletterTab({ date }: { date?: string }) {
               ))}
             </div>
           )}
+          <ContentInteraction contentKey={`card_news:${targetDate}`} />
         </section>
       )}
 
@@ -159,6 +166,7 @@ export async function NewsletterTab({ date }: { date?: string }) {
             picks={trend.top3}
             insight={trend.talking_points?.one_line_insight}
           />
+          <ContentInteraction contentKey={`ai_picks:${targetDate}`} />
         </section>
       )}
 
@@ -169,6 +177,7 @@ export async function NewsletterTab({ date }: { date?: string }) {
         <section className="flex flex-col gap-4">
           <SectionTitle icon="✍️" title="AI 편집장의 리뷰" />
           <BlogArticle title={article?.title} content={article?.content} date={targetDate} />
+          <ContentInteraction contentKey={`article:${targetDate}`} />
         </section>
       )}
 
