@@ -40,7 +40,7 @@ export function AiPicksSection({
         {picks.map((item) => (
           <div
             key={item.rank}
-            className="glass-card flex flex-col gap-2 p-4"
+            className="glass-card flex min-h-[160px] flex-col gap-2 p-4"
           >
             {/* Rank badge */}
             <div className="flex items-center justify-between">
@@ -67,12 +67,12 @@ export function AiPicksSection({
             </div>
 
             {/* Title */}
-            <p className="text-sm font-semibold leading-snug" style={{ color: 'var(--text)' }}>
+            <p className="line-clamp-2 text-sm font-semibold leading-snug" style={{ color: 'var(--text)' }}>
               {item.title}
             </p>
 
             {/* Why */}
-            <p className="mt-auto text-xs leading-relaxed" style={{ color: 'var(--muted2)' }}>
+            <p className="mt-auto line-clamp-3 text-xs leading-relaxed" style={{ color: 'var(--muted2)' }}>
               {item.why}
             </p>
           </div>

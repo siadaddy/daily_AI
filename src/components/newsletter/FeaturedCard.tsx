@@ -41,7 +41,7 @@ export function FeaturedCard({ card }: { card: ContentCard }) {
       </div>
 
       {/* 우: 텍스트 영역 */}
-      <div className="flex flex-col justify-center p-6 md:p-10">
+      <div className="flex flex-col justify-start p-6 md:p-10">
         {/* 라벨 */}
         <p
           className="mb-3 text-[0.67rem] font-black uppercase tracking-[0.14em]"
@@ -52,7 +52,7 @@ export function FeaturedCard({ card }: { card: ContentCard }) {
 
         {/* 제목 */}
         <h2
-          className="mb-5 text-xl font-bold leading-snug tracking-tight md:text-2xl"
+          className="mb-5 line-clamp-2 text-xl font-bold leading-snug tracking-tight md:text-2xl"
           style={{ color: 'var(--text)' }}
         >
           {card.headline}
@@ -70,7 +70,7 @@ export function FeaturedCard({ card }: { card: ContentCard }) {
             href={card.source_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="source-btn"
+            className="source-btn mt-auto"
           >
             📰 {card.source_name || '원문 보기'} →
           </a>
