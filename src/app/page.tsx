@@ -39,7 +39,7 @@ export default async function Home({
       <Suspense>
         <TabNav />
       </Suspense>
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 pt-3 pb-6">
         {tab === 'newsletter' && (
           <Suspense fallback={<LoadingSkeleton />}>
             <NewsletterTab date={date} />

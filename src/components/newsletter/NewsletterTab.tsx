@@ -133,10 +133,12 @@ export async function NewsletterTab({ date }: { date?: string }) {
 
   return (
     <div className="flex flex-col gap-8">
-      <Suspense>
-        <DateNav selectedDate={targetDate} />
-      </Suspense>
-      <DashboardBar />
+      <div className="flex flex-col gap-2">
+        <Suspense>
+          <DateNav selectedDate={targetDate} />
+        </Suspense>
+        <DashboardBar />
+      </div>
 
       {cards.length === 0 && (
         <div
