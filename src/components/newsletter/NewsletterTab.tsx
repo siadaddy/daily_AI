@@ -19,10 +19,24 @@ export const dynamic = 'force-dynamic'
 
 function SectionTitle({ icon, title, sub }: { icon: string; title: string; sub?: string }) {
   return (
-    <div className="flex items-center gap-2 border-b pb-2" style={{ borderColor: 'var(--border)' }}>
-      <span className="text-lg">{icon}</span>
-      <span className="font-semibold text-sm" style={{ color: 'var(--fg)' }}>{title}</span>
-      {sub && <span className="ml-1 text-xs" style={{ color: 'var(--muted)' }}>{sub}</span>}
+    <div
+      className="flex items-center gap-3 rounded-xl px-4 py-3"
+      style={{
+        background: 'linear-gradient(135deg, rgba(28,105,212,0.08) 0%, rgba(167,139,250,0.04) 100%)',
+        border: '1px solid rgba(28,105,212,0.15)',
+        borderLeft: '3px solid var(--bmw)',
+      }}
+    >
+      <span className="text-xl">{icon}</span>
+      <span className="text-base font-bold" style={{ color: 'var(--text)' }}>{title}</span>
+      {sub && (
+        <span
+          className="ml-auto rounded-full px-2.5 py-0.5 text-xs font-semibold"
+          style={{ background: 'var(--glass)', border: '1px solid var(--border)', color: 'var(--muted2)' }}
+        >
+          {sub}
+        </span>
+      )}
     </div>
   )
 }
