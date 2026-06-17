@@ -16,7 +16,11 @@ export function Header() {
       <div className="header-main">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           {/* Logo — home link */}
-          <Link href="/" className="header-logo group">
+          <Link
+            href="/"
+            className="header-logo group"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          >
             <div className="header-logo-icon transition-transform group-hover:scale-110">🤖</div>
             <div>
               <h1 className="header-title">시아아빠의 AI 데일리</h1>
