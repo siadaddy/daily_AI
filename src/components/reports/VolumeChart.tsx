@@ -11,10 +11,13 @@ import {
 import { Bar } from 'react-chartjs-2'
 import type { DailyVolume } from '@/lib/types'
 import dayjs from 'dayjs'
+import { useChartColors } from '@/lib/hooks/useChartColors'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Filler)
 
 export function VolumeChart({ volumeSeries }: { volumeSeries: DailyVolume[] }) {
+  const { grid, tick } = useChartColors()
+
   if (volumeSeries.length === 0) {
     return (
       <p className="py-8 text-center text-sm" style={{ color: 'var(--muted)' }}>
@@ -49,12 +52,12 @@ export function VolumeChart({ volumeSeries }: { volumeSeries: DailyVolume[] }) {
         },
         scales: {
           x: {
-            grid: { color: 'rgba(255,255,255,0.05)' },
-            ticks: { color: '#94a3b8', font: { size: 11 }, maxRotation: 45 },
+            grid: { color: grid },
+            ticks: { color: tick, font: { size: 11 }, maxRotation: 45 },
           },
           y: {
-            grid: { color: 'rgba(255,255,255,0.05)' },
-            ticks: { color: '#94a3b8', font: { size: 11 }, stepSize: 1 },
+            grid: { color: grid },
+            ticks: { color: tick, font: { size: 11 }, stepSize: 1 },
             beginAtZero: true,
           },
         },

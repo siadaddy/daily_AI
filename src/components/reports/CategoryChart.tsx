@@ -9,10 +9,13 @@ import {
 } from 'chart.js'
 import { Bar } from 'react-chartjs-2'
 import type { CategoryStat } from '@/lib/types'
+import { useChartColors } from '@/lib/hooks/useChartColors'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip)
 
 export function CategoryChart({ stats }: { stats: CategoryStat[] }) {
+  const { grid, tick } = useChartColors()
+
   const data = {
     labels: stats.map((s) => s.name),
     datasets: [
@@ -38,8 +41,8 @@ export function CategoryChart({ stats }: { stats: CategoryStat[] }) {
         responsive: true,
         plugins: { legend: { display: false } },
         scales: {
-          x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
-          y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+          x: { grid: { color: grid }, ticks: { color: tick } },
+          y: { grid: { color: grid }, ticks: { color: tick } },
         },
       }}
     />

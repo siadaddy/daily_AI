@@ -22,6 +22,11 @@
   --border: rgba(255, 255, 255, 0.07);
   --glass: rgba(255, 255, 255, 0.04);
 
+  /* Chart.js (dark) */
+  --chart-grid: rgba(255, 255, 255, 0.08);
+  --chart-tick: #64748b;
+  --chart-legend: #94a3b8;
+
   /* Radii */
   --r-sm: 10px;
   --r-md: 18px;
@@ -40,10 +45,15 @@
   --card2: #f8fafc;
   --text: #0f172a;
   --muted: #64748b;
-  --muted2: #94a3b8;
+  --muted2: #475569;
   --border: rgba(0, 0, 0, 0.08);
   --glass: rgba(0, 0, 0, 0.03);
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.08);
+
+  /* Chart.js (light) */
+  --chart-grid: rgba(0, 0, 0, 0.08);
+  --chart-tick: #475569;
+  --chart-legend: #475569;
 }
 
 /* ── Base ──────────────────────────────────────────── */
@@ -59,7 +69,9 @@ html {
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Inter', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  font-family: var(--font-noto-kr), 'Noto Sans KR', 'Apple SD Gothic Neo', var(--font-inter), 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
 }
 

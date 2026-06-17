@@ -3,6 +3,7 @@
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip } from 'chart.js'
 import { Bar } from 'react-chartjs-2'
 import type { KeywordStat } from '@/lib/types'
+import { useChartColors } from '@/lib/hooks/useChartColors'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip)
 
@@ -18,6 +19,8 @@ const COLORS = [
 ]
 
 export function KeywordChart({ keywords }: { keywords: KeywordStat[] }) {
+  const { grid, tick } = useChartColors()
+
   if (keywords.length === 0) {
     return (
       <p className="py-8 text-center text-sm" style={{ color: 'var(--muted)' }}>
@@ -49,12 +52,12 @@ export function KeywordChart({ keywords }: { keywords: KeywordStat[] }) {
         plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => ` ${ctx.raw}회` } } },
         scales: {
           x: {
-            grid: { color: 'rgba(255,255,255,0.05)' },
-            ticks: { color: '#94a3b8', font: { size: 11 } },
+            grid: { color: grid },
+            ticks: { color: tick, font: { size: 11 } },
           },
           y: {
             grid: { display: false },
-            ticks: { color: '#e2e8f0', font: { size: 12 } },
+            ticks: { color: tick, font: { size: 12 } },
           },
         },
       }}

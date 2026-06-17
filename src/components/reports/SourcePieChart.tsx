@@ -3,6 +3,7 @@
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
 import { Doughnut } from 'react-chartjs-2'
 import type { SourceStat } from '@/lib/types'
+import { useChartColors } from '@/lib/hooks/useChartColors'
 
 ChartJS.register(ArcElement, Tooltip, Legend)
 
@@ -19,6 +20,8 @@ const PALETTE = [
 ]
 
 export function SourcePieChart({ sources }: { sources: SourceStat[] }) {
+  const { legend } = useChartColors()
+
   if (sources.length === 0) {
     return (
       <p className="py-8 text-center text-sm" style={{ color: 'var(--muted)' }}>
@@ -49,7 +52,7 @@ export function SourcePieChart({ sources }: { sources: SourceStat[] }) {
           legend: {
             position: 'bottom',
             labels: {
-              color: '#94a3b8',
+              color: legend,
               font: { size: 11 },
               padding: 12,
               boxWidth: 12,
