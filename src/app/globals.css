@@ -552,8 +552,13 @@ body {
   overflow-x: auto;
   scrollbar-width: none;
   padding: 0 4px;
+  scroll-behavior: smooth;
+  -webkit-user-select: none;
+  user-select: none;
 }
 .dash-scroll::-webkit-scrollbar { display: none; }
+.dash-scroll--draggable { cursor: grab; }
+.dash-scroll--grabbing  { cursor: grabbing; }
 
 .dash-widget {
   display: flex;

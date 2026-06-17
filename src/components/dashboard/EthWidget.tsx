@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from 'react'
 
-export function BtcWidget() {
+export function EthWidget() {
   const [data, setData] = useState<{ krw: number; change: number } | null>(null)
 
   useEffect(() => {
     fetch('/api/crypto')
       .then((r) => r.json())
-      .then((d) => setData(d?.btc ?? null))
+      .then((d) => setData(d?.eth ?? null))
       .catch(() => {})
   }, [])
 
@@ -16,13 +16,13 @@ export function BtcWidget() {
 
   return (
     <div className="dash-widget">
-      <span className="dash-icon">₿</span>
+      <span className="dash-icon">Ξ</span>
       <div className="dash-body">
         <p className="dash-value">
-          {data?.krw ? `₩${(data.krw / 1_000_000).toFixed(1)}M` : '---'}
+          {data?.krw ? `₩${(data.krw / 1_000_000).toFixed(2)}M` : '---'}
         </p>
         <p className="dash-label">
-          BTC/KRW&nbsp;
+          ETH/KRW&nbsp;
           {data && (
             <span style={{ color: up ? 'var(--green)' : 'var(--red)', fontWeight: 700 }}>
               {up ? '▲' : '▼'} {Math.abs(data.change)}%

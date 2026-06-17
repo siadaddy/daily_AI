@@ -2,31 +2,30 @@
 
 import { useEffect, useState } from 'react'
 
-export function KospiWidget() {
+export function Sp500Widget() {
   const [data, setData] = useState<{ price: number | null; change: number | null } | null>(null)
 
   useEffect(() => {
     fetch('/api/market')
       .then((r) => r.json())
-      .then((d) => setData(d?.kospi ?? null))
+      .then((d) => setData(d?.sp500 ?? null))
       .catch(() => {})
   }, [])
 
-  const up   = (data?.change ?? 0) >= 0
-  const sign = up ? '▲' : '▼'
+  const up = (data?.change ?? 0) >= 0
 
   return (
     <div className="dash-widget">
-      <span className="dash-icon">📈</span>
+      <span className="dash-icon">📊</span>
       <div className="dash-body">
         <p className="dash-value">
           {data?.price ? data.price.toLocaleString() : '---'}
         </p>
         <p className="dash-label">
-          KOSPI&nbsp;
+          S&amp;P 500&nbsp;
           {data?.change != null && data.price && (
             <span style={{ color: up ? 'var(--green)' : 'var(--red)', fontWeight: 700 }}>
-              {sign} {Math.abs(data.change)}%
+              {up ? '▲' : '▼'} {Math.abs(data.change)}%
             </span>
           )}
         </p>
