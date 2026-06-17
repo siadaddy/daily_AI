@@ -12,10 +12,8 @@ import { Suspense } from 'react'
 export const revalidate = 3600
 
 function getToday() {
-  return new Date()
-    .toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' })
-    .replace(/\. /g, '-')
-    .replace(/\.$/, '')
+  const d = new Date()
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`
 }
 
 async function fetchCardNews(date: string): Promise<ContentCard[]> {
