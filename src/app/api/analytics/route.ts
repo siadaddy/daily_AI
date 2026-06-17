@@ -67,8 +67,9 @@ export async function GET(req: NextRequest) {
     }
     const allSources: SourceStat[] = Object.entries(srcMap)
       .sort((a, b) => b[1] - a[1])
+      .map(([source, count]) => ({ source, count }))
     const topSources = allSources.slice(0, 8)
-    const etcCount = allSources.slice(8).reduce((s, [, n]) => s + n, 0)
+    const etcCount = allSources.slice(8).reduce((s, v) => s + v.count, 0)
     const sources: SourceStat[] = etcCount > 0
       ? [...topSources, { source: '기타', count: etcCount }]
       : topSources
