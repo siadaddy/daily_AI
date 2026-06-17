@@ -50,7 +50,7 @@ const PORTFOLIO_ITEMS: PortfolioItem[] = [
   },
   {
     title: 'BMW SA 대시보드',
-    description: '딜러 영업사원 성과 분석 대시보드',
+    description: '서비스 어드바이저 성과 분석 대시보드',
     emoji: '🚗',
     tags: ['Python', 'Streamlit', 'Plotly'],
     href: '/works/SA대시보드_demo.html',
