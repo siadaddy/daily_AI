@@ -4,7 +4,7 @@ import { highlightCaption } from '@/lib/utils/caption'
 
 export function NewsCard({ card, idx }: { card: ContentCard; idx: number }) {
   return (
-    <div className="news-card-item glass-card flex flex-col overflow-hidden transition-all duration-200 hover:-translate-y-1">
+    <div className="news-card-item glass-card group flex flex-col overflow-hidden transition-all duration-200 hover:-translate-y-1">
       {/* 상단: 이미지 전체 너비 */}
       <div className="relative aspect-video w-full overflow-hidden">
         {card.image_url ? (
@@ -12,13 +12,13 @@ export function NewsCard({ card, idx }: { card: ContentCard; idx: number }) {
             src={card.image_url}
             alt={card.headline}
             fill
-            className="object-cover"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
             sizes="(max-width: 640px) 100vw, 50vw"
             unoptimized
           />
         ) : (
           <div
-            className="flex h-full w-full items-center justify-center text-5xl"
+            className="flex h-full w-full items-center justify-center text-5xl transition-transform duration-500 group-hover:scale-105"
             style={{ background: 'linear-gradient(135deg, var(--surface) 0%, var(--card2) 100%)' }}
           >
             📄

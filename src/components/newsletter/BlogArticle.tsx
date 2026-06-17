@@ -17,7 +17,7 @@ export function BlogArticle({
     : null
 
   return (
-    <section className="blog-article">
+    <section className="blog-article transition-transform duration-300 hover:-translate-y-1">
       {/* 상단 액센트 라인 */}
       <div className="blog-accent" />
 

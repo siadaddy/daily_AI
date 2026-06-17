@@ -190,10 +190,20 @@ body {
   background: var(--card);
   box-shadow: var(--shadow-card);
   overflow: hidden;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.blog-article:hover {
+  border-color: rgba(245, 158, 11, 0.45);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.3), 0 0 20px rgba(245, 158, 11, 0.12);
 }
 .blog-accent {
   height: 3px;
   background: linear-gradient(90deg, #f59e0b 0%, #f97316 50%, var(--accent2) 100%);
+  transform-origin: top;
+  transition: transform 0.3s ease;
+}
+.blog-article:hover .blog-accent {
+  transform: scaleY(1.8);
 }
 .blog-header {
   padding: 28px 32px 24px;
@@ -341,6 +351,27 @@ body {
 .news-card-item:hover {
   border-color: rgba(28, 105, 212, 0.4) !important;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3), 0 0 24px rgba(28, 105, 212, 0.1) !important;
+}
+
+/* ── AI Pick Item Hover ────────────────────────────── */
+.ai-pick-item:hover {
+  border-color: rgba(28, 105, 212, 0.4) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3), 0 0 24px rgba(28, 105, 212, 0.1) !important;
+}
+
+/* ── Reduced Motion (접근성) ───────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .news-card-item,
+  .ai-pick-item,
+  .blog-article,
+  .blog-accent {
+    transition: none !important;
+  }
+  .news-card-item:hover,
+  .ai-pick-item:hover,
+  .blog-article:hover {
+    transform: none !important;
+  }
 }
 
 /* ── Card Caption ──────────────────────────────────── */

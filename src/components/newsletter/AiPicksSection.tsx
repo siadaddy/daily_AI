@@ -40,7 +40,7 @@ export function AiPicksSection({
         {picks.map((item) => (
           <div
             key={item.rank}
-            className="glass-card flex min-h-[160px] flex-col gap-2 p-4"
+            className="glass-card ai-pick-item flex min-h-[160px] flex-col gap-2 p-4 transition-all duration-200 hover:-translate-y-1"
           >
             {/* Rank badge */}
             <div className="flex items-center justify-between">
