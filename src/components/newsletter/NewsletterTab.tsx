@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { DashboardBar } from '@/components/dashboard/DashboardBar'
+import { AiPickTicker } from './AiPickTicker'
 import { FeaturedCard } from './FeaturedCard'
 import { NewsCard } from './NewsCard'
 import { BlogArticle } from './BlogArticle'
@@ -137,6 +138,7 @@ export async function NewsletterTab({ date }: { date?: string }) {
         <DateNav selectedDate={targetDate} />
       </Suspense>
       <DashboardBar />
+      <AiPickTicker news={rawNews} />
 
       {cards.length === 0 && (
         <div
