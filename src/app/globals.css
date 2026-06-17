@@ -589,7 +589,7 @@ body {
   align-items: center;
   gap: 0;
   flex-shrink: 0;
-  animation: dash-marquee 40s linear infinite;
+  animation: dash-marquee 80s linear infinite;
 }
 .dash-scroll:hover .dash-track,
 .dash-scroll--paused .dash-track {
@@ -642,7 +642,7 @@ body {
   user-select: none;
 }
 .ai-pick-track {
-  animation-duration: 120s;
+  animation-duration: 80s;
 }
 .ai-pick-scroll:hover .ai-pick-track {
   animation-play-state: paused;

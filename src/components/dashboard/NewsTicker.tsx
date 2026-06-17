@@ -35,10 +35,6 @@ export function NewsTicker() {
 
   return (
     <div className="ticker-bar">
-      <span className="ticker-label">
-        <span className="ticker-dot" />
-        <span className="ticker-label-text">AI 픽</span>
-      </span>
       <div className="ticker-track">
         <div className="ticker-inner" style={{ '--count': items.length } as React.CSSProperties}>
           {items.map((h, i) => (
