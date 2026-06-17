@@ -2,10 +2,26 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { signIn, signUp } from '@/app/actions/community'
+import { createBrowserClient } from '@supabase/ssr'
 
 interface Props {
   onClose: () => void
+}
+
+function makeSupabase() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}
+
+function toKoreanError(msg: string): string {
+  if (msg.includes('Invalid login credentials')) return '이메일 또는 비밀번호가 올바르지 않습니다'
+  if (msg.includes('Email not confirmed')) return '이메일 인증이 필요합니다. 가입 시 받은 메일을 확인해주세요'
+  if (msg.includes('User already registered')) return '이미 가입된 이메일입니다. 로그인을 시도해보세요'
+  if (msg.includes('Password should be at least')) return '비밀번호는 6자 이상이어야 합니다'
+  if (msg.includes('Unable to validate email')) return '유효하지 않은 이메일 형식입니다'
+  return msg
 }
 
 export function AuthModal({ onClose }: Props) {
@@ -15,22 +31,39 @@ export function AuthModal({ onClose }: Props) {
   const [password, setPassword] = useState('')
   const [nickname, setNickname] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
+  const [successMsg, setSuccessMsg] = useState('')
   const [isPending, startTransition] = useTransition()
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setErrorMsg('')
+    setSuccessMsg('')
     startTransition(async () => {
-      const result =
-        mode === 'login'
-          ? await signIn(email, password)
-          : await signUp(email, password, nickname)
+      const supabase = makeSupabase()
 
-      if (result.error) {
-        setErrorMsg(result.error)
+      if (mode === 'login') {
+        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        if (error) {
+          setErrorMsg(toKoreanError(error.message))
+        } else {
+          router.refresh()
+          onClose()
+        }
       } else {
-        router.refresh()
-        onClose()
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { data: { nickname } },
+        })
+        if (error) {
+          setErrorMsg(toKoreanError(error.message))
+        } else if (data.user && !data.session) {
+          // 이메일 인증 필요한 경우
+          setSuccessMsg('가입 완료! 이메일로 인증 링크가 발송되었습니다. 확인 후 로그인해주세요.')
+        } else {
+          router.refresh()
+          onClose()
+        }
       }
     })
   }
@@ -54,6 +87,7 @@ export function AuthModal({ onClose }: Props) {
               onClick={() => {
                 setMode(m)
                 setErrorMsg('')
+                setSuccessMsg('')
               }}
               className="flex-1 rounded-md py-2 text-sm font-medium transition-colors"
               style={{
@@ -112,8 +146,13 @@ export function AuthModal({ onClose }: Props) {
           />
 
           {errorMsg && (
-            <p className="text-xs" style={{ color: 'var(--red)' }}>
+            <p className="text-xs" style={{ color: 'var(--red, #ef4444)' }}>
               {errorMsg}
+            </p>
+          )}
+          {successMsg && (
+            <p className="text-xs" style={{ color: '#22c55e' }}>
+              {successMsg}
             </p>
           )}
 
