@@ -1,12 +1,9 @@
 'use client'
 
 import { useTheme } from '@/components/layout/ThemeProvider'
-import { NewsTicker } from '@/components/dashboard/NewsTicker'
 import { ClockWidget } from '@/components/dashboard/ClockWidget'
 import { WeatherWidget } from '@/components/dashboard/WeatherWidget'
 import { UserButton } from '@/components/layout/UserButton'
-import { Suspense } from 'react'
-
 export function Header() {
   const { theme, setTheme } = useTheme()
 
@@ -52,10 +49,6 @@ export function Header() {
         </div>
       </div>
 
-      {/* 뉴스 티커 */}
-      <Suspense>
-        <NewsTicker />
-      </Suspense>
     </header>
   )
 }
