@@ -1,4 +1,5 @@
 import { Suspense } from 'react'
+import dynamic from 'next/dynamic'
 import { Header } from '@/components/layout/Header'
 import { TabNav } from '@/components/layout/TabNav'
 import { Footer } from '@/components/layout/Footer'
@@ -8,6 +9,14 @@ import { OfficeTab } from '@/components/office/OfficeTab'
 import { MusicUniverse } from '@/components/music/MusicUniverse'
 import { PortfolioSection } from '@/components/portfolio/PortfolioCard'
 import type { TabId } from '@/lib/types'
+
+const CommunityTab = dynamic(
+  () =>
+    import('@/components/community/CommunityTab').then((m) => ({
+      default: m.CommunityTab,
+    })),
+  { loading: () => <LoadingSkeleton /> }
+)
 
 function LoadingSkeleton() {
   return (
@@ -51,6 +60,7 @@ export default async function Home({
         )}
         {tab === 'music' && <MusicUniverse />}
         {tab === 'office' && <OfficeTab />}
+        {tab === 'community' && <CommunityTab />}
 
         {/* Portfolio — 항상 하단에 표시 */}
         <div className="mt-12">

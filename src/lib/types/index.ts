@@ -87,7 +87,26 @@ export interface CategoryStat {
   trend: 'up' | 'down' | 'flat'
 }
 
-export type TabId = 'newsletter' | 'reports' | 'music' | 'office'
+export type TabId = 'newsletter' | 'reports' | 'music' | 'office' | 'community'
+
+export interface CommunityPost {
+  id: number
+  user_id: string
+  nickname: string
+  title: string
+  content: string
+  view_count: number
+  created_at: string
+}
+
+export interface CommunityComment {
+  id: number
+  post_id: number
+  user_id: string
+  nickname: string
+  content: string
+  created_at: string
+}
 
 export type Category =
   | '전체'
