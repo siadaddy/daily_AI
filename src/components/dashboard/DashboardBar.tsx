@@ -1,7 +1,5 @@
 'use client'
 
-import { ClockWidget }   from './ClockWidget'
-import { WeatherWidget }  from './WeatherWidget'
 import { ExchangeWidget } from './ExchangeWidget'
 import { DxyWidget }     from './DxyWidget'
 import { KospiWidget }   from './KospiWidget'
@@ -20,10 +18,6 @@ const Divider = () => <div className="dash-divider" />
 function WidgetRow() {
   return (
     <>
-      <ClockWidget />
-      <Divider />
-      <WeatherWidget />
-      <Divider />
       <ExchangeWidget />
       <Divider />
       <DxyWidget />
