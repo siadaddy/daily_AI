@@ -425,9 +425,10 @@ body {
 
 .site-header {
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   background: linear-gradient(180deg, #0b1120 0%, #080c14 100%);
   border-bottom: 1px solid rgba(28,105,212,0.2);
+  z-index: 100;
 }
 [data-theme='light'] .site-header {
   background: linear-gradient(180deg, #dce8f8 0%, #e8edf5 100%);

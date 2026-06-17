@@ -74,7 +74,7 @@ export function UserButton() {
 
       {showDropdown && (
         <div
-          className="absolute right-0 top-full z-50 mt-1 min-w-[120px] rounded-xl p-1 shadow-lg"
+          className="absolute right-0 top-full z-[200] mt-1 min-w-[120px] rounded-xl p-1 shadow-lg"
           style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
         >
           <form action={signOut}>
