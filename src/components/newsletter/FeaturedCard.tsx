@@ -5,11 +5,10 @@ import { highlightCaption } from '@/lib/utils/caption'
 export function FeaturedCard({ card }: { card: ContentCard }) {
   return (
     <div
-      className="glass-card grid grid-cols-1 overflow-hidden md:grid-cols-2"
+      className="glass-card grid grid-cols-1 overflow-hidden md:grid-cols-2 min-h-64 sm:min-h-80 md:min-h-[400px]"
       style={{
         border: '1px solid rgba(28,105,212,.25)',
         boxShadow: 'var(--shadow-glow)',
-        minHeight: '400px',
       }}
     >
       {/* 좌: 이미지 영역 */}

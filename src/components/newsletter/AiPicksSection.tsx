@@ -36,7 +36,7 @@ export function AiPicksSection({
         </p>
       )}
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
         {picks.map((item) => (
           <div
             key={item.rank}
@@ -55,7 +55,7 @@ export function AiPicksSection({
                 {getRankLabel(item.rank)}
               </span>
               <span
-                className="rounded-full px-2 py-0.5 text-[10px]"
+                className="rounded-full px-2 py-0.5 text-[11px]"
                 style={{
                   background: 'var(--surface)',
                   color: 'var(--muted)',

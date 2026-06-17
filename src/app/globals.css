@@ -170,7 +170,8 @@ body {
   font-weight: 700;
   color: #60a5fa;
   text-decoration: none;
-  padding: 5px 12px;
+  padding: 8px 14px;
+  min-height: 36px;
   border-radius: 20px;
   border: 1px solid rgba(96, 165, 250, 0.3);
   background: rgba(96, 165, 250, 0.08);
@@ -412,6 +413,11 @@ body {
 @media (min-width: 640px) {
   .header-stats { display: flex; }
 }
+@media (max-width: 390px) {
+  .header-logo-icon { font-size: 1.2rem; }
+  .header-title { font-size: 0.85rem; }
+  .header-subtitle { display: none; }
+}
 .header-theme-btn {
   border-radius: 50%;
   width: 36px;
@@ -451,6 +457,10 @@ body {
   text-transform: uppercase;
   border-right: 1px solid var(--border);
   height: 100%;
+}
+@media (max-width: 639px) {
+  .ticker-label { padding: 0 8px; gap: 0; letter-spacing: 0; }
+  .ticker-label-text { display: none; }
 }
 .ticker-dot {
   width: 6px;
@@ -569,9 +579,12 @@ body {
 }
 
 /* ── Date Navigation ───────────────────────────────── */
+:root { --header-h: 89px; }
+@media (max-width: 639px) { :root { --header-h: 83px; } }
+
 .dn-wrap {
   position: sticky;
-  top: 86px; /* 헤더(56px) + 티커(30px) */
+  top: var(--header-h);
   z-index: 40;
   background: var(--bg);
   padding: 10px 0 8px;

@@ -6,7 +6,7 @@ export function NewsCard({ card, idx }: { card: ContentCard; idx: number }) {
   return (
     <div className="news-card-item glass-card flex flex-col overflow-hidden transition-all duration-200 hover:-translate-y-1">
       {/* 상단: 이미지 전체 너비 */}
-      <div className="relative h-48 w-full overflow-hidden">
+      <div className="relative aspect-video w-full overflow-hidden">
         {card.image_url ? (
           <Image
             src={card.image_url}

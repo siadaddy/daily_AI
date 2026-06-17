@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter, Noto_Sans_KR } from 'next/font/google'
 import { ThemeProvider } from '@/components/layout/ThemeProvider'
 import './globals.css'
@@ -15,6 +15,12 @@ const notoSansKR = Noto_Sans_KR({
   weight: ['300', '400', '500', '700'],
   display: 'swap',
 })
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+}
 
 export const metadata: Metadata = {
   title: {

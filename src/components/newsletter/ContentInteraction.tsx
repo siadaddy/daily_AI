@@ -208,7 +208,7 @@ export function ContentInteraction({ contentKey }: { contentKey: string }) {
                 </span>
               </div>
               <div className="flex shrink-0 items-center gap-1.5">
-                <span className="text-[10px]" style={{ color: 'var(--muted)' }}>{timeAgo(c.created_at)}</span>
+                <span className="text-[11px]" style={{ color: 'var(--muted)' }}>{timeAgo(c.created_at)}</span>
                 {user?.id === c.user_id && (
                   <button
                     onClick={() => handleDelete(c.id)}
@@ -225,14 +225,14 @@ export function ContentInteraction({ contentKey }: { contentKey: string }) {
 
           {/* 댓글 입력 */}
           {user ? (
-            <form onSubmit={handleComment} className="flex gap-2 pt-1">
+            <form onSubmit={handleComment} className="flex flex-col gap-2 pt-1 sm:flex-row">
               <input
                 ref={inputRef}
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 placeholder="댓글을 남겨보세요..."
                 maxLength={500}
-                className="flex-1 rounded-lg border px-3 py-1.5 text-xs outline-none"
+                className="flex-1 rounded-lg border px-3 py-2 text-xs outline-none sm:py-1.5"
                 style={{
                   background: 'var(--surface)',
                   borderColor: 'var(--border)',
@@ -242,7 +242,7 @@ export function ContentInteraction({ contentKey }: { contentKey: string }) {
               <button
                 type="submit"
                 disabled={isPending || !commentText.trim()}
-                className="rounded-lg px-3 py-1.5 text-xs font-semibold transition-opacity disabled:opacity-40"
+                className="w-full rounded-lg px-3 py-2 text-xs font-semibold transition-opacity disabled:opacity-40 sm:w-auto sm:py-1.5"
                 style={{ background: 'var(--accent2)', color: '#fff' }}
               >
                 {isPending ? '...' : '등록'}
