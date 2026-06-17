@@ -429,6 +429,24 @@ body {
   background: linear-gradient(180deg, #0b1120 0%, #080c14 100%);
   border-bottom: 1px solid rgba(28,105,212,0.2);
 }
+[data-theme='light'] .site-header {
+  background: linear-gradient(180deg, #dce8f8 0%, #e8edf5 100%);
+  border-bottom-color: rgba(28,105,212,0.15);
+}
+[data-theme='light'] .header-title {
+  background: linear-gradient(120deg, #1c69d4 0%, #7c3aed 50%, #9333ea 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shimmer-line 6s linear infinite;
+}
+[data-theme='light'] .header-subtitle {
+  color: rgba(30,41,59,0.55);
+}
+[data-theme='light'] .header-live-widgets {
+  border-color: rgba(28,105,212,0.2);
+  background: rgba(255,255,255,0.6);
+}
 
 /* Aurora glow blobs behind content */
 .site-header::before,
@@ -449,6 +467,12 @@ body {
   top: -60px; right: 80px;
   background: radial-gradient(ellipse, rgba(167,139,250,0.2) 0%, transparent 70%);
   animation-delay: -4s;
+}
+[data-theme='light'] .site-header::before {
+  background: radial-gradient(ellipse, rgba(28,105,212,0.12) 0%, transparent 70%);
+}
+[data-theme='light'] .site-header::after {
+  background: radial-gradient(ellipse, rgba(167,139,250,0.1) 0%, transparent 70%);
 }
 
 .header-accent-line {
