@@ -10,9 +10,9 @@ interface PortfolioItem {
 const PORTFOLIO_ITEMS: PortfolioItem[] = [
   {
     title: 'AI 뉴스레터 자동화',
-    description: 'Claude Code + Gemini AI + GitHub Actions로 매일 새벽 뉴스를 자동 수집·분석·발행',
+    description: 'Claude Code + AI Agent + GitHub Actions로 매일 새벽 뉴스를 자동 수집·분석·발행',
     emoji: '📰',
-    tags: ['Python', 'Claude Code', 'Gemini', 'Supabase', 'GitHub Actions'],
+    tags: ['Python', 'Claude Code', 'AI Agent', 'Supabase', 'GitHub Actions'],
     href: '?tab=newsletter',
     status: 'live',
   },
