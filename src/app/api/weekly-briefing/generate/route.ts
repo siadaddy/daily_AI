@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import OpenAI from 'openai'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
@@ -85,7 +85,7 @@ async function handler(req: NextRequest) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.OPENAI_API_KEY) {
     return NextResponse.json({ error: 'missing_api_key' }, { status: 500 })
   }
 
@@ -129,17 +129,16 @@ async function handler(req: NextRequest) {
     const cards: NewsCard[] = rawCards ?? []
     const trends: NewsTrend[] = rawTrends ?? []
 
-    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
       max_tokens: 1024,
       messages: [{ role: 'user', content: buildPrompt(startStr, endStr, cards, trends) }],
     })
 
-    const firstBlock = message.content[0]
-    const rawText = firstBlock?.type === 'text' ? firstBlock.text : ''
+    const rawText = completion.choices[0]?.message?.content ?? ''
     if (!rawText) {
-      console.error('[weekly-briefing] Claude returned no text block:', message.content)
+      console.error('[weekly-briefing] OpenAI returned no content:', completion.choices)
       return NextResponse.json({ error: 'empty_response' }, { status: 500 })
     }
 
