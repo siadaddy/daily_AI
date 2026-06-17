@@ -589,7 +589,7 @@ body {
   align-items: center;
   gap: 0;
   flex-shrink: 0;
-  animation: dash-marquee 80s linear infinite;
+  animation: dash-marquee 50s linear infinite;
 }
 .dash-scroll:hover .dash-track,
 .dash-scroll--paused .dash-track {

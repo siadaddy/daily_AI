@@ -14,7 +14,6 @@ import { OilWidget }     from './OilWidget'
 
 const Divider = () => <div className="dash-divider" />
 
-// 위젯 목록을 컴포넌트 배열로 정의해 두 번 렌더링 (무한 루프용 복제)
 function WidgetRow() {
   return (
     <>
@@ -39,10 +38,6 @@ function WidgetRow() {
       <GoldWidget />
       <Divider />
       <OilWidget />
-      <div className="dash-live">
-        <span className="dash-live-dot" />
-        LIVE
-      </div>
       <div className="dash-track-gap" />
     </>
   )
@@ -52,11 +47,12 @@ export function DashboardBar() {
   return (
     <div className="dash-bar">
       <div className="dash-scroll">
-        {/* 원본 + 복제본을 이어 붙여 끊김 없는 루프 구현 */}
-        <div className="dash-track" aria-hidden="false">
+        {/*
+          하나의 트랙 안에 원본+복제본을 순서대로 배치.
+          translateX(0 → -50%) 하면 정확히 원본 1벌 이동 후 루프.
+        */}
+        <div className="dash-track">
           <WidgetRow />
-        </div>
-        <div className="dash-track" aria-hidden="true">
           <WidgetRow />
         </div>
       </div>
