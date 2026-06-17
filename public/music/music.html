@@ -470,7 +470,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 // ═══════════════════════════════════════════════════
 // YouTube 플레이어
 // ═══════════════════════════════════════════════════
-const YT_KEY = 'AIzaSyBGVbnH0iL_1unWWfktA6nrZMT29uSkOK0';
+const YT_KEY = ''; // key managed server-side via /api/music-search
 
 const GENRE = {
   '2000s힙합':    { hue:  45, color: '#ffd60a' },   // 골드 — 올드스쿨 바이브
@@ -558,14 +558,13 @@ async function searchVideo(song) {
     if (_vidCache[cacheKey]) return _vidCache[cacheKey];
   }
 
-  // 3) YouTube Data API 검색 (캐시 미스 시)
+  // 3) 서버 API를 통한 YouTube 검색 (키는 서버에서 관리)
   try {
-    const q   = encodeURIComponent(`${song.t} ${song.a}`);
-    const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${q}&type=video&maxResults=1&key=${YT_KEY}`;
-    const r   = await fetch(url);
+    const q = encodeURIComponent(`${song.t} ${song.a}`);
+    const r = await fetch(`/api/music-search?q=${q}`);
     if (!r.ok) return null;
-    const d   = await r.json();
-    return d.items?.[0]?.id?.videoId ?? null;
+    const d = await r.json();
+    return d.videoId ?? null;
   } catch { return null; }
 }
 
