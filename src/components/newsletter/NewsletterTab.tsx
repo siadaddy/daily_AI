@@ -142,17 +142,24 @@ export async function NewsletterTab({ date }: { date?: string }) {
 
       {/* 1. 카드뉴스 */}
       {cards.length > 0 && (
-        <section className="flex flex-col gap-4">
+        <section className="flex flex-col gap-6">
           <SectionTitle icon="📰" title="카드뉴스" />
-          {featured && <FeaturedCard card={featured} />}
+          {featured && (
+            <div className="flex flex-col gap-3">
+              <FeaturedCard card={featured} />
+              <ContentInteraction contentKey={`card_news:${targetDate}:0`} />
+            </div>
+          )}
           {grid.length > 0 && (
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               {grid.map((card, i) => (
-                <NewsCard key={i} card={card} idx={i + 1} />
+                <div key={i} className="flex flex-col gap-3">
+                  <NewsCard card={card} idx={i + 1} />
+                  <ContentInteraction contentKey={`card_news:${targetDate}:${i + 1}`} />
+                </div>
               ))}
             </div>
           )}
-          <ContentInteraction contentKey={`card_news:${targetDate}`} />
         </section>
       )}
 
