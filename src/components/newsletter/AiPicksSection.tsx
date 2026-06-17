@@ -22,14 +22,7 @@ export function AiPicksSection({
   if (!picks || picks.length === 0) return null
 
   return (
-    <section className="flex flex-col gap-3">
-      <div className="flex items-center gap-2">
-        <span className="text-lg">🤖</span>
-        <h2 className="text-base font-bold" style={{ color: 'var(--text)' }}>
-          AI Pick — 오늘의 TOP 3
-        </h2>
-      </div>
-
+    <div className="flex flex-col gap-3">
       {insight && (
         <p
           className="rounded-xl px-4 py-2 text-sm italic"
@@ -85,6 +78,6 @@ export function AiPicksSection({
           </div>
         ))}
       </div>
-    </section>
+    </div>
   )
 }

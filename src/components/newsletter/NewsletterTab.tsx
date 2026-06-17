@@ -11,6 +11,16 @@ import { Suspense } from 'react'
 
 export const dynamic = 'force-dynamic'
 
+function SectionTitle({ icon, title, sub }: { icon: string; title: string; sub?: string }) {
+  return (
+    <div className="flex items-center gap-2 border-b pb-2" style={{ borderColor: 'var(--border)' }}>
+      <span className="text-lg">{icon}</span>
+      <span className="font-semibold text-sm" style={{ color: 'var(--fg)' }}>{title}</span>
+      {sub && <span className="ml-1 text-xs" style={{ color: 'var(--muted)' }}>{sub}</span>}
+    </div>
+  )
+}
+
 function getToday() {
   return new Date()
     .toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' })
@@ -105,7 +115,7 @@ export async function NewsletterTab({ date }: { date?: string }) {
   const grid = cards.slice(1)
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       <Suspense>
         <DateNav selectedDate={targetDate} />
       </Suspense>
@@ -124,8 +134,10 @@ export async function NewsletterTab({ date }: { date?: string }) {
         </div>
       )}
 
+      {/* 1. 카드뉴스 */}
       {cards.length > 0 && (
-        <div className="flex flex-col gap-5">
+        <section className="flex flex-col gap-4">
+          <SectionTitle icon="📰" title="카드뉴스" />
           {featured && <FeaturedCard card={featured} />}
           {grid.length > 0 && (
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -134,19 +146,41 @@ export async function NewsletterTab({ date }: { date?: string }) {
               ))}
             </div>
           )}
-        </div>
+        </section>
       )}
 
+      <hr style={{ borderColor: 'var(--border)', borderTopWidth: '1px' }} />
+
+      {/* 2. AI Pick TOP3 */}
       {trend?.top3 && trend.top3.length > 0 && (
-        <AiPicksSection
-          picks={trend.top3}
-          insight={trend.talking_points?.one_line_insight}
-        />
+        <section className="flex flex-col gap-4">
+          <SectionTitle icon="🤖" title="AI Pick — 오늘의 TOP 3" />
+          <AiPicksSection
+            picks={trend.top3}
+            insight={trend.talking_points?.one_line_insight}
+          />
+        </section>
       )}
 
-      <BlogArticle title={article?.title} content={article?.content} date={targetDate} />
+      <hr style={{ borderColor: 'var(--border)', borderTopWidth: '1px' }} />
 
-      {rawNews.length > 0 && <RawNewsSection news={rawNews} />}
+      {/* 3. AI 편집장의 리뷰 */}
+      {article && (
+        <section className="flex flex-col gap-4">
+          <SectionTitle icon="✍️" title="AI 편집장의 리뷰" />
+          <BlogArticle title={article?.title} content={article?.content} date={targetDate} />
+        </section>
+      )}
+
+      <hr style={{ borderColor: 'var(--border)', borderTopWidth: '1px' }} />
+
+      {/* 4. 수집 뉴스 */}
+      {rawNews.length > 0 && (
+        <section className="flex flex-col gap-4">
+          <SectionTitle icon="📋" title="수집 뉴스" sub={`${rawNews.length}건`} />
+          <RawNewsSection news={rawNews} />
+        </section>
+      )}
     </div>
   )
 }

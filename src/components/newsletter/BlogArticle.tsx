@@ -23,11 +23,6 @@ export function BlogArticle({
 
       {/* 헤더 */}
       <div className="blog-header">
-        <div className="blog-label">
-          <span className="blog-label-icon">✍️</span>
-          AI 편집장의 오늘의 리뷰
-        </div>
-
         {title && (
           <h2 className="blog-title">{title}</h2>
         )}
