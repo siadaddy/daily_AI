@@ -67,9 +67,17 @@ const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
 export function PortfolioSection() {
   return (
     <section>
-      <h2 className="mb-6 text-xl font-bold" style={{ color: 'var(--text)' }}>
-        🛠 My Works
-      </h2>
+      <div
+        className="mb-6 flex items-center gap-3 rounded-xl px-4 py-3"
+        style={{
+          background: 'linear-gradient(135deg, rgba(28,105,212,0.08) 0%, rgba(167,139,250,0.04) 100%)',
+          border: '1px solid rgba(28,105,212,0.15)',
+          borderLeft: '3px solid var(--bmw)',
+        }}
+      >
+        <span className="text-xl">🛠</span>
+        <span className="text-base font-bold" style={{ color: 'var(--text)' }}>My Works</span>
+      </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {PORTFOLIO_ITEMS.map((item) => {
           const st = item.status ? STATUS_LABEL[item.status] : null
