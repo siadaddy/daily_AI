@@ -12,17 +12,22 @@ import { Suspense } from 'react'
 export const revalidate = 3600
 
 function getToday() {
-  const d = new Date()
-  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`
+  return new Date()
+    .toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' })
+    .replace(/\. /g, '-')
+    .replace(/\.$/, '')
 }
 
+// 정확한 날짜로 못 찾으면 가장 최근 데이터로 폴백
 async function fetchCardNews(date: string): Promise<ContentCard[]> {
   try {
     const supabase = await createClient()
     const { data } = await supabase
       .from('card_news')
       .select('cards')
-      .eq('date', date)
+      .lte('date', date)
+      .order('date', { ascending: false })
+      .limit(1)
       .single()
     return (data?.cards as ContentCard[]) ?? []
   } catch {
@@ -36,7 +41,9 @@ async function fetchTodayArticle(date: string): Promise<{ title: string; content
     const { data } = await supabase
       .from('articles')
       .select('title, content')
-      .eq('date', date)
+      .lte('date', date)
+      .order('date', { ascending: false })
+      .limit(1)
       .single()
     return data ?? null
   } catch {
@@ -47,10 +54,21 @@ async function fetchTodayArticle(date: string): Promise<{ title: string; content
 async function fetchTodayRawNews(date: string): Promise<NewsCardType[]> {
   try {
     const supabase = await createClient()
+    // 정확한 날짜 먼저 시도, 없으면 가장 최근 날짜로
+    const { data: exact } = await supabase
+      .from('news_cards')
+      .select('date')
+      .eq('date', date)
+      .limit(1)
+
+    const targetDate = exact && exact.length > 0
+      ? date
+      : (await supabase.from('news_cards').select('date').lte('date', date).order('date', { ascending: false }).limit(1).single()).data?.date ?? date
+
     const { data } = await supabase
       .from('news_cards')
       .select('*')
-      .eq('date', date)
+      .eq('date', targetDate)
       .order('id', { ascending: true })
     return data ?? []
   } catch {
@@ -64,7 +82,9 @@ async function fetchTodayTrend(date: string): Promise<NewsTrend | null> {
     const { data } = await supabase
       .from('news_trends')
       .select('*')
-      .eq('date', date)
+      .lte('date', date)
+      .order('date', { ascending: false })
+      .limit(1)
       .single()
     return data ?? null
   } catch {
