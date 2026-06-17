@@ -38,7 +38,10 @@ export function DateNav({ selectedDate }: { selectedDate: string }) {
       .order('date', { ascending: false })
       .limit(30)
       .then(({ data }) => {
-        if (data) setDates(data.map((r: { date: string }) => r.date))
+        const fetched = data?.map((r: { date: string }) => r.date) ?? []
+        // 오늘 콘텐츠가 아직 없어도 항상 첫 번째 칩으로 표시
+        const withToday = fetched.includes(today) ? fetched : [today, ...fetched]
+        setDates(withToday)
       })
   }, [])
 

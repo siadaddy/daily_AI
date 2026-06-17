@@ -4,6 +4,7 @@ import { NewsCard } from './NewsCard'
 import { BlogArticle } from './BlogArticle'
 import { RawNewsSection } from './RawNewsSection'
 import { AiPicksSection } from './AiPicksSection'
+import { PreparingBanner } from './PreparingBanner'
 import type { ContentCard, NewsCard as NewsCardType, NewsTrend } from '@/lib/types'
 import { Suspense } from 'react'
 import nextDynamic from 'next/dynamic'
@@ -52,6 +53,22 @@ async function fetchCardNews(date: string): Promise<ContentCard[]> {
       .select('cards')
       .lte('date', date)
       .order('date', { ascending: false })
+      .limit(1)
+      .single()
+    return (data?.cards as ContentCard[]) ?? []
+  } catch {
+    return []
+  }
+}
+
+// 오늘용: 정확한 날짜 일치만 (폴백 없음)
+async function fetchCardNewsExact(date: string): Promise<ContentCard[]> {
+  try {
+    const supabase = await createClient()
+    const { data } = await supabase
+      .from('card_news')
+      .select('cards')
+      .eq('date', date)
       .limit(1)
       .single()
     return (data?.cards as ContentCard[]) ?? []
@@ -118,13 +135,22 @@ async function fetchTodayTrend(date: string): Promise<NewsTrend | null> {
 }
 
 export async function NewsletterTab({ date }: { date?: string }) {
-  const targetDate = date ?? getToday()
+  const today = getToday()
+  const targetDate = date ?? today
+  const isToday = targetDate === today
+
   const [cards, article, rawNews, trend] = await Promise.all([
-    fetchCardNews(targetDate),
+    // 오늘이면 exact match만 — 어제 콘텐츠를 오늘인 척 보여주지 않음
+    isToday ? fetchCardNewsExact(targetDate) : fetchCardNews(targetDate),
     fetchTodayArticle(targetDate),
     fetchTodayRawNews(targetDate),
     fetchTodayTrend(targetDate),
   ])
+
+  // 오늘인데 콘텐츠 미생성 → 준비중 배너
+  if (isToday && cards.length === 0) {
+    return <PreparingBanner date={targetDate} rawNews={rawNews} />
+  }
 
   const featured = cards[0] ?? null
   const grid = cards.slice(1)
@@ -138,7 +164,7 @@ export async function NewsletterTab({ date }: { date?: string }) {
           style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
         >
           <span className="text-4xl">📭</span>
-          <p style={{ color: 'var(--muted)' }}>오늘의 카드뉴스가 아직 준비되지 않았습니다</p>
+          <p style={{ color: 'var(--muted)' }}>해당 날짜의 카드뉴스가 없습니다</p>
           <p className="text-xs" style={{ color: 'var(--muted)' }}>
             매일 06:40 KST에 업데이트됩니다
           </p>

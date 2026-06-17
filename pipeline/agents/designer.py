@@ -162,43 +162,52 @@ Return ONLY a JSON array, no markdown:
     return images
 
 
+_HF_TOKENS = [k for k in [os.getenv("HF_TOKEN"), os.getenv("HF_TOKEN_2")] if k]
+
+
 def _generate_image_hf(prompt: str) -> bytes | None:
-    """Hugging Face Inference API — FLUX.1-schnell → bytes 반환"""
+    """Hugging Face Inference API — FLUX.1-schnell → bytes 반환 (멀티키 failover)"""
     import requests as _req
-    hf_token = os.getenv("HF_TOKEN", "")
-    if not hf_token:
+    if not _HF_TOKENS:
         return None
 
     full_prompt = prompt + ", bright vivid colors, clean modern design, optimistic mood, high quality"
-    headers = {
-        "Authorization": f"Bearer {hf_token}",
-        "Content-Type":  "application/json",
-        "x-wait-for-model": "true",
-    }
-    wait_times = [0, 30, 60]
-    for attempt, wait in enumerate(wait_times, 1):
-        if wait:
-            print(f"    ⏳ {wait}초 후 재시도 ({attempt}/3)...")
-            time.sleep(wait)
-        try:
-            r = _req.post(
-                "https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-schnell",
-                headers=headers,
-                json={"inputs": full_prompt, "parameters": {"width": 768, "height": 768}},
-                timeout=120,
-            )
-            if r.status_code == 503:
-                print(f"    ⚠️  503 모델 로딩 중...")
-                continue
-            if r.status_code != 200:
-                print(f"    ⚠️  HF API {r.status_code}: {r.text[:100]}")
-                continue
-            if len(r.content) < 1000:
-                print("    ⚠️  응답 크기 너무 작음")
-                continue
-            return r.content
-        except Exception as e:
-            print(f"    ❌ HF 이미지 오류: {e}")
+
+    for token_idx, token in enumerate(_HF_TOKENS):
+        token_label = f"키{token_idx + 1}"
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type":  "application/json",
+            "x-wait-for-model": "true",
+        }
+        wait_times = [0, 30, 60]
+        token_ok = False
+        for attempt, wait in enumerate(wait_times, 1):
+            if wait:
+                print(f"    ⏳ {wait}초 후 재시도 ({token_label} {attempt}/3)...")
+                time.sleep(wait)
+            try:
+                r = _req.post(
+                    "https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-schnell",
+                    headers=headers,
+                    json={"inputs": full_prompt, "parameters": {"width": 768, "height": 768}},
+                    timeout=120,
+                )
+                if r.status_code == 402:
+                    print(f"    ⚠️  HF {token_label} 크레딧 소진 (402) — 다음 키 시도...")
+                    break  # 이 토큰은 포기, 다음 토큰으로
+                if r.status_code == 503:
+                    print(f"    ⚠️  503 모델 로딩 중...")
+                    continue
+                if r.status_code != 200:
+                    print(f"    ⚠️  HF API {r.status_code}: {r.text[:100]}")
+                    continue
+                if len(r.content) < 1000:
+                    print("    ⚠️  응답 크기 너무 작음")
+                    continue
+                return r.content
+            except Exception as e:
+                print(f"    ❌ HF 이미지 오류 ({token_label}): {e}")
     return None
 
 
