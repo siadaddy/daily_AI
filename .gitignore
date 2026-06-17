@@ -40,3 +40,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# pipeline
+pipeline/.env
+pipeline/output/
+pipeline/agent_memory.json
+pipeline/quality_log.json
+pipeline/__pycache__/
+pipeline/utils/__pycache__/
+pipeline/agents/__pycache__/

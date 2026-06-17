@@ -1,0 +1,8 @@
+google-generativeai
+groq
+notion-client
+requests
+python-dotenv
+Pillow
+supabase
+feedparser
