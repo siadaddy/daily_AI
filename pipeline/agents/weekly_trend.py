@@ -13,6 +13,8 @@ from utils.agent_memory import remember, get_hints, add_diary
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
+if SUPABASE_URL and not SUPABASE_URL.startswith("http"):
+    SUPABASE_URL = "https://" + SUPABASE_URL
 
 SYSTEM = """당신은 BMW 딜러십에 근무하며 삼천리 그룹에 관심 있는 30대 직장인을 위한 경제·기술 뉴스 큐레이터입니다.
 이번 주 뉴스를 날카롭게 분석해 "그래서 나한테 뭔 의미야?"에 바로 답하는 인사이트를 씁니다.

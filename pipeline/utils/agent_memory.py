@@ -13,6 +13,8 @@ MEMORY_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "agent_me
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
+if SUPABASE_URL and not SUPABASE_URL.startswith("http"):
+    SUPABASE_URL = "https://" + SUPABASE_URL
 
 
 def _load_from_supabase() -> dict:

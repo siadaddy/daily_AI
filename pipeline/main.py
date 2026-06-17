@@ -29,6 +29,8 @@ OUTPUT_DIR   = os.path.join(PIPELINE_DIR, "output")
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
+if SUPABASE_URL and not SUPABASE_URL.startswith("http"):
+    SUPABASE_URL = "https://" + SUPABASE_URL
 NTFY_TOPIC   = os.getenv("NTFY_TOPIC", "siadad-aicrew")
 MAX_RETRIES  = 3
 RETRY_DELAY  = 10
@@ -159,7 +161,7 @@ def _should_run_music() -> bool:
         days = (datetime.now(last.tzinfo) - last).days
         return days >= 90
     except Exception:
-        return True
+        return False  # 확인 불가 시 안전하게 스킵
 
 
 def main():

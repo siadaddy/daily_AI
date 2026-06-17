@@ -8,6 +8,8 @@ from datetime import datetime, timezone
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
+if SUPABASE_URL and not SUPABASE_URL.startswith("http"):
+    SUPABASE_URL = "https://" + SUPABASE_URL
 
 # 에이전트 이름 → agents 테이블 id 매핑 (upsert 기준 키)
 AGENT_IDS = {
