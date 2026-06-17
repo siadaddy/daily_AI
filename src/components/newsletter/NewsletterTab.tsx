@@ -42,10 +42,7 @@ function SectionTitle({ icon, title, sub }: { icon: string; title: string; sub?:
 }
 
 function getToday() {
-  return new Date()
-    .toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' })
-    .replace(/\. /g, '-')
-    .replace(/\.$/, '')
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(new Date())
 }
 
 // 정확한 날짜로 못 찾으면 가장 최근 데이터로 폴백

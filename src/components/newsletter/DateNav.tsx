@@ -5,10 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 
 function getToday() {
-  return new Date()
-    .toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' })
-    .replace(/\. /g, '-')
-    .replace(/\.$/, '')
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(new Date())
 }
 
 function parseDateParts(dateStr: string) {
