@@ -10,9 +10,9 @@ interface PortfolioItem {
 const PORTFOLIO_ITEMS: PortfolioItem[] = [
   {
     title: 'AI 뉴스레터 자동화',
-    description: 'Gemini AI + GitHub Actions로 매일 새벽 뉴스를 자동 수집·분석·발행',
+    description: 'Claude Code + Gemini AI + GitHub Actions로 매일 새벽 뉴스를 자동 수집·분석·발행',
     emoji: '📰',
-    tags: ['Python', 'Gemini', 'Supabase', 'GitHub Actions'],
+    tags: ['Python', 'Claude Code', 'Gemini', 'Supabase', 'GitHub Actions'],
     href: '?tab=newsletter',
     status: 'live',
   },
@@ -29,7 +29,7 @@ const PORTFOLIO_ITEMS: PortfolioItem[] = [
     description: 'AI 기반 자동 매매 봇 — 현재 종료됨',
     emoji: '💰',
     tags: ['Python', 'Upbit API', 'Claude AI'],
-    href: 'https://siadaddy.github.io/youngs/coin.html',
+    href: '/works/coin.html',
     status: 'ended',
   },
   {
@@ -37,7 +37,7 @@ const PORTFOLIO_ITEMS: PortfolioItem[] = [
     description: '서울 유동인구·경쟁 데이터로 최적 카페 위치 분석',
     emoji: '☕',
     tags: ['Python', 'Pandas', 'Folium'],
-    href: 'https://siadaddy.github.io/youngs/map.html',
+    href: '/works/map.html',
     status: 'demo',
   },
   {
@@ -53,7 +53,7 @@ const PORTFOLIO_ITEMS: PortfolioItem[] = [
     description: '딜러 영업사원 성과 분석 대시보드',
     emoji: '🚗',
     tags: ['Python', 'Streamlit', 'Plotly'],
-    href: 'https://siadaddy.github.io/youngs/SA대시보드_demo.html',
+    href: '/works/SA대시보드_demo.html',
     status: 'demo',
   },
 ]
