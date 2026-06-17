@@ -24,7 +24,7 @@ export function DxyWidget() {
         <p className="dash-label">
           달러인덱스&nbsp;
           {data?.change != null && data.price && (
-            <span style={{ color: up ? 'var(--green)' : 'var(--red)', fontWeight: 700 }}>
+            <span style={{ color: up ? 'var(--red)' : 'var(--blue)', fontWeight: 700 }}>
               {up ? '▲' : '▼'} {Math.abs(data.change)}%
             </span>
           )}

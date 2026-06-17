@@ -24,7 +24,7 @@ export function BtcWidget() {
         <p className="dash-label">
           BTC/KRW&nbsp;
           {data && (
-            <span style={{ color: up ? 'var(--green)' : 'var(--red)', fontWeight: 700 }}>
+            <span style={{ color: up ? 'var(--red)' : 'var(--blue)', fontWeight: 700 }}>
               {up ? '▲' : '▼'} {Math.abs(data.change)}%
             </span>
           )}

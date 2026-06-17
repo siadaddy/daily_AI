@@ -25,7 +25,7 @@ export function KospiWidget() {
         <p className="dash-label">
           KOSPI&nbsp;
           {data?.change != null && data.price && (
-            <span style={{ color: up ? 'var(--green)' : 'var(--red)', fontWeight: 700 }}>
+            <span style={{ color: up ? 'var(--red)' : 'var(--blue)', fontWeight: 700 }}>
               {sign} {Math.abs(data.change)}%
             </span>
           )}

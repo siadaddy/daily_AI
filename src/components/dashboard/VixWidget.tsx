@@ -13,11 +13,11 @@ export function VixWidget() {
   }, [])
 
   const vix = data?.price ?? 0
-  // VIX 수치에 따른 색상: 낮음=안정(초록), 중간=주의(노랑), 높음=공포(빨강)
+  // VIX 수치에 따른 색상: 낮음=안정(파랑), 중간=주의(노랑), 높음=공포(빨강)
   const vixColor =
     vix === 0 ? 'var(--muted)'
-    : vix < 15 ? 'var(--green)'
-    : vix < 25 ? '#f59e0b'
+    : vix < 15 ? 'var(--blue)'
+    : vix < 25 ? 'var(--gold)'
     : 'var(--red)'
 
   const vixLabel =

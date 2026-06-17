@@ -9,6 +9,7 @@
   --green: #10b981;
   --gold: #f59e0b;
   --red: #ef4444;
+  --blue: #3b82f6;
 
   /* Dark mode (default) */
   --bg: #080c14;
@@ -547,18 +548,26 @@ body {
 }
 .dash-scroll {
   display: flex;
-  align-items: center;
-  gap: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-  padding: 0 4px;
-  scroll-behavior: smooth;
+  overflow: hidden;
   -webkit-user-select: none;
   user-select: none;
 }
-.dash-scroll::-webkit-scrollbar { display: none; }
-.dash-scroll--draggable { cursor: grab; }
-.dash-scroll--grabbing  { cursor: grabbing; }
+.dash-track {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+  animation: dash-marquee 40s linear infinite;
+}
+.dash-scroll:hover .dash-track,
+.dash-scroll--paused .dash-track {
+  animation-play-state: paused;
+}
+@keyframes dash-marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.dash-track-gap { width: 48px; flex-shrink: 0; }
 
 .dash-widget {
   display: flex;
