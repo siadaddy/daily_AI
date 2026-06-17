@@ -4,11 +4,15 @@ import { useState, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import { createBrowserClient } from '@supabase/ssr'
 import type { User } from '@supabase/supabase-js'
-import { signOut } from '@/app/actions/community'
 
 const AuthModal = dynamic(
   () => import('@/components/community/AuthModal').then((m) => ({ default: m.AuthModal })),
   { loading: () => null }
+)
+
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
 export function UserButton() {
@@ -18,10 +22,6 @@ export function UserButton() {
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
     supabase.auth.getUser().then(({ data }) => setUser(data.user))
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user ?? null)
@@ -77,16 +77,16 @@ export function UserButton() {
           className="absolute right-0 top-full z-[200] mt-1 min-w-[120px] rounded-xl p-1 shadow-lg"
           style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
         >
-          <form action={signOut}>
-            <button
-              type="submit"
-              onClick={() => setShowDropdown(false)}
-              className="w-full rounded-lg px-3 py-2 text-left text-xs transition-colors hover:opacity-70"
-              style={{ color: 'var(--muted2)' }}
-            >
-              로그아웃
-            </button>
-          </form>
+          <button
+            onClick={async () => {
+              setShowDropdown(false)
+              await supabase.auth.signOut()
+            }}
+            className="w-full rounded-lg px-3 py-2 text-left text-xs transition-colors hover:opacity-70"
+            style={{ color: 'var(--muted2)' }}
+          >
+            로그아웃
+          </button>
         </div>
       )}
     </div>
