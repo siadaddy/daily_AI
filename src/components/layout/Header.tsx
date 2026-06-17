@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useTheme } from '@/components/layout/ThemeProvider'
 import { ClockWidget } from '@/components/dashboard/ClockWidget'
 import { WeatherWidget } from '@/components/dashboard/WeatherWidget'
@@ -35,6 +36,14 @@ export function Header() {
             </div>
 
             <UserButton />
+            <Link
+              href="/about"
+              className="header-theme-btn"
+              aria-label="서비스 소개"
+              title="서비스 소개"
+            >
+              ℹ️
+            </Link>
             <div className="header-stats">
               <span>60일 아카이브</span>
             </div>

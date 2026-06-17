@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 export function Footer() {
   return (
     <footer
@@ -8,6 +10,15 @@ export function Footer() {
       <p className="mt-1">
         Powered by{' '}
         <span style={{ color: 'var(--bmw-lt)' }}>Next.js · Supabase · GitHub Actions</span>
+      </p>
+      <p className="mt-2">
+        <Link
+          href="/about"
+          className="transition-colors hover:underline"
+          style={{ color: 'var(--bmw-lt)' }}
+        >
+          서비스 소개 →
+        </Link>
       </p>
     </footer>
   )
