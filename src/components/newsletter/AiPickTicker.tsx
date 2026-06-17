@@ -49,12 +49,6 @@ export function AiPickTicker({ news }: { news: NewsCard[] }) {
 
   return (
     <div className="ai-pick-bar">
-      {/* 고정 라벨 */}
-      <div className="ai-pick-label">
-        <span className="ai-pick-label-dot" />
-        AI 픽
-      </div>
-
       {/* 마퀴 트랙 */}
       <div className="ai-pick-scroll">
         <div className="dash-track ai-pick-track">

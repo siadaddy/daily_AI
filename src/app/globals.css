@@ -642,7 +642,7 @@ body {
   user-select: none;
 }
 .ai-pick-track {
-  animation-duration: 60s;
+  animation-duration: 120s;
 }
 .ai-pick-scroll:hover .ai-pick-track {
   animation-play-state: paused;
