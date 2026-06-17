@@ -15,16 +15,16 @@ export function Header() {
 
       <div className="header-main">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-          {/* Logo */}
-          <div className="header-logo">
-            <div className="header-logo-icon">🤖</div>
+          {/* Logo — home link */}
+          <Link href="/" className="header-logo group">
+            <div className="header-logo-icon transition-transform group-hover:scale-110">🤖</div>
             <div>
               <h1 className="header-title">시아아빠의 AI 데일리</h1>
               <p className="header-subtitle">
                 AI · 경제 · 자동차 · 매일 06:40 업데이트
               </p>
             </div>
-          </div>
+          </Link>
 
           {/* 우측: 시계·날씨 + 로그인 + 배지 + 테마 토글 */}
           <div className="flex items-center gap-3">

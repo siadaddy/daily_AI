@@ -474,6 +474,13 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
+  cursor: pointer;
+  text-decoration: none;
+  opacity: 1;
+  transition: opacity 0.2s;
+}
+.header-logo:hover {
+  opacity: 0.82;
 }
 
 .header-logo-icon {
