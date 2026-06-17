@@ -656,15 +656,25 @@ body {
 }
 
 /* ── Date Navigation ───────────────────────────────── */
-:root { --header-h: 89px; }
-@media (max-width: 639px) { :root { --header-h: 83px; } }
+/* header-h: 헤더(티커 제거 후 ~60px) / tabnav-h: 탭바(~44px) */
+:root { --header-h: 60px; --tabnav-h: 44px; }
+@media (max-width: 639px) { :root { --header-h: 56px; --tabnav-h: 44px; } }
+
+/* DateNav + DashboardBar 통합 고정 영역 */
+.sticky-nav-bar {
+  position: sticky;
+  top: calc(var(--header-h) + var(--tabnav-h));
+  z-index: 30;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 8px;
+}
 
 .dn-wrap {
-  position: sticky;
-  top: var(--header-h);
-  z-index: 40;
   background: var(--bg);
-  padding: 10px 0 8px;
+  padding: 6px 0 4px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -753,10 +763,10 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  width: 44px;
-  height: 52px;
-  border-radius: 12px;
+  gap: 1px;
+  width: 36px;
+  height: 42px;
+  border-radius: 10px;
   border: 1px solid var(--border);
   background: var(--glass);
   cursor: pointer;
@@ -777,7 +787,7 @@ body {
 
 /* 요일 */
 .dn-chip-dow {
-  font-size: 0.65rem;
+  font-size: 0.58rem;
   font-weight: 600;
   color: var(--muted);
   line-height: 1;
@@ -785,7 +795,7 @@ body {
 }
 /* 일 숫자 */
 .dn-chip-day {
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: var(--muted2);
   line-height: 1;

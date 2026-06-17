@@ -133,7 +133,7 @@ export async function NewsletterTab({ date }: { date?: string }) {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-2">
+      <div className="sticky-nav-bar">
         <Suspense>
           <DateNav selectedDate={targetDate} />
         </Suspense>
