@@ -119,3 +119,33 @@ export type Category =
   | '🏢 삼천리 그룹'
   | '🏙️ 사회'
   | '🚨 사건 / 사고'
+
+// ─── Analytics / Reports ───────────────────────────────────────────────────
+
+export type ReportPeriod = '일' | '주' | '월'
+
+export interface KeywordStat {
+  word: string
+  count: number
+}
+
+export interface SourceStat {
+  source: string
+  count: number
+}
+
+export interface DailyVolume {
+  date: string
+  count: number
+}
+
+export interface AnalyticsPayload {
+  keywords: KeywordStat[]
+  categoryStats: CategoryStat[]
+  sources: SourceStat[]
+  volumeSeries: DailyVolume[]
+  totalArticles: number
+  avgPerDay: number
+  topDate: string
+  periodLabel: string
+}

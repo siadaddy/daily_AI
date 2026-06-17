@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { WeeklyBriefing } from './WeeklyBriefing'
 import { CardArchive } from './CardArchive'
+import { ReportsDashboard } from './ReportsDashboard'
 import type { WeeklyReport, NewsCard } from '@/lib/types'
 import dayjs from 'dayjs'
 
@@ -49,6 +50,11 @@ export async function ReportsTab() {
           📅 주간 트렌드 브리핑
         </h2>
         <WeeklyBriefing report={report} />
+      </section>
+
+      {/* Analytics dashboard */}
+      <section>
+        <ReportsDashboard />
       </section>
 
       {/* Card archive */}
