@@ -67,12 +67,12 @@ export function AiPicksSection({
             </div>
 
             {/* Title */}
-            <p className="line-clamp-3 text-sm font-semibold leading-snug" style={{ color: 'var(--text)' }}>
+            <p className="text-sm font-semibold leading-snug" style={{ color: 'var(--text)' }}>
               {item.title}
             </p>
 
             {/* Why */}
-            <p className="mt-auto line-clamp-5 text-xs leading-relaxed" style={{ color: 'var(--muted2)' }}>
+            <p className="mt-auto text-xs leading-relaxed" style={{ color: 'var(--muted2)' }}>
               {item.why}
             </p>
           </div>

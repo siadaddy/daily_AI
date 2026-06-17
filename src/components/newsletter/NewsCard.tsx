@@ -38,7 +38,7 @@ export function NewsCard({ card, idx }: { card: ContentCard; idx: number }) {
 
         {/* 제목 */}
         <h3
-          className="mb-3 line-clamp-3 text-base font-bold leading-snug tracking-tight"
+          className="mb-3 text-base font-bold leading-snug tracking-tight"
           style={{ color: 'var(--text)' }}
         >
           {card.headline}

@@ -349,20 +349,12 @@ body {
   line-height: 1.9;
   color: var(--muted2);
   word-break: break-word;
-  display: -webkit-box;
-  -webkit-line-clamp: 6;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 .nc-caption {
   font-size: 0.83rem;
   line-height: 1.85;
   color: var(--muted2);
   word-break: break-word;
-  display: -webkit-box;
-  -webkit-line-clamp: 5;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
 /* ── Site Header ───────────────────────────────────── */

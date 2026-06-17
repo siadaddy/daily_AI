@@ -52,7 +52,7 @@ export function FeaturedCard({ card }: { card: ContentCard }) {
 
         {/* 제목 */}
         <h2
-          className="mb-5 line-clamp-3 text-xl font-bold leading-snug tracking-tight md:text-2xl"
+          className="mb-5 text-xl font-bold leading-snug tracking-tight md:text-2xl"
           style={{ color: 'var(--text)' }}
         >
           {card.headline}
