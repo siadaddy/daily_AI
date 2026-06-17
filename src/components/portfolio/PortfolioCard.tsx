@@ -45,7 +45,7 @@ const PORTFOLIO_ITEMS: PortfolioItem[] = [
     description: '장바구니 분석으로 VIP 고객 패턴 발견 및 추천 전략 수립',
     emoji: '🛒',
     tags: ['Python', 'Pandas', 'Matplotlib'],
-    href: '#',
+    href: 'https://youngs-9ewwwhdidksu3qeifbh2qb.streamlit.app/',
     status: 'demo',
   },
   {
