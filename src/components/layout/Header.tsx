@@ -1,12 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { useTheme } from '@/components/layout/ThemeProvider'
 import { ClockWidget } from '@/components/dashboard/ClockWidget'
 import { WeatherWidget } from '@/components/dashboard/WeatherWidget'
 import { UserButton } from '@/components/layout/UserButton'
+
 export function Header() {
-  const { theme, setTheme } = useTheme()
 
   return (
     <header className="site-header">
@@ -30,34 +29,14 @@ export function Header() {
             </div>
           </Link>
 
-          {/* 우측: 시계·날씨 + 로그인 + 배지 + 테마 토글 */}
+          {/* 우측: 로그인 + 시계·날씨 */}
           <div className="flex items-center gap-3">
-            {/* 시계 + 날씨 고정 표시 */}
+            <UserButton />
             <div className="header-live-widgets">
               <ClockWidget />
               <div className="header-widget-divider" />
               <WeatherWidget />
             </div>
-
-            <UserButton />
-            <Link
-              href="/about"
-              className="header-theme-btn"
-              aria-label="서비스 소개"
-              title="서비스 소개"
-            >
-              ℹ️
-            </Link>
-            <div className="header-stats">
-              <span>60일 아카이브</span>
-            </div>
-            <button
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="header-theme-btn"
-              aria-label="테마 전환"
-            >
-              {theme === 'dark' ? '☀️' : '🌙'}
-            </button>
           </div>
         </div>
       </div>
