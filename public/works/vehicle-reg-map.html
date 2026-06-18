@@ -1,392 +1,378 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BMW 등록 대수 지역 시각화 — DEMO</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<meta charset="utf-8"/>
+<title>BMW 등록대수 지도 — DEMO</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #080c14; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; min-height: 100vh; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background: #f1f5f9; }
+  #map { position: relative; width: 100%; height: 100vh; z-index: 0; }
 
-  /* Header */
-  .header {
-    background: linear-gradient(135deg, rgba(28,105,212,0.15) 0%, rgba(10,14,26,0.95) 100%);
-    border-bottom: 1px solid rgba(28,105,212,0.25);
-    padding: 14px 20px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    position: relative;
+  #title-panel {
+    position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
+    z-index: 1000;
+    background: rgba(255,255,255,0.92);
+    border: 1px solid rgba(0,0,0,0.10);
+    border-radius: 12px; padding: 10px 22px; text-align: center;
+    backdrop-filter: blur(8px); box-shadow: 0 4px 20px rgba(0,0,0,0.12);
   }
-  .header-logo {
-    width: 36px; height: 36px;
-    background: #1c69d4;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 900; font-size: 13px; color: #fff; letter-spacing: -0.5px;
-  }
-  .header-title { font-size: 16px; font-weight: 700; color: #fff; }
-  .header-sub { font-size: 12px; color: #64748b; margin-top: 2px; }
-  .demo-badge {
-    margin-left: auto;
-    background: rgba(28,105,212,0.2);
-    border: 1px solid rgba(28,105,212,0.4);
-    color: #60a5fa;
-    font-size: 11px; font-weight: 700;
-    padding: 3px 10px; border-radius: 4px;
-    letter-spacing: 1px;
-  }
+  #title-panel .main { font-size: 15px; font-weight: 700; color: #1e293b; letter-spacing: 0.03em; }
+  #title-panel .sub  { font-size: 11px; color: #64748b; margin-top: 2px; }
 
-  /* Stats bar */
-  .stats-bar {
-    display: flex; gap: 0;
-    background: #0d1117;
-    border-bottom: 1px solid #1e293b;
+  #zoom-indicator {
+    position: fixed; top: 14px; right: 14px; z-index: 1000;
+    background: rgba(255,255,255,0.88); border: 1px solid rgba(0,0,0,0.10);
+    border-radius: 10px; padding: 8px 14px; font-size: 12px; color: #64748b;
+    backdrop-filter: blur(6px);
   }
-  .stat {
-    flex: 1; padding: 10px 16px;
-    border-right: 1px solid #1e293b;
-    text-align: center;
-  }
-  .stat:last-child { border-right: none; }
-  .stat-val { font-size: 18px; font-weight: 800; color: #1c69d4; font-family: monospace; }
-  .stat-label { font-size: 10px; color: #64748b; margin-top: 1px; letter-spacing: 0.5px; }
+  #zoom-indicator .level { font-size: 13px; font-weight: 700; color: #1e293b; margin-left: 4px; }
 
-  /* Map + controls layout */
-  .map-container { position: relative; }
-  #map { width: 100%; height: calc(100vh - 120px); min-height: 480px; background: #080c14; }
+  #legend {
+    position: fixed; bottom: 30px; left: 14px; z-index: 1000;
+    background: rgba(255,255,255,0.92); border: 1px solid rgba(0,0,0,0.10);
+    border-radius: 12px; padding: 12px 16px;
+    backdrop-filter: blur(8px); box-shadow: 0 4px 20px rgba(0,0,0,0.12); min-width: 110px;
+  }
+  #legend .leg-title { font-size: 11px; color: #94a3b8; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .leg-item { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 12px; color: #334155; }
+  .leg-dot  { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
 
-  /* Legend */
-  .legend {
-    position: absolute; bottom: 28px; left: 14px; z-index: 1000;
-    background: rgba(8,12,20,0.92);
-    border: 1px solid #1e293b;
-    border-radius: 8px;
-    padding: 12px 14px;
-    min-width: 160px;
+  #choro-legend {
+    position: fixed; bottom: 30px; right: 14px; z-index: 1000;
+    background: rgba(255,255,255,0.92); border: 1px solid rgba(0,0,0,0.10);
+    border-radius: 12px; padding: 12px 16px;
+    backdrop-filter: blur(8px); box-shadow: 0 4px 20px rgba(0,0,0,0.12); min-width: 160px;
   }
-  .legend-title { font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 8px; letter-spacing: 0.5px; }
-  .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 12px; color: #cbd5e1; }
-  .legend-circle { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
-  .legend-divider { border: none; border-top: 1px solid #1e293b; margin: 8px 0; }
-  .legend-marker-item { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font-size: 11px; color: #94a3b8; }
-  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.3); }
+  #choro-legend .leg-title { font-size: 11px; color: #94a3b8; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .choro-bar { height: 12px; border-radius: 4px; background: linear-gradient(to right, #fff5f0, #fc8d59, #d73027); margin-bottom: 4px; }
+  .choro-labels { display: flex; justify-content: space-between; font-size: 10px; color: #94a3b8; }
 
-  /* Layer toggle */
-  .layer-toggle {
-    position: absolute; top: 14px; right: 14px; z-index: 1000;
-    display: flex; gap: 6px;
+  #reset-btn {
+    position: fixed; top: 14px; left: 14px; z-index: 1000;
+    background: rgba(255,255,255,0.92); border: 1px solid rgba(0,0,0,0.10);
+    border-radius: 10px; padding: 8px 14px; font-size: 12px; color: #334155;
+    cursor: pointer; backdrop-filter: blur(6px); display: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
   }
-  .toggle-btn {
-    background: rgba(8,12,20,0.9);
-    border: 1px solid #1e293b;
-    border-radius: 6px;
-    color: #94a3b8;
-    font-size: 11px; font-weight: 600;
-    padding: 6px 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .toggle-btn.active {
-    background: rgba(28,105,212,0.2);
-    border-color: #1c69d4;
-    color: #60a5fa;
+  #reset-btn:hover { background: #f1f5f9; }
+
+  #demo-badge {
+    position: fixed; top: 14px; left: 14px; z-index: 1000;
+    background: rgba(255,255,255,0.92); border: 1px solid rgba(0,0,0,0.10);
+    border-radius: 10px; padding: 6px 12px; font-size: 11px;
+    color: #64748b; backdrop-filter: blur(6px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    font-weight: 700; letter-spacing: 1px;
   }
 
-  /* Tooltip */
-  .leaflet-tooltip {
-    background: rgba(8,12,20,0.95) !important;
-    border: 1px solid #1e293b !important;
-    border-radius: 8px !important;
-    color: #e2e8f0 !important;
-    padding: 10px 14px !important;
-    font-family: 'Segoe UI', sans-serif !important;
-    font-size: 13px !important;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+  .custom-tooltip {
+    background: rgba(255,255,255,0.97) !important;
+    border: 1px solid rgba(0,0,0,0.12) !important;
+    border-radius: 8px !important; color: #334155 !important;
+    font-size: 12px !important; padding: 8px 12px !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12) !important; line-height: 1.7 !important;
+    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif !important;
   }
-  .tt-title { font-weight: 700; color: #fff; font-size: 14px; }
-  .tt-row { display: flex; justify-content: space-between; gap: 16px; margin-top: 4px; }
-  .tt-key { color: #64748b; font-size: 11px; }
-  .tt-val { color: #60a5fa; font-weight: 700; font-size: 12px; }
+  .tt-name  { font-size: 13px; font-weight: 700; color: #1e293b; }
+  .tt-num   { color: #d97706; font-weight: 600; }
+  .tt-ratio { color: #2563eb; }
+  .tt-hint  { font-size: 10px; color: #94a3b8; margin-top: 4px; }
 
-  /* Dealer popup */
-  .leaflet-popup-content-wrapper {
-    background: rgba(8,12,20,0.97) !important;
-    border: 1px solid #1e293b !important;
-    border-radius: 10px !important;
-    color: #e2e8f0 !important;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.6) !important;
+  .region-label {
+    background: transparent; border: none; font-weight: 700;
+    text-align: center; pointer-events: none;
+    text-shadow: 0 0 3px #fff, 0 0 3px #fff, 1px 1px 2px #fff, -1px -1px 2px #fff;
+    line-height: 1.2; white-space: nowrap;
   }
-  .leaflet-popup-tip { background: rgba(8,12,20,0.97) !important; }
-  .popup-title { font-weight: 700; font-size: 14px; color: #fff; margin-bottom: 8px; }
-  .popup-badge {
-    display: inline-block; padding: 2px 7px; border-radius: 4px;
-    font-size: 10px; font-weight: 700; margin-left: 6px;
-    vertical-align: middle;
-  }
-  .popup-row { display: flex; justify-content: space-between; gap: 20px; margin-top: 5px; }
-  .popup-key { font-size: 11px; color: #64748b; }
-  .popup-val { font-size: 12px; font-weight: 600; color: #e2e8f0; }
+  .region-label .r-name { font-size: 10px; color: #475569; }
+  .region-label .r-num  { font-size: 12px; color: #b45309; font-weight: 800; }
 
-  /* Demo watermark */
-  .watermark {
-    position: fixed; bottom: 40px; right: 18px; z-index: 2000;
-    font-size: 10px; color: rgba(100,116,139,0.5);
-    letter-spacing: 2px; font-weight: 700;
-    pointer-events: none;
+  .sc-marker {
+    padding: 4px 9px; border-radius: 6px; font-size: 10px; font-weight: 700;
+    color: #fff; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+    cursor: pointer; letter-spacing: 0.03em;
+  }
+
+  #dealer-toggle {
+    display: inline-block; margin-top: 10px; padding: 5px 10px;
+    background: #1e293b; color: #fff; border: none; border-radius: 6px;
+    font-size: 11px; cursor: pointer; width: 100%; text-align: center;
+  }
+  #dealer-toggle:hover { background: #334155; }
+  #dealer-toggle.off { background: #94a3b8; }
+
+  .leaflet-control-zoom a {
+    background: rgba(255,255,255,0.9) !important; color: #1e293b !important;
+    border-color: rgba(0,0,0,0.15) !important;
+  }
+  .leaflet-control-zoom a:hover { background: rgba(241,245,249,0.95) !important; }
+
+  #loading {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    z-index: 2000; background: rgba(255,255,255,0.95); border-radius: 12px;
+    padding: 20px 32px; font-size: 13px; color: #475569;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12); border: 1px solid rgba(0,0,0,0.08);
   }
 </style>
 </head>
 <body>
+<div id="map"></div>
+<div id="loading">🗺 지도 데이터 불러오는 중...</div>
 
-<div class="header">
-  <div class="header-logo">BMW</div>
-  <div>
-    <div class="header-title">차량 등록 대수 지역 시각화</div>
-    <div class="header-sub">행정구역별 누적 등록 현황 · 시도 / 시군구 드릴다운</div>
-  </div>
-  <div class="demo-badge">DEMO</div>
+<div id="title-panel">
+  <div class="main">📍 BMW 차량 등록대수 시각화</div>
+  <div class="sub">🗓 적용 기간 : 2021-05 ~ 2026-05 &nbsp;|&nbsp; DEMO 데이터</div>
 </div>
 
-<div class="stats-bar">
-  <div class="stat"><div class="stat-val">374,472</div><div class="stat-label">전국 누적 등록</div></div>
-  <div class="stat"><div class="stat-val">17</div><div class="stat-label">시도</div></div>
-  <div class="stat"><div class="stat-val">82</div><div class="stat-label">딜러 마커</div></div>
-  <div class="stat"><div class="stat-val">2025.12</div><div class="stat-label">기준 월</div></div>
+<div id="zoom-indicator">현재 단계: <span class="level" id="zoom-label">시도</span></div>
+<div id="demo-badge">DEMO</div>
+<button id="reset-btn" onclick="resetHighlight()">✕ 전체 보기</button>
+
+<div id="legend">
+  <div class="leg-title">🚘 딜러</div>
+  <div id="leg-body"></div>
+  <button id="dealer-toggle" onclick="toggleDealers()">👁 마커 숨기기</button>
 </div>
 
-<div class="map-container">
-  <div id="map"></div>
-
-  <div class="layer-toggle">
-    <button class="toggle-btn active" id="btn-sido" onclick="setLayer('sido')">시도</button>
-    <button class="toggle-btn" id="btn-sgg" onclick="setLayer('sgg')">시군구</button>
-  </div>
-
-  <div class="legend">
-    <div class="legend-title">등록 대수</div>
-    <div class="legend-item"><div class="legend-circle" style="background:#1e3a5f"></div> ~ 9,999</div>
-    <div class="legend-item"><div class="legend-circle" style="background:#1a4f8a"></div> 10,000 ~ 19,999</div>
-    <div class="legend-item"><div class="legend-circle" style="background:#1c69d4"></div> 20,000 ~ 39,999</div>
-    <div class="legend-item"><div class="legend-circle" style="background:#3b82f6"></div> 40,000 ~ 79,999</div>
-    <div class="legend-item"><div class="legend-circle" style="background:#60a5fa"></div> 80,000+</div>
-    <hr class="legend-divider">
-    <div class="legend-title">딜러 유형</div>
-    <div class="legend-marker-item"><div class="legend-dot" style="background:#1c69d4"></div>Full Service [F]</div>
-    <div class="legend-marker-item"><div class="legend-dot" style="background:#a78bfa"></div>Mechanic [M]</div>
-    <div class="legend-marker-item"><div class="legend-dot" style="background:#34d399"></div>Body&Paint [B]</div>
-    <div class="legend-marker-item"><div class="legend-dot" style="background:#f59e0b"></div>SCL ★</div>
-  </div>
+<div id="choro-legend">
+  <div class="leg-title">📊 BMW 등록대수</div>
+  <div class="choro-bar"></div>
+  <div class="choro-labels"><span>적음</span><span>많음</span></div>
+  <div style="margin-top:8px;font-size:10px;color:#94a3b8;" id="choro-unit">단위: 시도별</div>
 </div>
-
-<div class="watermark">DEMO DATA · NOT REAL</div>
 
 <script>
 // ── DEMO DATA ──────────────────────────────────────────────
-const SIDO_DATA = [
-  { name: '서울', lat: 37.5665, lng: 126.9780, reg: 85432, sgg_count: 25 },
-  { name: '경기', lat: 37.4138, lng: 127.5183, reg: 112847, sgg_count: 31 },
-  { name: '부산', lat: 35.1796, lng: 129.0756, reg: 38291, sgg_count: 16 },
-  { name: '인천', lat: 37.4563, lng: 126.7052, reg: 29184, sgg_count: 10 },
-  { name: '대구', lat: 35.8714, lng: 128.6014, reg: 22547, sgg_count: 8 },
-  { name: '광주', lat: 35.1595, lng: 126.8526, reg: 15832, sgg_count: 5 },
-  { name: '대전', lat: 36.3504, lng: 127.3845, reg: 18294, sgg_count: 5 },
-  { name: '울산', lat: 35.5384, lng: 129.3114, reg: 12873, sgg_count: 5 },
-  { name: '세종', lat: 36.4801, lng: 127.2890, reg: 4521, sgg_count: 1 },
-  { name: '강원', lat: 37.8228, lng: 128.1555, reg: 11283, sgg_count: 18 },
-  { name: '충북', lat: 36.8000, lng: 127.7000, reg: 9847, sgg_count: 11 },
-  { name: '충남', lat: 36.5184, lng: 126.8000, reg: 13291, sgg_count: 15 },
-  { name: '전북', lat: 35.7167, lng: 127.1531, reg: 10543, sgg_count: 14 },
-  { name: '전남', lat: 34.8679, lng: 126.9910, reg: 8932, sgg_count: 22 },
-  { name: '경북', lat: 36.4919, lng: 128.8889, reg: 15847, sgg_count: 23 },
-  { name: '경남', lat: 35.4606, lng: 128.2132, reg: 18921, sgg_count: 18 },
-  { name: '제주', lat: 33.4996, lng: 126.5312, reg: 7287, sgg_count: 2 },
+const SIDO_TOTAL = {
+  '11': 85432,   // 서울
+  '26': 38291,   // 부산
+  '27': 22547,   // 대구
+  '28': 29184,   // 인천
+  '29': 15832,   // 광주
+  '30': 18294,   // 대전
+  '31': 12873,   // 울산
+  '36': 4521,    // 세종
+  '41': 112847,  // 경기
+  '42': 11283,   // 강원
+  '43': 9847,    // 충북
+  '44': 13291,   // 충남
+  '45': 10543,   // 전북
+  '46': 8932,    // 전남
+  '47': 15847,   // 경북
+  '48': 18921,   // 경남
+  '50': 7287,    // 제주
+};
+
+// 실명 매핑
+const NAME_TO_SIDO = {
+  '서울특별시':'11','부산광역시':'26','대구광역시':'27','인천광역시':'28',
+  '광주광역시':'29','대전광역시':'30','울산광역시':'31','세종특별자치시':'36',
+  '경기도':'41','강원특별자치도':'42','강원도':'42',
+  '충청북도':'43','충청남도':'44',
+  '전라북도':'45','전북특별자치도':'45',
+  '전라남도':'46','경상북도':'47','경상남도':'48','제주특별자치도':'50'
+};
+
+const DEALER_COLORS = { KL:'#D4880A', DT:'#D95B1A', HD:'#B03060', BV:'#6C3483', DS:'#0E7490', SCL:'#0055FF', NT:'#1A6B3A' };
+const DEALER_ORDER  = ['KL','DT','HD','BV','DS','SCL','NT'];
+
+const MARKERS = [
+  { workshop:'강남서비스',    dealer:'KL',  lat:37.517, lon:127.051, color:'#D4880A' },
+  { workshop:'강서서비스',    dealer:'DT',  lat:37.551, lon:126.850, color:'#D95B1A' },
+  { workshop:'수원서비스',    dealer:'HD',  lat:37.270, lon:127.029, color:'#B03060' },
+  { workshop:'분당서비스',    dealer:'SCL', lat:37.384, lon:127.125, color:'#0055FF' },
+  { workshop:'인천서비스',    dealer:'KL',  lat:37.411, lon:126.690, color:'#D4880A' },
+  { workshop:'부산서비스',    dealer:'DT',  lat:35.163, lon:129.168, color:'#D95B1A' },
+  { workshop:'대구서비스',    dealer:'HD',  lat:35.859, lon:128.637, color:'#B03060' },
+  { workshop:'대전서비스',    dealer:'BV',  lat:36.362, lon:127.362, color:'#6C3483' },
+  { workshop:'광주서비스',    dealer:'DS',  lat:35.153, lon:126.856, color:'#0E7490' },
+  { workshop:'울산서비스',    dealer:'NT',  lat:35.545, lon:129.318, color:'#1A6B3A' },
+  { workshop:'창원서비스',    dealer:'KL',  lat:35.232, lon:128.681, color:'#D4880A' },
+  { workshop:'청주서비스',    dealer:'DT',  lat:36.642, lon:127.489, color:'#D95B1A' },
 ];
 
-// 시군구 (demo subset — 30 districts)
-const SGG_DATA = [
-  { name: '강남구', sido: '서울', lat: 37.5172, lng: 127.0473, reg: 14832 },
-  { name: '서초구', sido: '서울', lat: 37.4836, lng: 127.0327, reg: 11247 },
-  { name: '송파구', sido: '서울', lat: 37.5145, lng: 127.1059, reg: 9843 },
-  { name: '마포구', sido: '서울', lat: 37.5638, lng: 126.9084, reg: 7231 },
-  { name: '영등포구', sido: '서울', lat: 37.5261, lng: 126.8963, reg: 6148 },
-  { name: '수원시', sido: '경기', lat: 37.2636, lng: 127.0286, reg: 12741 },
-  { name: '성남시', sido: '경기', lat: 37.4201, lng: 127.1265, reg: 11832 },
-  { name: '고양시', sido: '경기', lat: 37.6584, lng: 126.8320, reg: 10293 },
-  { name: '용인시', sido: '경기', lat: 37.2411, lng: 127.1776, reg: 9847 },
-  { name: '화성시', sido: '경기', lat: 37.1997, lng: 126.8314, reg: 7632 },
-  { name: '해운대구', sido: '부산', lat: 35.1631, lng: 129.1636, reg: 8294 },
-  { name: '남구', sido: '부산', lat: 35.1379, lng: 129.1013, reg: 6743 },
-  { name: '북구', sido: '부산', lat: 35.1972, lng: 128.9897, reg: 5128 },
-  { name: '연수구', sido: '인천', lat: 37.4106, lng: 126.6786, reg: 7841 },
-  { name: '남동구', sido: '인천', lat: 37.4479, lng: 126.7310, reg: 6293 },
-  { name: '수성구', sido: '대구', lat: 35.8588, lng: 128.6314, reg: 8431 },
-  { name: '달서구', sido: '대구', lat: 35.8297, lng: 128.5326, reg: 6124 },
-  { name: '유성구', sido: '대전', lat: 36.3624, lng: 127.3564, reg: 7293 },
-  { name: '서구', sido: '대전', lat: 36.3553, lng: 127.3832, reg: 5841 },
-  { name: '남구', sido: '울산', lat: 35.5384, lng: 129.3114, reg: 5192 },
-  { name: '세종시', sido: '세종', lat: 36.4801, lng: 127.2890, reg: 4521 },
-  { name: '춘천시', sido: '강원', lat: 37.8813, lng: 127.7298, reg: 3142 },
-  { name: '원주시', sido: '강원', lat: 37.3422, lng: 127.9201, reg: 2847 },
-  { name: '청주시', sido: '충북', lat: 36.6424, lng: 127.4890, reg: 4831 },
-  { name: '천안시', sido: '충남', lat: 36.8151, lng: 127.1139, reg: 5293 },
-  { name: '전주시', sido: '전북', lat: 35.8242, lng: 127.1480, reg: 4192 },
-  { name: '창원시', sido: '경남', lat: 35.2280, lng: 128.6811, reg: 6843 },
-  { name: '진주시', sido: '경남', lat: 35.1798, lng: 128.1076, reg: 3241 },
-  { name: '포항시', sido: '경북', lat: 36.0190, lng: 129.3435, reg: 4831 },
-  { name: '제주시', sido: '제주', lat: 33.4996, lng: 126.5312, reg: 5193 },
-];
-
-const DEALER_DATA = [
-  { name: '딜러A 강남점', type: 'F', lat: 37.5172, lng: 127.0512, city: '서울 강남', reg_area: 14832 },
-  { name: '딜러B 강서점', type: 'M', lat: 37.5509, lng: 126.8495, city: '서울 강서', reg_area: 8241 },
-  { name: '딜러C 수원점', type: 'F', lat: 37.2700, lng: 127.0286, city: '경기 수원', reg_area: 12741 },
-  { name: '딜러D 분당점', type: 'SCL', lat: 37.3840, lng: 127.1250, city: '경기 성남', reg_area: 11832 },
-  { name: '딜러E 인천점', type: 'F', lat: 37.4106, lng: 126.6900, city: '인천 연수', reg_area: 7841 },
-  { name: '딜러F 부산점', type: 'F', lat: 35.1631, lng: 129.1680, city: '부산 해운대', reg_area: 8294 },
-  { name: '딜러G 부산서점', type: 'M', lat: 35.1972, lng: 128.9940, city: '부산 북구', reg_area: 5128 },
-  { name: '딜러H 대구점', type: 'F', lat: 35.8588, lng: 128.6370, city: '대구 수성', reg_area: 8431 },
-  { name: '딜러I 대전점', type: 'F', lat: 36.3624, lng: 127.3620, city: '대전 유성', reg_area: 7293 },
-  { name: '딜러J 광주점', type: 'B', lat: 35.1531, lng: 126.8560, city: '광주 서구', reg_area: 6124 },
-  { name: '딜러K 울산점', type: 'M', lat: 35.5450, lng: 129.3180, city: '울산 남구', reg_area: 5192 },
-  { name: '딜러L 창원점', type: 'F', lat: 35.2320, lng: 128.6870, city: '경남 창원', reg_area: 6843 },
-];
-
-// ── COLOR HELPERS ──────────────────────────────────────────
-function regColor(reg) {
-  if (reg >= 80000) return '#60a5fa';
-  if (reg >= 40000) return '#3b82f6';
-  if (reg >= 20000) return '#1c69d4';
-  if (reg >= 10000) return '#1a4f8a';
-  return '#1e3a5f';
+// ── COLOR ──────────────────────────────────────────────────
+function choroplethColor(val, max) {
+  if (!val || val <= 0) return 'rgba(255,255,255,0.04)';
+  const t = Math.sqrt(val / max);
+  if (t < 0.5) {
+    const r = Math.round(255 + (252-255)*(t/0.5));
+    const g = Math.round(245 + (141-245)*(t/0.5));
+    const b = Math.round(240 + (89-240)*(t/0.5));
+    return `rgba(${r},${g},${b},0.75)`;
+  } else {
+    const s = (t-0.5)/0.5;
+    const r = Math.round(252 + (215-252)*s);
+    const g = Math.round(141 + (48-141)*s);
+    const b = Math.round(89  + (39-89)*s);
+    return `rgba(${r},${g},${b},0.80)`;
+  }
 }
+function fmt(n) { return n ? Number(n).toLocaleString() : '-'; }
+function fmt2k(n) { return n >= 10000 ? (n/10000).toFixed(1)+'만' : Number(n).toLocaleString(); }
 
-function regRadius(reg, isSido) {
-  if (isSido) return Math.sqrt(reg) * 0.55;
-  return Math.sqrt(reg) * 1.1;
-}
-
-const DEALER_COLORS = { F: '#1c69d4', M: '#a78bfa', B: '#34d399', SCL: '#f59e0b' };
-const DEALER_LABELS = { F: 'Full Service', M: 'Mechanic', B: 'Body & Paint', SCL: 'Special Channel' };
-
-function fmt(n) { return n.toLocaleString('ko-KR'); }
-
-// ── MAP INIT ───────────────────────────────────────────────
-const map = L.map('map', { center: [36.5, 127.8], zoom: 7, zoomControl: false });
-L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
-  subdomains: 'abcd', maxZoom: 19
+// ── MAP ────────────────────────────────────────────────────
+const map = L.map('map', { center:[36.5,127.8], zoom:7, zoomControl:true });
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution:'&copy; OpenStreetMap &copy; CARTO', maxZoom:18
 }).addTo(map);
 
-// ── LAYERS ─────────────────────────────────────────────────
-let sidoLayer, sggLayer, dealerLayer;
-let currentLayer = 'sido';
+// ── FETCH GEOJSON & BUILD LAYERS ───────────────────────────
+let sidoGeoJSON = null;
+let sidoLayer = null, sidoLabels = null;
+let selectedSido = null;
 
-function makeSidoLayer() {
-  const group = L.layerGroup();
-  SIDO_DATA.forEach(d => {
-    const circle = L.circle([d.lat, d.lng], {
-      radius: regRadius(d.reg, true) * 500,
-      color: regColor(d.reg),
-      fillColor: regColor(d.reg),
-      fillOpacity: 0.55,
-      weight: 1.5,
-    });
-    const pct = ((d.reg / 374472) * 100).toFixed(1);
-    circle.bindTooltip(`
-      <div class="tt-title">${d.name}</div>
-      <div class="tt-row"><span class="tt-key">등록 대수</span><span class="tt-val">${fmt(d.reg)} 대</span></div>
-      <div class="tt-row"><span class="tt-key">전국 점유</span><span class="tt-val">${pct}%</span></div>
-      <div class="tt-row"><span class="tt-key">시군구 수</span><span class="tt-val">${d.sgg_count}개</span></div>
-    `, { sticky: true });
-    group.addLayer(circle);
+const maxSido = Math.max(...Object.values(SIDO_TOTAL));
+const totalSido = Object.values(SIDO_TOTAL).reduce((a,b)=>a+b,0);
 
-    const label = L.marker([d.lat, d.lng], {
-      icon: L.divIcon({
-        className: '',
-        html: `<div style="font-size:11px;font-weight:700;color:#fff;text-shadow:0 0 4px #000,0 0 8px #000;white-space:nowrap;pointer-events:none;">${d.name}<br><span style="color:#60a5fa;font-size:10px;">${fmt(d.reg)}</span></div>`,
-        iconAnchor: [0, 0]
-      }),
-      interactive: false
-    });
-    group.addLayer(label);
-  });
-  return group;
-}
-
-function makeSggLayer() {
-  const group = L.layerGroup();
-  SGG_DATA.forEach(d => {
-    const circle = L.circle([d.lat, d.lng], {
-      radius: regRadius(d.reg, false) * 300,
-      color: regColor(d.reg),
-      fillColor: regColor(d.reg),
-      fillOpacity: 0.6,
-      weight: 1,
-    });
-    const pct = ((d.reg / 374472) * 100).toFixed(2);
-    circle.bindTooltip(`
-      <div class="tt-title">${d.sido} ${d.name}</div>
-      <div class="tt-row"><span class="tt-key">등록 대수</span><span class="tt-val">${fmt(d.reg)} 대</span></div>
-      <div class="tt-row"><span class="tt-key">전국 점유</span><span class="tt-val">${pct}%</span></div>
-    `, { sticky: true });
-    group.addLayer(circle);
-  });
-  return group;
-}
-
-function makeDealerLayer() {
-  const group = L.layerGroup();
-  DEALER_DATA.forEach(d => {
-    const color = DEALER_COLORS[d.type];
-    const isSCL = d.type === 'SCL';
-    const marker = L.circleMarker([d.lat, d.lng], {
-      radius: isSCL ? 9 : 7,
-      color: '#fff',
-      fillColor: color,
-      fillOpacity: 1,
-      weight: isSCL ? 2.5 : 1.5,
-    });
-    marker.bindPopup(`
-      <div class="popup-title">${d.name}
-        <span class="popup-badge" style="background:${color}22;color:${color};border:1px solid ${color}44;">${d.type}</span>
-      </div>
-      <div class="popup-row"><span class="popup-key">위치</span><span class="popup-val">${d.city}</span></div>
-      <div class="popup-row"><span class="popup-key">지역 유형</span><span class="popup-val">${DEALER_LABELS[d.type]}</span></div>
-      <div class="popup-row"><span class="popup-key">권역 등록</span><span class="popup-val">${fmt(d.reg_area)} 대</span></div>
-    `);
-    group.addLayer(marker);
-  });
-  return group;
-}
-
-// ── LAYER CONTROL ─────────────────────────────────────────
-function setLayer(type) {
-  if (sidoLayer) map.removeLayer(sidoLayer);
-  if (sggLayer) map.removeLayer(sggLayer);
-
-  document.getElementById('btn-sido').classList.toggle('active', type === 'sido');
-  document.getElementById('btn-sgg').classList.toggle('active', type === 'sgg');
-
-  if (type === 'sido') {
-    if (!sidoLayer) sidoLayer = makeSidoLayer();
-    sidoLayer.addTo(map);
-  } else {
-    if (!sggLayer) sggLayer = makeSggLayer();
-    sggLayer.addTo(map);
+function getSidoCode(props) {
+  const names = [props.CTP_KOR_NM, props.name, props.name_kor, props.sidonm, props.NM_KOR];
+  for (const nm of names) {
+    if (nm && NAME_TO_SIDO[nm]) return NAME_TO_SIDO[nm];
   }
-  currentLayer = type;
+  // fallback: partial match
+  const allNames = Object.keys(NAME_TO_SIDO);
+  for (const nm of names) {
+    if (!nm) continue;
+    for (const key of allNames) {
+      if (nm.includes(key.slice(0,2)) || key.includes(nm.slice(0,2))) return NAME_TO_SIDO[key];
+    }
+  }
+  return null;
 }
 
-// init
-sidoLayer = makeSidoLayer();
-sidoLayer.addTo(map);
-dealerLayer = makeDealerLayer();
-dealerLayer.addTo(map);
+function getSidoName(props) {
+  return props.CTP_KOR_NM || props.name || props.name_kor || props.sidonm || props.NM_KOR || '알 수 없음';
+}
+
+function calcCentroid(geometry) {
+  const coords = geometry.coordinates;
+  let sumLat=0, sumLng=0, cnt=0;
+  function processRing(ring) { ring.forEach(pt => { sumLng+=pt[0]; sumLat+=pt[1]; cnt++; }); }
+  try {
+    if (geometry.type === 'Polygon') {
+      coords.forEach(ring => processRing(ring));
+    } else if (geometry.type === 'MultiPolygon') {
+      let maxLen=0, best=coords[0][0];
+      coords.forEach(poly => { if(poly[0].length>maxLen){ maxLen=poly[0].length; best=poly[0]; } });
+      processRing(best);
+    }
+  } catch(e) {}
+  return cnt ? L.latLng(sumLat/cnt, sumLng/cnt) : null;
+}
+
+function buildSidoLayer(geojson) {
+  return L.geoJSON(geojson, {
+    style: f => {
+      const code = getSidoCode(f.properties);
+      const v = code ? (SIDO_TOTAL[code] || 0) : 0;
+      return { fillColor: choroplethColor(v, maxSido), color:'#475569', weight:1.5, fillOpacity:1 };
+    },
+    onEachFeature: (f, layer) => {
+      const code = getSidoCode(f.properties);
+      const v = code ? (SIDO_TOTAL[code] || 0) : 0;
+      const nm = getSidoName(f.properties);
+      const pct = totalSido ? (v/totalSido*100).toFixed(1) : '0.0';
+      layer.bindTooltip(`
+        <div class="tt-name">${nm}</div>
+        <div>등록대수: <span class="tt-num">${fmt(v)}</span></div>
+        <div>비율: <span class="tt-ratio">${pct}%</span></div>
+        <div class="tt-hint">🔍 클릭 → 시군구 드릴다운 (실 데이터 미포함)</div>
+      `, {className:'custom-tooltip', sticky:true});
+    }
+  });
+}
+
+function buildSidoLabels(geojson) {
+  const group = L.layerGroup();
+  geojson.features.forEach(f => {
+    const code = getSidoCode(f.properties);
+    const v = code ? (SIDO_TOTAL[code] || 0) : 0;
+    if (!v) return;
+    const center = calcCentroid(f.geometry);
+    if (!center) return;
+    const nm = getSidoName(f.properties);
+    const shortNm = nm.replace('특별시','').replace('광역시','').replace('특별자치시','').replace('특별자치도','').replace('도','').replace('특별자치도','');
+    const el = document.createElement('div');
+    el.className = 'region-label';
+    el.innerHTML = `<div class="r-name">${shortNm}</div><div class="r-num">${fmt2k(v)}</div>`;
+    const icon = L.divIcon({ html: el, className: '', iconSize: null, iconAnchor: [0, 0] });
+    group.addLayer(L.marker(center, { icon, interactive: false, keyboard: false }));
+  });
+  return group;
+}
+
+// ── 딜러 마커 ──────────────────────────────────────────────
+const scGroup = L.featureGroup();
+MARKERS.forEach(m => {
+  const el = document.createElement('div');
+  el.className = 'sc-marker';
+  el.style.background = m.color;
+  el.textContent = m.workshop;
+  const icon = L.divIcon({ html:el, className:'', iconAnchor:[0,12] });
+  const mk = L.marker([m.lat, m.lon], { icon });
+  mk.bindTooltip(`<div class="tt-name">${m.workshop}</div><div style="font-size:11px;color:#94a3b8;">${m.dealer}</div>`, {className:'custom-tooltip'});
+  scGroup.addLayer(mk);
+});
+scGroup.addTo(map);
+
+// ── 범례 ───────────────────────────────────────────────────
+const legBody = document.getElementById('leg-body');
+DEALER_ORDER.forEach(d => {
+  if (!DEALER_COLORS[d]) return;
+  legBody.innerHTML += `<div class="leg-item"><div class="leg-dot" style="background:${DEALER_COLORS[d]};"></div><span>${d}</span></div>`;
+});
+
+// ── GeoJSON fetch ──────────────────────────────────────────
+const GEOJSON_URLS = [
+  'https://cdn.jsdelivr.net/gh/southkorea/southkorea-maps@master/kostat/2018/json/skorea-provinces-2018-geo.json',
+  'https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2018/json/skorea-provinces-2018-geo.json',
+];
+
+async function loadGeoJSON() {
+  for (const url of GEOJSON_URLS) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) continue;
+      return await res.json();
+    } catch(e) { continue; }
+  }
+  return null;
+}
+
+loadGeoJSON().then(geojson => {
+  document.getElementById('loading').style.display = 'none';
+  if (!geojson) {
+    // fallback: circle markers (already shown via scGroup)
+    document.getElementById('zoom-label').textContent = '(지도 없음)';
+    return;
+  }
+  sidoGeoJSON = geojson;
+  sidoLayer = buildSidoLayer(geojson);
+  sidoLabels = buildSidoLabels(geojson);
+  sidoLayer.addTo(map);
+  sidoLabels.addTo(map);
+  scGroup.bringToFront();
+}).catch(() => {
+  document.getElementById('loading').style.display = 'none';
+});
+
+// ── 딜러 토글 ──────────────────────────────────────────────
+let dealerVisible = true;
+function toggleDealers() {
+  dealerVisible = !dealerVisible;
+  const btn = document.getElementById('dealer-toggle');
+  if (dealerVisible) { scGroup.addTo(map); btn.textContent='👁 마커 숨기기'; btn.classList.remove('off'); }
+  else { map.removeLayer(scGroup); btn.textContent='🙈 마커 보이기'; btn.classList.add('off'); }
+}
+
+function resetHighlight() {
+  document.getElementById('reset-btn').style.display = 'none';
+}
 </script>
 </body>
 </html>

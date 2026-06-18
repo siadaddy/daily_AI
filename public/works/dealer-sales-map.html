@@ -2,264 +2,442 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BMW 딜러&지점 매출 시각화 — DEMO</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>BMW Korea Dealer Sales Map — DEMO</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #080c14; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
-
-  /* Header */
-  .header {
-    background: linear-gradient(135deg, rgba(28,105,212,0.12) 0%, rgba(10,14,26,0.98) 100%);
-    border-bottom: 1px solid rgba(28,105,212,0.2);
-    padding: 13px 20px;
-    display: flex; align-items: center; gap: 14px; flex-shrink: 0;
+  :root {
+    --bg:#F1F5F9; --surface:#FFFFFF; --border:#CBD5E1;
+    --text:#0F172A; --text2:#475569; --text3:#94A3B8;
+    --accent:#0055FF; --up:#0000FF; --dn:#DC2626;
+    --shadow:0 4px 24px rgba(15,23,42,0.10);
+    --shadow2:0 2px 8px rgba(15,23,42,0.06);
   }
-  .header-logo { width: 34px; height: 34px; background: #1c69d4; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 12px; color: #fff; }
-  .header-title { font-size: 15px; font-weight: 700; color: #fff; }
-  .header-sub { font-size: 11px; color: #64748b; margin-top: 1px; }
-  .demo-badge { margin-left: auto; background: rgba(28,105,212,0.2); border: 1px solid rgba(28,105,212,0.4); color: #60a5fa; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 1px; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; overflow:hidden; }
 
-  /* Stats */
-  .stats-bar { display: flex; background: #0d1117; border-bottom: 1px solid #1e293b; flex-shrink: 0; }
-  .stat { flex: 1; padding: 9px 14px; border-right: 1px solid #1e293b; text-align: center; }
-  .stat:last-child { border-right: none; }
-  .stat-val { font-size: 17px; font-weight: 800; color: #1c69d4; font-family: monospace; }
-  .stat-label { font-size: 10px; color: #64748b; margin-top: 1px; }
+  /* ── Header ── */
+  #header { height:54px; flex-shrink:0; background:var(--surface); border-bottom:2px solid var(--border); box-shadow:var(--shadow2); display:flex; align-items:center; padding:0 20px; gap:16px; z-index:1000; }
+  .logo { font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:0.15em; color:var(--accent); white-space:nowrap; line-height:1; }
+  .logo span { color:var(--text3); font-size:11px; font-family:'Noto Sans KR',sans-serif; font-weight:400; letter-spacing:0.05em; display:block; margin-top:1px; }
+  .hd-sep { width:1px; height:22px; background:var(--border); flex-shrink:0; }
+  #breadcrumb { display:flex; align-items:center; gap:5px; }
+  .crumb { cursor:pointer; color:var(--accent); padding:3px 10px; border-radius:20px; background:rgba(0,85,255,0.07); border:1px solid rgba(0,85,255,0.15); transition:all 0.18s; font-size:12px; font-weight:500; }
+  .crumb:hover { background:var(--accent); color:#fff; }
+  .crumb.active { color:var(--text2); cursor:default; background:transparent; border-color:transparent; font-weight:400; }
+  .sep { color:var(--text3); font-size:11px; }
+  .demo-chip { padding:2px 10px; border-radius:20px; border:1.5px solid #CBD5E1; font-size:10px; font-weight:700; color:#64748b; letter-spacing:1px; background:#f8fafc; }
+  #level-indicator { margin-left:auto; display:flex; gap:7px; align-items:center; }
+  .level-dot { width:7px; height:7px; border-radius:50%; background:var(--border); transition:all 0.3s; }
+  .level-dot.active { background:var(--accent); box-shadow:0 0 0 3px rgba(0,85,255,0.2); }
+  #dealer-toggles { display:flex; gap:4px; flex-wrap:wrap; }
+  .dtoggle { padding:2px 9px; border-radius:20px; border:1.5px solid transparent; cursor:pointer; font-size:10px; font-weight:700; font-family:'Noto Sans KR',sans-serif; transition:all 0.18s; background:#fff; }
+  .dtoggle.scl-toggle { border-width:2px; box-shadow:0 0 0 2px rgba(0,85,255,0.15); }
+  .dtoggle.off { opacity:0.25; box-shadow:none; }
 
-  /* Layout: map + table */
-  .body-wrap { display: flex; flex-direction: column; flex: 1; }
-  .map-section { position: relative; flex: 1; min-height: 380px; }
-  #map { width: 100%; height: 100%; min-height: 380px; background: #080c14; }
+  /* ── Map ── */
+  #map-container { flex:1; position:relative; }
+  #map { width:100%; height:100%; }
+  .leaflet-container { background:#dde8f0; }
+  #click-hint { position:absolute; bottom:18px; left:50%; transform:translateX(-50%); z-index:500; background:rgba(255,255,255,0.92); border:1px solid var(--border); border-radius:20px; padding:5px 14px; font-size:11px; color:var(--text2); box-shadow:var(--shadow2); pointer-events:none; white-space:nowrap; }
+  #back-btn { display:none; position:absolute; top:14px; left:56px; z-index:500; background:var(--surface); border:1px solid var(--border); box-shadow:var(--shadow2); color:var(--accent); padding:6px 14px; border-radius:20px; cursor:pointer; font-size:12px; font-family:'Noto Sans KR',sans-serif; font-weight:500; transition:all 0.18s; }
+  #back-btn:hover { background:var(--accent); color:#fff; }
 
-  /* Legend */
-  .legend {
-    position: absolute; bottom: 24px; left: 14px; z-index: 1000;
-    background: rgba(8,12,20,0.93); border: 1px solid #1e293b; border-radius: 8px;
-    padding: 11px 14px; min-width: 155px;
-  }
-  .legend-title { font-size: 10px; font-weight: 700; color: #94a3b8; margin-bottom: 7px; letter-spacing: 0.5px; text-transform: uppercase; }
-  .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 11px; color: #cbd5e1; }
-  .legend-dot { border-radius: 50%; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.25); }
-  .legend-hr { border: none; border-top: 1px solid #1e293b; margin: 7px 0; }
-  .legend-size { display: flex; align-items: flex-end; gap: 6px; margin-top: 4px; }
-  .bubble { border-radius: 50%; background: rgba(28,105,212,0.35); border: 1px solid #1c69d4; flex-shrink: 0; }
+  /* ── Sales Panel ── */
+  #sales-panel { position:absolute; top:14px; right:14px; z-index:500; background:var(--surface); border:1px solid var(--border); border-radius:12px; width:320px; box-shadow:var(--shadow); overflow:hidden; }
+  .ph { padding:12px 16px; background:linear-gradient(135deg,#F8FAFF,#EEF3FF); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+  .ph-title { font-size:12px; font-weight:700; color:var(--accent); letter-spacing:0.08em; text-transform:uppercase; }
+  .ph-sub { font-size:10px; color:var(--text3); margin-top:1px; }
+  .ph-badge { background:var(--accent); color:#fff; font-size:9px; font-weight:700; padding:2px 7px; border-radius:20px; }
+  .pb { padding:4px 0 10px; }
+  table.dt { width:100%; border-collapse:collapse; }
+  table.dt th { padding:6px 14px; font-size:10px; color:var(--text3); letter-spacing:0.08em; text-transform:uppercase; border-bottom:1px solid var(--border); text-align:left; font-weight:500; }
+  table.dt th.r { text-align:center; }
+  .trow td { padding:5px 14px; font-size:11px; border-bottom:1px solid #F1F5F9; transition:background 0.15s; }
+  .trow:hover td { background:#F8FAFF; }
+  .total-row td { border-top:2px solid var(--border)!important; border-bottom:none!important; padding-top:7px; }
+  .d-badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700; }
+  .num { text-align:right; }
+  .pct { font-size:10px; color:var(--text3); }
+  .pf { padding:8px 14px; border-top:1px solid var(--border); font-size:10px; color:var(--text3); text-align:right; }
+  .up { color:var(--up); font-weight:600; }
+  .dn { color:var(--dn); font-weight:600; }
+  .na { color:var(--text3); }
 
-  /* Tooltip / Popup */
-  .leaflet-tooltip { background: rgba(8,12,20,0.95) !important; border: 1px solid #1e293b !important; border-radius: 8px !important; color: #e2e8f0 !important; padding: 9px 13px !important; font-family: 'Segoe UI', sans-serif !important; font-size: 12px !important; box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important; }
-  .tt-title { font-weight: 700; color: #fff; font-size: 13px; margin-bottom: 5px; }
-  .tt-row { display: flex; justify-content: space-between; gap: 14px; margin-top: 3px; }
-  .tt-key { color: #64748b; font-size: 10px; }
-  .tt-val { color: #60a5fa; font-weight: 700; font-size: 11px; }
-  .tt-pos { color: #34d399; }
-  .tt-neg { color: #f87171; }
+  /* ── Legend ── */
+  #legend { position:absolute; bottom:52px; left:14px; z-index:500; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px; box-shadow:var(--shadow); min-width:148px; }
+  .leg-sec { font-size:9px; color:var(--text3); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:9px; font-weight:600; }
+  .leg-row { display:flex; align-items:center; gap:8px; margin-bottom:5px; font-size:11px; color:var(--text2); }
+  .leg-row.scl-row { background:rgba(0,85,255,0.05); border-radius:4px; padding:2px 5px; margin:-2px -5px 3px; }
+  .leg-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .leg-hr { border:none; border-top:1px solid var(--border); margin:8px 0; }
+  .size-demo { display:flex; align-items:center; gap:10px; color:var(--text3); font-size:10px; margin-top:4px; }
 
-  .leaflet-popup-content-wrapper { background: rgba(8,12,20,0.97) !important; border: 1px solid #1e293b !important; border-radius: 10px !important; color: #e2e8f0 !important; box-shadow: 0 8px 32px rgba(0,0,0,0.6) !important; }
-  .leaflet-popup-tip { background: rgba(8,12,20,0.97) !important; }
-  .popup-title { font-weight: 700; font-size: 14px; color: #fff; margin-bottom: 8px; }
-  .popup-type { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; margin-left: 5px; vertical-align: middle; }
-  .popup-row { display: flex; justify-content: space-between; gap: 18px; margin-top: 5px; }
-  .popup-key { font-size: 11px; color: #64748b; }
-  .popup-val { font-size: 12px; font-weight: 600; }
-  .bar-wrap { margin-top: 8px; }
-  .bar-bg { background: #1e293b; border-radius: 3px; height: 5px; margin-top: 3px; }
-  .bar-fill { height: 5px; border-radius: 3px; background: #1c69d4; }
+  /* ── Permanent tooltip ── */
+  .leaflet-tooltip.perm-tip { background:transparent!important; border:none!important; box-shadow:none!important; padding:0!important; white-space:normal!important; }
+  .leaflet-tooltip.perm-tip::before { display:none!important; }
+  .leaflet-tooltip.scl-tip { background:transparent!important; border:none!important; box-shadow:none!important; padding:0!important; white-space:normal!important; }
+  .leaflet-tooltip.scl-tip::before { display:none!important; }
+  .ptt { background:rgba(255,255,255,0.82); border-radius:8px; padding:8px 11px; box-shadow:0 2px 10px rgba(15,23,42,0.13); font-family:'Noto Sans KR',sans-serif; min-width:200px; border-left:3px solid #ccc; backdrop-filter:blur(4px); }
+  .ptt-name { font-size:12px; font-weight:700; margin-bottom:5px; }
+  .ptt-row { font-size:11px; color:#475569; margin-top:3px; display:flex; justify-content:space-between; gap:10px; }
+  .ptt-row b { color:#0F172A; }
+  .ptt-sub { font-size:10px; color:#94A3B8; margin-top:5px; padding-top:5px; border-top:1px solid #F1F5F9; line-height:1.6; }
 
-  /* Table section */
-  .table-section { background: #0d1117; border-top: 1px solid #1e293b; overflow-x: auto; flex-shrink: 0; }
-  .table-header { padding: 10px 16px 6px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #1e293b; }
-  .table-header-title { font-size: 12px; font-weight: 700; color: #94a3b8; letter-spacing: 0.5px; text-transform: uppercase; }
-  table { width: 100%; border-collapse: collapse; font-size: 11px; }
-  thead th { padding: 6px 12px; text-align: right; color: #64748b; font-weight: 600; border-bottom: 1px solid #1e293b; white-space: nowrap; }
-  thead th:first-child { text-align: left; }
-  tbody tr { border-bottom: 1px solid rgba(30,41,59,0.6); transition: background 0.15s; }
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: rgba(28,105,212,0.06); }
-  td { padding: 7px 12px; text-align: right; white-space: nowrap; }
-  td:first-child { text-align: left; }
-  .dealer-badge { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; margin-right: 5px; }
-  .type-badge { display: inline-block; padding: 1px 5px; border-radius: 3px; font-size: 9px; color: #94a3b8; border: 1px solid #334155; margin-left: 3px; }
-  .up { color: #34d399; } .dn { color: #f87171; } .neu { color: #94a3b8; }
-  .bar-mini { display: inline-block; height: 3px; border-radius: 2px; vertical-align: middle; margin-left: 4px; }
-  .rank-num { color: #64748b; font-size: 10px; width: 18px; display: inline-block; }
-
-  /* watermark */
-  .watermark { position: fixed; bottom: 36px; right: 16px; z-index: 2000; font-size: 10px; color: rgba(100,116,139,0.4); letter-spacing: 2px; font-weight: 700; pointer-events: none; }
+  #loading { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:2000; background:rgba(255,255,255,0.95); border-radius:12px; padding:16px 28px; font-size:13px; color:#475569; box-shadow:0 4px 20px rgba(0,0,0,0.12); border:1px solid rgba(0,0,0,0.08); }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="header-logo">BMW</div>
-  <div>
-    <div class="header-title">딜러 & 지점 매출 시각화</div>
-    <div class="header-sub">YTD 판매량 · 전년 대비 성장률 · 딜러 유형별 분포</div>
+<div id="header">
+  <div class="logo">BMW Dealer<span>After Sales Dashboard</span></div>
+  <div class="hd-sep"></div>
+  <div id="breadcrumb">
+    <span class="crumb active" id="crumb-sido" onclick="goLevel('sido')">전국</span>
+    <span class="sep" id="sep1" style="display:none">›</span>
+    <span class="crumb" id="crumb-sgg" style="display:none"></span>
   </div>
-  <div class="demo-badge">DEMO</div>
+  <div class="hd-sep"></div>
+  <button type="button" id="tooltip-toggle" onclick="toggleTooltips()"
+    style="padding:2px 12px;border-radius:20px;border:1.5px solid #0055FF;cursor:pointer;font-size:10px;font-weight:700;font-family:'Noto Sans KR',sans-serif;background:#fff;color:#0055FF;white-space:nowrap;">
+    툴팁 OFF
+  </button>
+  <div class="hd-sep"></div>
+  <div id="dealer-toggles"></div>
+  <div class="hd-sep"></div>
+  <span class="demo-chip">DEMO</span>
+  <div id="level-indicator">
+    <div class="level-dot active" id="dot1"></div>
+    <div class="level-dot" id="dot2"></div>
+  </div>
 </div>
 
-<div class="stats-bar">
-  <div class="stat"><div class="stat-val">84</div><div class="stat-label">전국 딜러·지점</div></div>
-  <div class="stat"><div class="stat-val">12,847</div><div class="stat-label">YTD 총 판매</div></div>
-  <div class="stat"><div class="stat-val">+8.4%</div><div class="stat-label">전년 대비 성장</div></div>
-  <div class="stat"><div class="stat-val">2026.05</div><div class="stat-label">기준 월</div></div>
-</div>
+<div id="map-container">
+  <div id="map"></div>
+  <div id="loading">🗺 지도 데이터 불러오는 중...</div>
+  <button type="button" id="back-btn" onclick="goBack()">← 뒤로</button>
+  <div id="click-hint">지역 클릭 → 드릴다운</div>
 
-<div class="body-wrap">
-  <div class="map-section">
-    <div id="map"></div>
-
-    <div class="legend">
-      <div class="legend-title">딜러 유형</div>
-      <div class="legend-item"><div class="legend-dot" style="width:11px;height:11px;background:#1c69d4;"></div>Full Service [F]</div>
-      <div class="legend-item"><div class="legend-dot" style="width:11px;height:11px;background:#a78bfa;"></div>Mechanic [M]</div>
-      <div class="legend-item"><div class="legend-dot" style="width:11px;height:11px;background:#34d399;"></div>Body & Paint [B]</div>
-      <div class="legend-item"><div class="legend-dot" style="width:11px;height:11px;background:#f59e0b;"></div>SCL ★</div>
-      <div class="legend-hr"></div>
-      <div class="legend-title">버블 크기 = YTD 판매</div>
-      <div class="legend-size">
-        <div><div class="bubble" style="width:8px;height:8px;"></div><div style="font-size:9px;color:#64748b;text-align:center;margin-top:2px;">소</div></div>
-        <div><div class="bubble" style="width:14px;height:14px;"></div><div style="font-size:9px;color:#64748b;text-align:center;margin-top:2px;">중</div></div>
-        <div><div class="bubble" style="width:22px;height:22px;"></div><div style="font-size:9px;color:#64748b;text-align:center;margin-top:2px;">대</div></div>
-      </div>
+  <div id="sales-panel">
+    <div class="ph">
+      <div><div class="ph-title">Dealer Performance</div><div class="ph-sub">26년 YTD · DEMO 데이터</div></div>
+      <div class="ph-badge">DEMO</div>
     </div>
-  </div>
-
-  <div class="table-section">
-    <div class="table-header">
-      <div class="table-header-title">딜러 성과 순위</div>
-      <span style="font-size:10px;color:#475569;margin-left:auto;">YTD 기준 · 전 지점 (DEMO 데이터)</span>
-    </div>
-    <table>
-      <thead>
+    <div class="pb">
+      <table class="dt" id="perf-table">
         <tr>
-          <th>딜러명</th>
-          <th>유형</th>
-          <th>YTD 판매</th>
-          <th>시장점유</th>
-          <th>전년 평균</th>
-          <th>YoY %</th>
-          <th>워런티</th>
+          <th>딜러</th>
+          <th class="r">매출</th>
+          <th>점유율</th>
+          <th class="r">성장률<br>(vs '25 avg)</th>
         </tr>
-      </thead>
-      <tbody id="dealer-table"></tbody>
-    </table>
+        <!-- rows injected by JS -->
+      </table>
+    </div>
+    <div class="pf">★ = 내 지점</div>
+  </div>
+
+  <div id="legend">
+    <div class="leg-sec">Dealer</div>
+    <div class="leg-row"><div class="leg-dot" style="background:#D4880A;"></div>KL</div>
+    <div class="leg-row"><div class="leg-dot" style="background:#D95B1A;"></div>DT</div>
+    <div class="leg-row"><div class="leg-dot" style="background:#B03060;"></div>HD</div>
+    <div class="leg-row"><div class="leg-dot" style="background:#6C3483;"></div>BV</div>
+    <div class="leg-row"><div class="leg-dot" style="background:#0E7490;"></div>DS</div>
+    <div class="leg-row scl-row">
+      <div class="leg-dot" style="background:#0055FF;box-shadow:0 0 5px rgba(0,85,255,0.5);"></div>
+      <span style="color:#0055FF;font-weight:700;">SCL ★</span>
+    </div>
+    <div class="leg-row"><div class="leg-dot" style="background:#1A6B3A;"></div>NT</div>
+    <hr class="leg-hr">
+    <div class="leg-sec">마커 크기 = 매출</div>
+    <div class="size-demo">
+      <div style="width:7px;height:7px;border-radius:50%;background:#94A3B8;flex-shrink:0;"></div>소
+      <div style="width:13px;height:13px;border-radius:50%;background:#94A3B8;flex-shrink:0;"></div>중
+      <div style="width:20px;height:20px;border-radius:50%;background:#94A3B8;flex-shrink:0;"></div>대
+    </div>
   </div>
 </div>
 
-<div class="watermark">DEMO DATA · NOT REAL</div>
-
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 // ── DEMO DATA ──────────────────────────────────────────────
-const DEALERS = [
-  { name:'딜러D 분당점', type:'SCL', lat:37.3840, lng:127.1250, ytd:1482, ms:11.5, prev:1320, warranty:96.2 },
-  { name:'딜러A 강남점', type:'F',   lat:37.5172, lng:127.0512, ytd:1241, ms: 9.7, prev:1190, warranty:94.8 },
-  { name:'딜러C 수원점', type:'F',   lat:37.2700, lng:127.0286, ytd: 983, ms: 7.7, prev: 921, warranty:93.1 },
-  { name:'딜러F 부산점', type:'F',   lat:35.1631, lng:129.1680, ytd: 847, ms: 6.6, prev: 803, warranty:91.4 },
-  { name:'딜러E 인천점', type:'F',   lat:37.4106, lng:126.6900, ytd: 734, ms: 5.7, prev: 712, warranty:90.7 },
-  { name:'딜러H 대구점', type:'F',   lat:35.8588, lng:128.6370, ytd: 691, ms: 5.4, prev: 650, warranty:89.3 },
-  { name:'딜러I 대전점', type:'F',   lat:36.3624, lng:127.3620, ytd: 628, ms: 4.9, prev: 589, warranty:88.6 },
-  { name:'딜러L 창원점', type:'F',   lat:35.2320, lng:128.6870, ytd: 587, ms: 4.6, prev: 571, warranty:92.0 },
-  { name:'딜러P 고양점', type:'F',   lat:37.6584, lng:126.8320, ytd: 541, ms: 4.2, prev: 498, warranty:90.1 },
-  { name:'딜러Q 용인점', type:'M',   lat:37.2411, lng:127.1776, ytd: 493, ms: 3.8, prev: 501, warranty:87.4 },
-  { name:'딜러R 화성점', type:'M',   lat:37.1997, lng:126.8314, ytd: 458, ms: 3.6, prev: 431, warranty:86.9 },
-  { name:'딜러B 강서점', type:'M',   lat:37.5509, lng:126.8495, ytd: 412, ms: 3.2, prev: 385, warranty:88.2 },
-  { name:'딜러G 부산서점', type:'M', lat:35.1972, lng:128.9940, ytd: 387, ms: 3.0, prev: 394, warranty:85.7 },
-  { name:'딜러J 광주점', type:'B',   lat:35.1531, lng:126.8560, ytd: 364, ms: 2.8, prev: 342, warranty:91.5 },
-  { name:'딜러K 울산점', type:'M',   lat:35.5450, lng:129.3180, ytd: 348, ms: 2.7, prev: 329, warranty:84.3 },
-  { name:'딜러S 청주점', type:'F',   lat:36.6424, lng:127.4890, ytd: 321, ms: 2.5, prev: 298, warranty:87.8 },
-  { name:'딜러T 천안점', type:'M',   lat:36.8151, lng:127.1139, ytd: 294, ms: 2.3, prev: 311, warranty:83.1 },
-  { name:'딜러U 포항점', type:'B',   lat:36.0190, lng:129.3435, ytd: 273, ms: 2.1, prev: 259, warranty:85.9 },
-  { name:'딜러V 전주점', type:'M',   lat:35.8242, lng:127.1480, ytd: 248, ms: 1.9, prev: 241, warranty:82.4 },
-  { name:'딜러W 제주점', type:'F',   lat:33.4996, lng:126.5312, ytd: 241, ms: 1.9, prev: 228, warranty:88.0 },
+var DEALER_COLORS = { KL:'#D4880A', DT:'#D95B1A', HD:'#B03060', BV:'#6C3483', DS:'#0E7490', SCL:'#0055FF', NT:'#1A6B3A' };
+var DEALER_ORDER  = ['KL','DT','HD','BV','DS','SCL','NT'];
+
+var MARKERS_DATA = [
+  { dealer:'SCL', workshop:'분당서비스',  lat:37.384, lon:127.125, ytd:'1,482', ms:'11.5%', ratio_html:'<span class="up">▲12.3%</span>', avg25:'1,320', ms25:'10.8%', avg26:'1,482', w_mech:42, w_bp:12, radius:22, isSCL:true,  color:'#0055FF', dtype_tag:'[F]' },
+  { dealer:'KL',  workshop:'강남서비스',  lat:37.517, lon:127.051, ytd:'1,241', ms:' 9.7%', ratio_html:'<span class="up">▲ 4.3%</span>', avg25:'1,190', ms25:' 9.3%', avg26:'1,241', w_mech:36, w_bp:10, radius:19, isSCL:false, color:'#D4880A', dtype_tag:'[F]' },
+  { dealer:'HD',  workshop:'수원서비스',  lat:37.270, lon:127.029, ytd:' 983', ms:' 7.7%', ratio_html:'<span class="up">▲ 6.7%</span>', avg25:' 921', ms25:' 7.1%', avg26:' 983', w_mech:28, w_bp: 8, radius:16, isSCL:false, color:'#B03060', dtype_tag:'[F]' },
+  { dealer:'DT',  workshop:'부산서비스',  lat:35.163, lon:129.168, ytd:' 847', ms:' 6.6%', ratio_html:'<span class="up">▲ 5.5%</span>', avg25:' 803', ms25:' 6.2%', avg26:' 847', w_mech:24, w_bp: 7, radius:15, isSCL:false, color:'#D95B1A', dtype_tag:'[F]' },
+  { dealer:'KL',  workshop:'인천서비스',  lat:37.411, lon:126.690, ytd:' 734', ms:' 5.7%', ratio_html:'<span class="up">▲ 3.1%</span>', avg25:' 712', ms25:' 5.5%', avg26:' 734', w_mech:22, w_bp: 6, radius:14, isSCL:false, color:'#D4880A', dtype_tag:'[F]' },
+  { dealer:'HD',  workshop:'대구서비스',  lat:35.859, lon:128.637, ytd:' 691', ms:' 5.4%', ratio_html:'<span class="up">▲ 6.3%</span>', avg25:' 650', ms25:' 5.0%', avg26:' 691', w_mech:20, w_bp: 5, radius:13, isSCL:false, color:'#B03060', dtype_tag:'[F]' },
+  { dealer:'BV',  workshop:'대전서비스',  lat:36.362, lon:127.362, ytd:' 628', ms:' 4.9%', ratio_html:'<span class="up">▲ 6.6%</span>', avg25:' 589', ms25:' 4.6%', avg26:' 628', w_mech:18, w_bp: 5, radius:13, isSCL:false, color:'#6C3483', dtype_tag:'[F]' },
+  { dealer:'KL',  workshop:'창원서비스',  lat:35.232, lon:128.681, ytd:' 587', ms:' 4.6%', ratio_html:'<span class="up">▲ 2.8%</span>', avg25:' 571', ms25:' 4.4%', avg26:' 587', w_mech:16, w_bp: 4, radius:12, isSCL:false, color:'#D4880A', dtype_tag:'[F]' },
+  { dealer:'DT',  workshop:'고양서비스',  lat:37.658, lon:126.832, ytd:' 541', ms:' 4.2%', ratio_html:'<span class="up">▲ 8.6%</span>', avg25:' 498', ms25:' 3.9%', avg26:' 541', w_mech:14, w_bp: 4, radius:12, isSCL:false, color:'#D95B1A', dtype_tag:'[F]' },
+  { dealer:'DS',  workshop:'용인서비스',  lat:37.241, lon:127.178, ytd:' 493', ms:' 3.8%', ratio_html:'<span class="dn">▼ 1.6%</span>', avg25:' 501', ms25:' 3.9%', avg26:' 493', w_mech:12, w_bp: 3, radius:11, isSCL:false, color:'#0E7490', dtype_tag:'[M]' },
+  { dealer:'NT',  workshop:'광주서비스',  lat:35.153, lon:126.856, ytd:' 364', ms:' 2.8%', ratio_html:'<span class="up">▲ 6.4%</span>', avg25:' 342', ms25:' 2.7%', avg26:' 364', w_mech:10, w_bp: 3, radius:10, isSCL:false, color:'#1A6B3A', dtype_tag:'[B]' },
+  { dealer:'DS',  workshop:'울산서비스',  lat:35.545, lon:129.318, ytd:' 348', ms:' 2.7%', ratio_html:'<span class="up">▲ 5.8%</span>', avg25:' 329', ms25:' 2.6%', avg26:' 348', w_mech: 9, w_bp: 2, radius: 9, isSCL:false, color:'#0E7490', dtype_tag:'[M]' },
+  { dealer:'DT',  workshop:'청주서비스',  lat:36.642, lon:127.489, ytd:' 321', ms:' 2.5%', ratio_html:'<span class="up">▲ 7.7%</span>', avg25:' 298', ms25:' 2.3%', avg26:' 321', w_mech: 8, w_bp: 2, radius: 9, isSCL:false, color:'#D95B1A', dtype_tag:'[F]' },
+  { dealer:'BV',  workshop:'천안서비스',  lat:36.815, lon:127.114, ytd:' 294', ms:' 2.3%', ratio_html:'<span class="dn">▼ 5.5%</span>', avg25:' 311', ms25:' 2.4%', avg26:' 294', w_mech: 7, w_bp: 2, radius: 8, isSCL:false, color:'#6C3483', dtype_tag:'[M]' },
+  { dealer:'NT',  workshop:'포항서비스',  lat:36.019, lon:129.344, ytd:' 273', ms:' 2.1%', ratio_html:'<span class="up">▲ 5.4%</span>', avg25:' 259', ms25:' 2.0%', avg26:' 273', w_mech: 7, w_bp: 2, radius: 8, isSCL:false, color:'#1A6B3A', dtype_tag:'[B]' },
 ];
 
-const TYPE_COLOR = { F:'#1c69d4', M:'#a78bfa', B:'#34d399', SCL:'#f59e0b' };
-const TYPE_LABEL = { F:'Full Svc', M:'Mechanic', B:'Body&Paint', SCL:'SCL★' };
-const maxYTD = Math.max(...DEALERS.map(d=>d.ytd));
-
-function fmt(n) { return n.toLocaleString('ko-KR'); }
-function yoy(d) { return (((d.ytd - d.prev) / d.prev) * 100).toFixed(1); }
-
 // ── MAP ────────────────────────────────────────────────────
-const map = L.map('map', { center:[36.5, 127.8], zoom:7, zoomControl:false });
-L.control.zoom({ position:'bottomright' }).addTo(map);
+var map = L.map('map', { center:[36.5,127.8], zoom:7, zoomControl:true, attributionControl:false });
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { subdomains:'abcd', maxZoom:19 }).addTo(map);
 
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  attribution:'&copy; <a href="https://carto.com/">CARTO</a>',
-  subdomains:'abcd', maxZoom:19
-}).addTo(map);
+map.createPane('geojsonPane');
+map.createPane('markerPane');
+map.getPane('geojsonPane').style.zIndex = 400;
+map.getPane('markerPane').style.zIndex  = 620;
+map.getPane('geojsonPane').style.pointerEvents = 'none';
 
-DEALERS.forEach((d, i) => {
-  const color = TYPE_COLOR[d.type];
-  const isSCL = d.type === 'SCL';
-  const r = Math.max(8, Math.sqrt(d.ytd / maxYTD) * 38) * (isSCL ? 1.35 : 1);
-  const yoyVal = parseFloat(yoy(d));
+var STYLE = {
+  sido:  { pane:'geojsonPane', color:'#1E40AF', weight:3,   fillColor:'#3B82F6', fillOpacity:0.15 },
+  sidoH: { pane:'geojsonPane', color:'#1E3A8A', weight:4,   fillColor:'#3B82F6', fillOpacity:0.25 },
+  sgg:   { pane:'geojsonPane', color:'#1E3A8A', weight:2.5, fillColor:'#3B82F6', fillOpacity:0.12 },
+  sggH:  { pane:'geojsonPane', color:'#1E3A8A', weight:3.5, fillColor:'#3B82F6', fillOpacity:0.22 },
+};
 
-  const marker = L.circleMarker([d.lat, d.lng], {
-    radius: r,
-    color: '#fff',
-    fillColor: color,
-    fillOpacity: isSCL ? 0.85 : 0.65,
-    weight: isSCL ? 2.5 : 1.5,
+var currentLayer = null, markerLayer = null, currentLevel = 'sido';
+var selectedSido = null;
+var activeFilters = new Set(DEALER_ORDER);
+var currentFilterFn = null;
+var tooltipVisible = false;
+var sidoGeoData = null;
+
+// ── Dealer toggles ──────────────────────────────────────────
+var tc = document.getElementById('dealer-toggles');
+DEALER_ORDER.forEach(function(dealer) {
+  if (!MARKERS_DATA.some(function(m){ return m.dealer === dealer; })) return;
+  var btn = document.createElement('button');
+  var isSCL = dealer === 'SCL';
+  btn.className = 'dtoggle' + (isSCL ? ' scl-toggle' : '');
+  btn.textContent = isSCL ? dealer + ' ★' : dealer;
+  btn.style.borderColor = DEALER_COLORS[dealer];
+  btn.style.color = DEALER_COLORS[dealer];
+  if (isSCL) btn.style.background = 'rgba(0,85,255,0.08)';
+  btn.onclick = function() {
+    if (activeFilters.has(dealer)) { activeFilters.delete(dealer); btn.classList.add('off'); }
+    else { activeFilters.add(dealer); btn.classList.remove('off'); }
+    renderMarkers(currentFilterFn);
+  };
+  tc.appendChild(btn);
+});
+
+// ── Render markers ──────────────────────────────────────────
+function renderMarkers(filterFn) {
+  currentFilterFn = filterFn || null;
+  if (markerLayer) { map.removeLayer(markerLayer); markerLayer = null; }
+  markerLayer = L.layerGroup();
+  var data = filterFn ? MARKERS_DATA.filter(filterFn) : MARKERS_DATA;
+  var normal = data.filter(function(m){ return !m.isSCL; });
+  var scl    = data.filter(function(m){ return m.isSCL; });
+
+  normal.concat(scl).forEach(function(m) {
+    if (!activeFilters.has(m.dealer)) return;
+    var isSCL = m.isSCL;
+    var circle = L.circleMarker([m.lat, m.lon], {
+      pane: 'markerPane',
+      radius: m.radius,
+      color: isSCL ? '#ffffff' : m.color,
+      fillColor: m.color,
+      fillOpacity: isSCL ? 0.92 : 0.65,
+      weight: isSCL ? 3 : 1.5,
+    });
+
+    var tipHtml =
+      '<div class="ptt" style="border-left-color:' + m.color + ';">'
+      + '<div class="ptt-name" style="color:' + m.color + ';">' + m.dtype_tag + ' ' + m.dealer + (isSCL ? ' ★' : '') + ' · ' + m.workshop + '</div>'
+      + '<div class="ptt-row"><span>26년 YTD</span><b>' + m.ytd + '</b></div>'
+      + '<div class="ptt-row"><span>M/S</span><b>' + m.ms + '</b></div>'
+      + '<div class="ptt-row"><span>성장률</span><span>' + m.ratio_html + '</span></div>'
+      + '<div class="ptt-sub">'
+      + 'Workbay Mech:' + m.w_mech + ' | B&amp;P:' + m.w_bp + '<br>'
+      + "'25 평균:" + m.avg25 + ' / \'26 평균:' + m.avg26
+      + '</div>'
+      + '</div>';
+
+    circle.bindTooltip(tipHtml, {
+      permanent: true,
+      direction: 'right',
+      offset: [8, 0],
+      opacity: 1,
+      className: isSCL ? 'scl-tip' : 'perm-tip',
+    });
+    circle.addTo(markerLayer);
   });
+  markerLayer.addTo(map);
+  if (!tooltipVisible) {
+    markerLayer.eachLayer(function(layer){ layer.closeTooltip(); });
+  }
+}
 
-  const yoyClass = yoyVal > 0 ? 'tt-pos' : yoyVal < 0 ? 'tt-neg' : '';
-  const arrow = yoyVal > 0 ? '▲' : yoyVal < 0 ? '▼' : '–';
+// ── Performance table ───────────────────────────────────────
+(function buildTable() {
+  var table = document.getElementById('perf-table');
+  var totalYTD = 0;
+  MARKERS_DATA.forEach(function(m){ totalYTD += parseInt((m.ytd||'0').replace(/,/g,'')); });
 
-  marker.bindTooltip(`
-    <div class="tt-title">${d.name}${isSCL ? ' ★' : ''}</div>
-    <div class="tt-row"><span class="tt-key">유형</span><span class="tt-val">${TYPE_LABEL[d.type]}</span></div>
-    <div class="tt-row"><span class="tt-key">YTD 판매</span><span class="tt-val">${fmt(d.ytd)} 대</span></div>
-    <div class="tt-row"><span class="tt-key">시장점유</span><span class="tt-val">${d.ms}%</span></div>
-    <div class="tt-row"><span class="tt-key">전년비</span><span class="tt-val ${yoyClass}">${arrow} ${Math.abs(yoyVal)}%</span></div>
-  `, { sticky:true });
+  MARKERS_DATA.forEach(function(m) {
+    var tr = document.createElement('tr');
+    tr.className = 'trow';
+    tr.innerHTML =
+      '<td><span class="d-badge" style="background:' + m.color + '22;color:' + m.color + ';">' + m.dealer + '</span>'
+      + (m.isSCL ? '★ ' : '') + m.workshop + '</td>'
+      + '<td class="num">' + m.ytd + '</td>'
+      + '<td><span class="pct">' + m.ms + '</span></td>'
+      + '<td class="num">' + m.ratio_html + '</td>';
+    table.appendChild(tr);
+  });
+  var totalTr = document.createElement('tr');
+  totalTr.className = 'total-row';
+  totalTr.innerHTML =
+    '<td style="font-weight:700;">합계</td>'
+    + '<td class="num" style="font-weight:700;">' + totalYTD.toLocaleString() + '</td>'
+    + '<td colspan="2"></td>';
+  table.appendChild(totalTr);
+})();
 
-  marker.bindPopup(`
-    <div class="popup-title">${d.name}
-      <span class="popup-type" style="background:${color}22;color:${color};border:1px solid ${color}44;">${d.type}</span>
-    </div>
-    <div class="popup-row"><span class="popup-key">YTD 판매</span><span class="popup-val" style="color:#60a5fa;">${fmt(d.ytd)} 대</span></div>
-    <div class="popup-row"><span class="popup-key">시장점유</span><span class="popup-val">${d.ms}%</span></div>
-    <div class="popup-row"><span class="popup-key">전년 평균</span><span class="popup-val">${fmt(d.prev)} 대</span></div>
-    <div class="popup-row"><span class="popup-key">YoY 성장</span><span class="popup-val ${yoyVal>0?'up':'dn'}">${yoyVal>0?'▲':'▼'} ${Math.abs(yoyVal)}%</span></div>
-    <div class="popup-row"><span class="popup-key">워런티</span><span class="popup-val">${d.warranty}%</span></div>
-    <div class="bar-wrap">
-      <div style="font-size:10px;color:#64748b;margin-bottom:2px;">YTD 점유 비중</div>
-      <div class="bar-bg"><div class="bar-fill" style="width:${d.ms*5}%;background:${color};"></div></div>
-    </div>
-  `);
+// ── GeoJSON (name → sido code) ──────────────────────────────
+var NAME_TO_SIDO = {
+  '서울특별시':'11','부산광역시':'26','대구광역시':'27','인천광역시':'28',
+  '광주광역시':'29','대전광역시':'30','울산광역시':'31','세종특별자치시':'36',
+  '경기도':'41','강원특별자치도':'42','강원도':'42','충청북도':'43','충청남도':'44',
+  '전라북도':'45','전북특별자치도':'45','전라남도':'46',
+  '경상북도':'47','경상남도':'48','제주특별자치도':'50',
+};
+function getSidoCode(props) {
+  var names = [props.CTP_KOR_NM, props.name, props.name_kor, props.sidonm];
+  for (var i=0; i<names.length; i++) {
+    if (names[i] && NAME_TO_SIDO[names[i]]) return NAME_TO_SIDO[names[i]];
+  }
+  return null;
+}
+function getSidoName(props) {
+  return props.CTP_KOR_NM || props.name || props.name_kor || props.sidonm || '';
+}
 
-  marker.addTo(map);
-});
+// ── Show/hide layers ────────────────────────────────────────
+function clearLayer() { if (currentLayer) { map.removeLayer(currentLayer); currentLayer = null; } }
 
-// ── TABLE ──────────────────────────────────────────────────
-const tbody = document.getElementById('dealer-table');
-[...DEALERS].sort((a,b)=>b.ytd-a.ytd).forEach((d, i) => {
-  const color = TYPE_COLOR[d.type];
-  const yoyVal = parseFloat(yoy(d));
-  const arrow = yoyVal > 0 ? '▲' : yoyVal < 0 ? '▼' : '–';
-  const cls = yoyVal > 0 ? 'up' : yoyVal < 0 ? 'dn' : 'neu';
-  const barW = Math.round((d.ytd / maxYTD) * 80);
+function updateUI(level, sidoName) {
+  document.getElementById('crumb-sido').className = 'crumb' + (level==='sido' ? ' active' : '');
+  document.getElementById('sep1').style.display = level !== 'sido' ? 'inline' : 'none';
+  if (level === 'sgg') {
+    var el = document.getElementById('crumb-sgg');
+    el.style.display = 'inline'; el.textContent = sidoName; el.className = 'crumb active';
+  } else {
+    document.getElementById('crumb-sgg').style.display = 'none';
+  }
+  ['dot1','dot2'].forEach(function(id,i) {
+    var on = (level==='sido' && i===0) || (level==='sgg' && i===1);
+    document.getElementById(id).className = 'level-dot' + (on ? ' active' : '');
+  });
+  document.getElementById('back-btn').style.display = level !== 'sido' ? 'block' : 'none';
+}
 
-  const tr = document.createElement('tr');
-  tr.innerHTML = `
-    <td>
-      <span class="rank-num">${i+1}</span>
-      <span class="dealer-badge" style="background:${color}22;color:${color};">${d.type}</span>
-      ${d.name}
-    </td>
-    <td><span class="type-badge">${TYPE_LABEL[d.type]}</span></td>
-    <td>${fmt(d.ytd)} <span class="bar-mini" style="width:${barW}px;background:${color}55;"></span></td>
-    <td>${d.ms}%</td>
-    <td>${fmt(d.prev)}</td>
-    <td class="${cls}">${arrow} ${Math.abs(yoyVal)}%</td>
-    <td>${d.warranty}%</td>
-  `;
-  tbody.appendChild(tr);
-});
+function showSido(geojson) {
+  clearLayer();
+  currentLevel = 'sido';
+  currentLayer = L.geoJSON(geojson, {
+    style: STYLE.sido,
+    onEachFeature: function(ft, layer) {
+      var nm = getSidoName(ft.properties);
+      layer.bindTooltip(nm, { sticky:true, direction:'top', className:'custom-tooltip' });
+      layer.on({
+        mouseover: function(e){ e.target.setStyle(STYLE.sidoH); },
+        mouseout:  function(e){ currentLayer.resetStyle(e.target); },
+        click: function(e) {
+          selectedSido = getSidoCode(ft.properties);
+          showSgg(geojson, selectedSido, nm);
+          map.fitBounds(e.target.getBounds(), { padding:[40,40] });
+        },
+      });
+    },
+  }).addTo(map);
+  renderMarkers(null);
+  updateUI('sido');
+}
+
+function showSgg(geojson, sidoCode, sidoName) {
+  clearLayer();
+  currentLevel = 'sgg';
+  // Demo: redraw same features (no real SGG data), filtered by bbox
+  currentLayer = L.geoJSON(geojson, {
+    style: STYLE.sgg,
+    filter: function(ft) { return getSidoCode(ft.properties) === sidoCode; },
+    onEachFeature: function(ft, layer) {
+      var nm = getSidoName(ft.properties);
+      layer.bindTooltip(nm + ' (시군구 상세 데모 미포함)', { sticky:true, direction:'top', className:'custom-tooltip' });
+      layer.on({
+        mouseover: function(e){ e.target.setStyle(STYLE.sggH); },
+        mouseout:  function(e){ currentLayer.resetStyle(e.target); },
+      });
+    },
+  }).addTo(map);
+
+  // filter markers to this region
+  var bounds = currentLayer.getBounds();
+  renderMarkers(function(m) {
+    return bounds.contains(L.latLng(m.lat, m.lon));
+  });
+  updateUI('sgg', sidoName);
+}
+
+function goBack() {
+  if (currentLevel === 'sgg' && sidoGeoData) {
+    showSido(sidoGeoData);
+    map.setView([36.5,127.8], 7);
+  }
+}
+function goLevel(level) {
+  if (level === 'sido' && sidoGeoData) {
+    showSido(sidoGeoData);
+    map.setView([36.5,127.8], 7);
+  }
+}
+
+// ── Tooltip toggle ──────────────────────────────────────────
+function toggleTooltips() {
+  tooltipVisible = !tooltipVisible;
+  var btn = document.getElementById('tooltip-toggle');
+  btn.textContent = tooltipVisible ? '툴팁 ON' : '툴팁 OFF';
+  btn.style.background = tooltipVisible ? '#0055FF' : '#fff';
+  btn.style.color      = tooltipVisible ? '#fff'    : '#0055FF';
+  if (markerLayer) {
+    markerLayer.eachLayer(function(layer) {
+      if (tooltipVisible) layer.openTooltip();
+      else layer.closeTooltip();
+    });
+  }
+}
+
+// ── Fetch GeoJSON ───────────────────────────────────────────
+var GEOJSON_URLS = [
+  'https://cdn.jsdelivr.net/gh/southkorea/southkorea-maps@master/kostat/2018/json/skorea-provinces-2018-geo.json',
+  'https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2018/json/skorea-provinces-2018-geo.json',
+];
+
+function fetchGeoJSON(urls, idx) {
+  if (idx >= urls.length) {
+    document.getElementById('loading').style.display = 'none';
+    renderMarkers(null);
+    return;
+  }
+  fetch(urls[idx])
+    .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+    .then(function(geojson) {
+      document.getElementById('loading').style.display = 'none';
+      sidoGeoData = geojson;
+      showSido(geojson);
+    })
+    .catch(function(){ fetchGeoJSON(urls, idx+1); });
+}
+
+fetchGeoJSON(GEOJSON_URLS, 0);
 </script>
 </body>
 </html>
