@@ -28,6 +28,18 @@ export const metadata: Metadata = {
     template: '%s | 시아아빠의 AI 데일리',
   },
   description: 'AI가 매일 자동 생성하는 뉴스레터 · 트렌드 리포트 · 음악 유니버스',
+  openGraph: {
+    title: '시아아빠의 AI 데일리',
+    description: 'AI가 매일 자동 생성하는 뉴스레터 · 트렌드 리포트 · 음악 유니버스',
+    siteName: '시아아빠의 AI 데일리',
+    locale: 'ko_KR',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '시아아빠의 AI 데일리',
+    description: 'AI가 매일 자동 생성하는 뉴스레터 · 트렌드 리포트 · 음악 유니버스',
+  },
 }
 
 export default function RootLayout({
