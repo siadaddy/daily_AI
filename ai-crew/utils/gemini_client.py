@@ -55,7 +55,7 @@ def _call_gemini(prompt: str, system: str, temperature: float, max_tokens: int, 
     if not gemini_keys:
         raise RuntimeError("GEMINI_API_KEY 없음")
 
-    gemini_models = ["gemini-2.5-flash", "gemini-2.0-flash"]
+    gemini_models = ["gemini-2.5-flash"]
 
     for key_idx, gemini_key in enumerate(gemini_keys):
         key_label = f"키{key_idx + 1}"

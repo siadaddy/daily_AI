@@ -46,13 +46,18 @@ def _sanitize(text: str) -> str:
 _429_models: set = set()
 
 
+def reset_rate_limit_cache() -> None:
+    """세션 내 429로 스킵된 Gemini 모델 캐시를 초기화한다."""
+    _429_models.clear()
+
+
 def _call_gemini(prompt: str, system: str, temperature: float, max_tokens: int, json_mode: bool) -> str:
     import time
     gemini_keys = [k for k in [os.getenv("GEMINI_API_KEY", ""), os.getenv("GEMINI_API_KEY_2", "")] if k]
     if not gemini_keys:
         raise RuntimeError("GEMINI_API_KEY 없음")
 
-    gemini_models = ["gemini-2.5-flash", "gemini-2.0-flash"]
+    gemini_models = ["gemini-2.5-flash"]
 
     for key_idx, gemini_key in enumerate(gemini_keys):
         key_label = f"키{key_idx + 1}"
@@ -83,8 +88,10 @@ def _call_gemini(prompt: str, system: str, temperature: float, max_tokens: int, 
                         print(f"  ✅ Gemini {key_label}/{gmodel} 성공" + (f" (시도 {attempt})" if attempt > 1 else ""))
                     return _sanitize(result)
                 except Exception as e:
-                    status = getattr(getattr(e, 'response', None), 'status_code', 0)
-                    print(f"  ⚠️  Gemini {key_label}/{gmodel} 시도 {attempt}/3 실패: {e}")
+                    resp_obj = getattr(e, 'response', None)
+                    status = getattr(resp_obj, 'status_code', 0)
+                    body = getattr(resp_obj, 'text', '')[:200]
+                    print(f"  ⚠️  Gemini {key_label}/{gmodel} 시도 {attempt}/3 실패: HTTP {status} | {body or e}")
                     if status == 429:
                         _429_models.add(gmodel)
                         print(f"      429 → {gmodel} 이번 세션 스킵, 다음 모델로 전환...")
@@ -202,8 +209,10 @@ def ask_gemini25_first(prompt: str, system: str = "", temperature: float = 0.7, 
                 print(f"  ✅ Gemini 2.5-flash {key_label} 성공")
                 return _sanitize(result)
             except Exception as e:
-                status = getattr(getattr(e, 'response', None), 'status_code', 0)
-                print(f"  ⚠️  Gemini 2.5-flash {key_label} 시도 {attempt}/2 실패: {status or e}")
+                resp_obj = getattr(e, 'response', None)
+                status = getattr(resp_obj, 'status_code', 0)
+                body = getattr(resp_obj, 'text', '')[:200]
+                print(f"  ⚠️  Gemini 2.5-flash {key_label} 시도 {attempt}/2 실패: HTTP {status} | {body or e}")
                 if attempt < 2:
                     wait = 30 if status == 429 else 10
                     print(f"      {wait}초 대기 후 재시도...")
