@@ -23,14 +23,23 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ??
+      (process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : 'http://localhost:3000')
+  ),
   title: {
     default: '시아아빠의 AI 데일리',
     template: '%s | 시아아빠의 AI 데일리',
   },
-  description: 'AI가 매일 자동 생성하는 뉴스레터 · 트렌드 리포트 · 음악 유니버스',
+  description:
+    'AI가 매일 자동 생성하는 뉴스레터 · 트렌드 리포트 · 음악 유니버스',
   openGraph: {
+    url: '/',
     title: '시아아빠의 AI 데일리',
-    description: 'AI가 매일 자동 생성하는 뉴스레터 · 트렌드 리포트 · 음악 유니버스',
+    description:
+      'AI가 매일 자동 생성하는 뉴스레터 · 트렌드 리포트 · 음악 유니버스',
     siteName: '시아아빠의 AI 데일리',
     locale: 'ko_KR',
     type: 'website',
@@ -38,7 +47,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: '시아아빠의 AI 데일리',
-    description: 'AI가 매일 자동 생성하는 뉴스레터 · 트렌드 리포트 · 음악 유니버스',
+    description:
+      'AI가 매일 자동 생성하는 뉴스레터 · 트렌드 리포트 · 음악 유니버스',
   },
 }
 
