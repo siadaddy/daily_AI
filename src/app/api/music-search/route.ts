@@ -7,7 +7,10 @@ export async function GET(req: NextRequest) {
   if (!q) return NextResponse.json({ error: 'missing q' }, { status: 400 })
 
   const key = process.env.YOUTUBE_API_KEY
-  if (!key) return NextResponse.json({ videoId: null }, { status: 200 })
+  if (!key) {
+    console.error('YOUTUBE_API_KEY not configured')
+    return NextResponse.json({ videoId: null }, { status: 200 })
+  }
 
   try {
     const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q)}&type=video&maxResults=1&key=${key}`

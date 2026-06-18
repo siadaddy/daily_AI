@@ -16,7 +16,7 @@ from collections import Counter
 
 MEMORY_FILE = os.path.join(os.path.dirname(__file__), "..", "agent_memory.json")
 
-SUPABASE_URL = os.getenv("SUPABASE_URL", "https://rlaemixsrmhocxjhkjxl.supabase.co")
+SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
 
 
