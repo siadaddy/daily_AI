@@ -1,0 +1,37 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const j=JSON.parse(d);const fp=j.tool_input?.file_path;if(fp&&/\\.(ts|tsx|css|json)$/.test(fp)&&!fp.includes('node_modules')){require('child_process').execSync('npx prettier --write '+JSON.stringify(fp),{stdio:'pipe'});console.log('✨ prettier: '+fp.split(/[\\\\/]/).pop())}}catch(e){}})\"",
+            "timeout": 15000
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const j=JSON.parse(d);const fp=j.tool_input?.file_path;if(fp&&/(route\\.ts$|[\\\\/]actions[\\\\/]|[\\\\/]server\\.ts$)/.test(fp)){const fs=require('fs');const c=fs.existsSync(fp)?fs.readFileSync(fp,'utf8'):'';if(c.includes('createBrowserClient')){console.error('⚠️  [Server/Client Guard] '+fp.split(/[\\\\/]/).pop()+' 에서 createBrowserClient 감지!\\n   → lib/supabase/server.ts 의 createServerClient() 사용 필요');process.exit(2)}}}catch(e){}})\"",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const {execSync}=require('child_process');try{execSync('npm run lint --silent',{stdio:'pipe',encoding:'utf8'});console.log('✅ ESLint: 문제 없음')}catch(e){const out=(e.stdout||'')+(e.stderr||'');const lines=out.split('\\n').filter(l=>l.includes('error')||l.includes('warning')).slice(0,15);if(lines.length)console.log('⚠️  ESLint 이슈:\\n'+lines.join('\\n'))}\"",
+            "timeout": 30000
+          }
+        ]
+      }
+    ]
+  }
+}
