@@ -24,7 +24,7 @@ export function Header() {
             <div>
               <h1 className="header-title">시아아빠의 AI 데일리</h1>
               <p className="header-subtitle">
-                AI · 경제 · 자동차 · 매일 06:40 업데이트
+                Claude Code와 함께한 뉴스 &amp; 포트폴리오 놀이터
               </p>
             </div>
           </Link>
