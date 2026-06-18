@@ -16,7 +16,7 @@ GitHub Actions 06:00 KST (= 21:00 UTC 전날) 자동 실행
 import sys, os, json, time, requests
 sys.path.insert(0, os.path.dirname(__file__))
 
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from dotenv import load_dotenv
 
 load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
@@ -165,7 +165,8 @@ def _should_run_music() -> bool:
 
 
 def main():
-    today = date.today().strftime("%Y-%m-%d")
+    _KST = timezone(timedelta(hours=9))
+    today = datetime.now(_KST).strftime("%Y-%m-%d")
     print(f"\n🤖 시아아빠님의 AI 크리에이터 시작 — {today}")
     print("━" * 50)
 

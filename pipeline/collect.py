@@ -7,7 +7,7 @@
 """
 
 import os, re, time, json, sys, requests
-from datetime import datetime, date
+from datetime import datetime, date, timezone, timedelta
 from dotenv import load_dotenv
 
 load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
@@ -27,7 +27,8 @@ GROQ_KEYS           = [k for k in [
     os.getenv("GROQ_API_KEY"), os.getenv("GROQ_API_KEY_2"),
     os.getenv("GROQ_API_KEY_3"), os.getenv("GROQ_API_KEY_4"),
 ] if k]
-TODAY            = date.today().strftime("%Y-%m-%d")
+_KST             = timezone(timedelta(hours=9))
+TODAY            = datetime.now(_KST).strftime("%Y-%m-%d")
 MAX_PER_CATEGORY = 5
 MAX_RETRIES      = 3
 RETRY_DELAY      = 10
@@ -303,7 +304,7 @@ def insert_trends_to_supabase(ai_summary, today, talking_points=None):
 
 def save_output(categorized, ai_summary, talking_points=None):
     """pipeline/output/{TODAY}.md 와 {TODAY}_data.json 저장"""
-    today_str = date.today().strftime("%Y년 %m월 %d일")
+    today_str = datetime.now(_KST).strftime("%Y년 %m월 %d일")
     lines = [f"# 📰 뉴스레터 - {today_str}", ""]
 
     top3 = ai_summary.get("top3", [])

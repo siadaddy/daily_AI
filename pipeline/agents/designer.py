@@ -1,5 +1,5 @@
 import os, json, re as _re, time, textwrap
-from datetime import date
+from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
 from utils.gemini_client import ask_gemini
 from utils.agent_memory import remember, get_hints
@@ -56,7 +56,8 @@ def _upload_to_supabase(image_bytes: bytes, filename: str) -> str | None:
 def run(brief: dict, writer_output: dict) -> list:
     print("🎨 디자이너 에이전트 실행 중... (HF Flux → Supabase Storage)")
 
-    today = date.today().strftime("%Y-%m-%d")
+    _KST = timezone(timedelta(hours=9))
+    today = datetime.now(_KST).strftime("%Y-%m-%d")
     items = brief["instagram"]
 
     # 배치 이미지 프롬프트 생성
