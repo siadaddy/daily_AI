@@ -7,15 +7,15 @@ type Theme = 'dark' | 'light'
 const ThemeContext = createContext<{
   theme: Theme
   setTheme: (t: Theme) => void
-}>({ theme: 'dark', setTheme: () => {} })
+}>({ theme: 'light', setTheme: () => {} })
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('dark')
+  const [theme, setThemeState] = useState<Theme>('light')
 
   // 초기 테마 복원
   useEffect(() => {
     const saved = localStorage.getItem('theme') as Theme | null
-    if (saved === 'light') setThemeState('light')
+    if (saved === 'dark' || saved === 'light') setThemeState(saved)
   }, [])
 
   // DOM + localStorage 동기화
