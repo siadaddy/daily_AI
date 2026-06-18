@@ -76,6 +76,15 @@ const PORTFOLIO_ITEMS: PortfolioItem[] = [
     status: 'demo',
     category: 'work',
   },
+  {
+    title: '통합 대시보드 자동화',
+    description: 'MyDMS 리포트 자동 추출 · PostgreSQL DB 적재 · Next.js 통합 대시보드 · 텔레그램 봇 알림',
+    emoji: '🤖',
+    tags: ['Python', 'PostgreSQL', 'Next.js', 'Telegram Bot', 'Recharts'],
+    href: '/works/dashboard-auto.html',
+    status: 'live',
+    category: 'work',
+  },
   // ── 교육 ─────────────────────────────────────────────────
   {
     title: '커피 입지 최적화 분석',
