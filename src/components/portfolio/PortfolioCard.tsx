@@ -85,6 +85,15 @@ const PORTFOLIO_ITEMS: PortfolioItem[] = [
     status: 'demo',
     category: 'work',
   },
+  {
+    title: '주소클렌징 시스템',
+    description: '지점별 고객 주소 데이터 113,777건 정제 · Juso/Kakao API 이중 검증 · 99.7% 성공률',
+    emoji: '📍',
+    tags: ['Python', 'Juso API', 'Kakao Maps API', 'pandas', 'asyncio'],
+    href: '/works/address-cleansing.html',
+    status: 'demo',
+    category: 'work',
+  },
   // ── 교육 ─────────────────────────────────────────────────
   {
     title: '커피 입지 최적화 분석',
