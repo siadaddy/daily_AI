@@ -77,8 +77,8 @@ const PORTFOLIO_ITEMS: PortfolioItem[] = [
     description: '4년치 일 단위 입고 데이터로 주차별 KPI·YoY 비교·연말 예측·요일 패턴 분석',
     emoji: '📊',
     tags: ['Python', 'Streamlit', 'Plotly', 'Google Sheets API'],
-    href: 'https://intake-dashboard-nvkkwjrlsuapds4kub79hw.streamlit.app/',
-    status: 'live',
+    href: '/works/intake-dashboard.html',
+    status: 'demo',
   },
 ]
 
