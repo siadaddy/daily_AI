@@ -87,7 +87,7 @@ export interface CategoryStat {
   trend: 'up' | 'down' | 'flat'
 }
 
-export type TabId = 'newsletter' | 'reports' | 'music' | 'office'
+export type TabId = 'newsletter' | 'reports' | 'music' | 'office' | 'portfolio'
 
 export interface CommunityPost {
   id: number

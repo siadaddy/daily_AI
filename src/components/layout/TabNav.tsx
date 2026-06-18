@@ -11,6 +11,7 @@ const TABS: { id: TabId; label: string; emoji: string }[] = [
   { id: 'reports', label: '리포트', emoji: '📊' },
   { id: 'music', label: '뮤직 유니버스', emoji: '🌌' },
   // { id: 'office', label: 'AI 사무실', emoji: '🏢' },
+  { id: 'portfolio', label: 'My Works', emoji: '🛠' },
 ]
 
 export function TabNav() {

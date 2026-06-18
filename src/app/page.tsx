@@ -67,10 +67,7 @@ export default async function Home({
         )}
         {tab === 'music' && <MusicUniverse />}
         {tab === 'office' && <OfficeTab />}
-
-        <div className="mt-12">
-          <PortfolioSection />
-        </div>
+        {tab === 'portfolio' && <PortfolioSection />}
       </main>
       <Footer />
     </>
