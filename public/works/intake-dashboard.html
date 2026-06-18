@@ -8,416 +8,510 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 :root {
-  --sidebar-bg:#1a1d23; --main-bg:#0e1117; --card-bg:#1c2030;
-  --card-border:#2d3149; --text:#e2e8f0; --text2:#94a3b8; --text3:#64748b;
-  --accent:#4f8ef7; --accent2:#a78bfa; --up:#34d399; --dn:#f87171;
+  --sb-bg:#0d1117; --sb-border:#1a2030; --sb-text:#e2e8f0;
+  --sb-text2:#94a3b8; --sb-text3:#4a5568;
+  --main-bg:#f1f5f9; --card:#ffffff; --border:#e2e8f0;
+  --text:#0f172a; --text2:#475569; --text3:#94a3b8;
+  --up:#1d4ed8; --dn:#dc2626; --green:#16a34a;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--main-bg);color:var(--text);overflow:hidden}
-
+html,body{height:100%;font-family:'Noto Sans KR',sans-serif;overflow:hidden}
 .layout{display:flex;height:100vh}
-.sidebar{width:230px;flex-shrink:0;background:var(--sidebar-bg);border-right:1px solid var(--card-border);display:flex;flex-direction:column;overflow-y:auto}
-.main{flex:1;overflow-y:auto;padding:20px 24px}
 
+/* ── Sidebar (always dark) ── */
+.sidebar{
+  width:270px;flex-shrink:0;
+  background:var(--sb-bg);border-right:1px solid var(--sb-border);
+  display:flex;flex-direction:column;overflow-y:auto;
+}
 /* back btn */
-.back-btn{position:fixed;top:12px;left:12px;z-index:9999;background:rgba(28,32,48,.92);border:1px solid rgba(79,142,247,.35);color:#94a3b8;font-size:12px;font-weight:600;padding:6px 14px;border-radius:20px;text-decoration:none;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 2px 10px rgba(0,0,0,.4);transition:all .15s}
-.back-btn:hover{background:rgba(79,142,247,.15);color:#e2e8f0}
+.back-btn{
+  position:fixed;top:12px;left:12px;z-index:9999;
+  background:rgba(13,17,23,.88);border:1px solid rgba(255,255,255,.14);
+  color:#94a3b8;font-size:12px;font-weight:600;padding:6px 14px;
+  border-radius:20px;text-decoration:none;
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  box-shadow:0 2px 10px rgba(0,0,0,.45);transition:all .15s;
+}
+.back-btn:hover{color:#e2e8f0;background:rgba(29,78,216,.4)}
 
-/* sidebar */
-.sb-logo{padding:20px 16px 14px;border-bottom:1px solid var(--card-border)}
-.sb-logo-title{font-size:13px;font-weight:700;color:var(--text)}
-.sb-logo-sub{font-size:10px;color:var(--text3);margin-top:3px}
-.demo-pill{display:inline-block;background:rgba(79,142,247,.15);border:1px solid rgba(79,142,247,.3);color:var(--accent);font-size:9px;font-weight:700;padding:1px 7px;border-radius:10px;letter-spacing:1px;margin-top:6px}
+.sb-logo{padding:52px 20px 14px;border-bottom:1px solid var(--sb-border)}
+.sb-car{font-size:22px;margin-bottom:6px}
+.sb-company{font-size:14px;font-weight:700;color:var(--sb-text)}
+.sb-title{font-size:11px;color:var(--sb-text2);margin-top:2px}
+.demo-pill{display:inline-block;margin-top:8px;background:rgba(29,78,216,.2);border:1px solid rgba(29,78,216,.4);color:#93c5fd;font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;letter-spacing:1px}
 
-.sb-section{padding:14px 16px 4px;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+.sb-section{padding:16px 20px 6px;font-size:10px;font-weight:700;color:var(--sb-text3);text-transform:uppercase;letter-spacing:1.5px}
+.menu-btn{
+  display:flex;align-items:center;gap:10px;width:100%;
+  background:none;border:none;border-left:3px solid transparent;
+  color:var(--sb-text2);font-size:13px;font-family:'Noto Sans KR',sans-serif;
+  padding:10px 20px;cursor:pointer;transition:all .15s;text-align:left;
+}
+.menu-btn:hover{background:rgba(255,255,255,.04);color:var(--sb-text)}
+.menu-btn.active{background:rgba(29,78,216,.15);color:#93c5fd;border-left-color:#1d4ed8;font-weight:600}
+.sb-hr{border:none;border-top:1px solid var(--sb-border);margin:10px 0}
+.sb-status{padding:4px 20px 12px}
+.sb-status-title{font-size:10px;font-weight:700;color:var(--sb-text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.sb-row{display:flex;justify-content:space-between;align-items:baseline;padding:3px 0}
+.sb-label{font-size:11px;color:var(--sb-text3)}
+.sb-val{font-size:12px;color:var(--sb-text2);font-weight:500}
+.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#22c55e;margin-right:5px;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.live-val{color:#22c55e!important}
 
-.menu-btn{display:block;width:100%;text-align:left;background:none;border:none;border-left:3px solid transparent;color:var(--text2);font-size:13px;font-family:'Noto Sans KR',sans-serif;padding:9px 16px;cursor:pointer;transition:all .15s}
-.menu-btn:hover{background:rgba(255,255,255,.04);color:var(--text)}
-.menu-btn.active{background:rgba(79,142,247,.1);color:var(--accent);border-left-color:var(--accent);font-weight:600}
-
-.sb-data{margin:10px 16px;background:var(--card-bg);border-radius:8px;padding:12px;border:1px solid var(--card-border)}
-.sb-data-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04)}
-.sb-data-row:last-child{border-bottom:none}
-.sb-data-label{font-size:10px;color:var(--text3)}
-.sb-data-val{font-size:11px;color:var(--accent);font-weight:600;font-family:monospace}
-
-.sb-filter{padding:8px 16px}
-.sb-select{width:100%;background:#252836;border:1px solid var(--card-border);border-radius:6px;color:var(--text);font-size:12px;font-family:'Noto Sans KR',sans-serif;padding:6px 10px;cursor:pointer}
-.sb-select:focus{outline:none;border-color:var(--accent)}
-
-.sb-stat{margin:8px 16px;background:var(--card-bg);border-radius:8px;padding:10px 12px;border:1px solid var(--card-border)}
-.sb-stat-val{font-size:20px;font-weight:800;font-family:monospace;color:var(--accent)}
-.sb-stat-label{font-size:10px;color:var(--text3);margin-top:2px}
-
-/* header */
-.page-title{font-size:17px;font-weight:700;color:var(--text);margin-bottom:4px}
-.page-sub{font-size:11px;color:var(--text3);margin-bottom:16px}
-
-/* tabs */
-.tabs{display:flex;gap:2px;margin-bottom:18px;background:var(--card-bg);border-radius:8px;padding:4px;border:1px solid var(--card-border)}
-.tab{flex:1;padding:7px 10px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;text-align:center;color:var(--text2);background:none;border:none;font-family:'Noto Sans KR',sans-serif;transition:all .15s}
-.tab.active{background:rgba(79,142,247,.2);color:var(--accent);font-weight:700}
+/* ── Main (light) ── */
+.main{flex:1;overflow-y:auto;background:var(--main-bg)}
 .tab-content{display:none}
 .tab-content.active{display:block}
 
-/* KPI */
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
-.kpi-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:14px 16px}
-.kpi-label{font-size:10px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
-.kpi-val{font-size:24px;font-weight:800;font-family:monospace;color:var(--text)}
-.kpi-delta{font-size:11px;margin-top:4px;font-weight:600}
-.kpi-delta.up{color:var(--up)} .kpi-delta.dn{color:var(--dn)} .kpi-delta.na{color:var(--text3)}
+/* Header banner */
+.page-banner{background:linear-gradient(135deg,#1e3a8a 0%,#1d4ed8 55%,#2563eb 100%);padding:24px 32px}
+.banner-title{font-size:22px;font-weight:800;color:#fff;margin-bottom:4px}
+.banner-sub{font-size:13px;color:rgba(255,255,255,.72)}
 
-/* charts */
-.chart-row{display:grid;gap:10px;margin-bottom:12px}
-.chart-row.cols-2{grid-template-columns:1.8fr 1fr}
-.chart-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:16px}
-.chart-title{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:12px}
+.content{padding:24px 32px}
+.sec-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:6px}
 
-/* perf table */
-.table-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:16px;margin-bottom:12px;overflow-x:auto}
-.perf-table{width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap}
-.perf-table th{color:var(--text3);font-weight:600;text-align:right;padding:5px 10px;border-bottom:1px solid var(--card-border);font-size:10px;text-transform:uppercase;letter-spacing:.4px}
-.perf-table th:first-child{text-align:left}
-.perf-table td{padding:7px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.04);color:var(--text2)}
-.perf-table td:first-child{text-align:left;color:var(--text);font-weight:500}
-.perf-table tr:last-child td{border-bottom:none}
-.perf-table tr.section-head td{background:rgba(79,142,247,.05);color:var(--text3);font-size:10px;letter-spacing:.5px;font-weight:600;text-transform:uppercase}
-.up-val{color:var(--up)} .dn-val{color:var(--dn)}
+/* Year cards */
+.year-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
+.yc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 12px}
+.yc.now{border:2px solid #1d4ed8;background:linear-gradient(145deg,#eff6ff,#fff)}
+.yc-year{font-size:11px;font-weight:600;color:var(--text3);margin-bottom:4px;display:flex;align-items:center;gap:5px}
+.yc-badge{font-size:9px;background:#dbeafe;color:#1d4ed8;padding:1px 6px;border-radius:5px;font-weight:700}
+.yc-total{font-size:20px;font-weight:800;color:var(--text);font-family:monospace;margin-bottom:2px}
+.yc-total .u{font-size:12px;font-weight:500;color:var(--text2)}
+.yc-yoy{font-size:12px;font-weight:600;margin-bottom:8px}
+.yc-row{display:flex;justify-content:space-between;padding:2px 0;border-top:1px solid #f1f5f9}
+.yc-l{font-size:10px;color:var(--text3)}
+.yc-v{font-size:10px;font-weight:600;color:var(--text2)}
+.yc-pct{font-size:9px;margin-left:3px}
+.yc-hr{border:none;border-top:1px solid #e2e8f0;margin:6px 0}
+.yc-ma{font-size:10px;color:#1d4ed8;font-weight:600;margin-top:2px}
 
-/* tab2 filter row */
-.filter-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.filter-label{font-size:11px;color:var(--text3);white-space:nowrap}
-.filter-select{background:#252836;border:1px solid var(--card-border);border-radius:6px;color:var(--text);font-size:12px;font-family:'Noto Sans KR',sans-serif;padding:5px 10px;cursor:pointer}
-.filter-select:focus{outline:none;border-color:var(--accent)}
+/* AI block */
+.ai-block{border-left:4px solid #22c55e;background:#f0fdf4;border-radius:0 8px 8px 0;padding:14px 18px;margin-bottom:22px}
+.ai-head{font-size:12px;font-weight:700;color:#15803d;margin-bottom:8px}
+.ai-sub{font-size:11px;font-weight:600;color:var(--text3);margin-bottom:6px}
+.ai-row{display:flex;gap:8px;align-items:baseline;margin-bottom:4px;flex-wrap:wrap}
+.ai-type{font-size:12px;font-weight:700;color:#1d4ed8;min-width:28px}
+.ai-type.acc{color:#dc2626}
+.ai-txt{font-size:12px;color:var(--text2)}
+.ai-note{font-size:12px;font-weight:600;color:#7c3aed;margin-top:8px}
+
+/* Chart grid */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.cc{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px}
+.ct{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px}
+
+/* Quarter table */
+.q-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.q-table th{text-align:right;padding:6px 10px;border-bottom:2px solid var(--border);font-size:10px;font-weight:600;color:var(--text3)}
+.q-table th:first-child{text-align:left}
+.q-table td{text-align:right;padding:7px 10px;border-bottom:1px solid #f1f5f9;color:var(--text2)}
+.q-table td:first-child{text-align:left;color:var(--text);font-weight:500}
+.q-table tr:last-child td{border-bottom:none}
+.qs{color:#1d4ed8;font-weight:700} .qw{color:#dc2626;font-weight:700}
+.qy{font-size:9px;color:#16a34a;display:block}
+
+/* Perf table */
+.perf-wrap{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:24px;overflow-x:auto}
+.perf{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap}
+.perf th{text-align:right;padding:7px 12px;border-bottom:2px solid var(--border);font-size:10px;font-weight:600;color:var(--text3);background:#f8fafc}
+.perf th:first-child{text-align:left;min-width:120px}
+.perf td{text-align:right;padding:8px 12px;border-bottom:1px solid #f1f5f9;color:var(--text2)}
+.perf td:first-child{text-align:left;color:var(--text)}
+.perf tr.grp td{background:#f8fafc;color:var(--text3);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:5px 12px}
+.up{color:#1d4ed8} .dn{color:#dc2626}
+
+/* Tab2 filter */
+.filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.filter-label{font-size:12px;color:var(--text2);font-weight:500}
+.filter-select{background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-family:'Noto Sans KR',sans-serif;padding:6px 12px;cursor:pointer}
+.filter-select:focus{outline:none;border-color:#1d4ed8}
+
+/* KPI cards (tab3) */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.kc{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px}
+.kc-l{font-size:10px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.kc-v{font-size:24px;font-weight:800;color:var(--text);font-family:monospace}
+.kc-d{font-size:11px;margin-top:4px;font-weight:600}
 </style>
 </head>
 <body>
 <a href="/?tab=portfolio" class="back-btn">← My Works</a>
 <div class="layout">
-  <!-- Sidebar -->
+
+  <!-- Dark Sidebar -->
   <div class="sidebar">
     <div class="sb-logo">
-      <div class="sb-logo-title">차량 입고<br>분석 대시보드</div>
-      <div class="sb-logo-sub">SCL Motors 내부 시스템</div>
+      <div class="sb-car">🚗</div>
+      <div class="sb-company">삼천리모터스</div>
+      <div class="sb-title">입고 분석 대시보드</div>
       <div class="demo-pill">DEMO</div>
     </div>
-
     <div class="sb-section">MENU</div>
-    <button type="button" class="menu-btn active" onclick="switchMenu(this,0)">📊 월별 KPI</button>
-    <button type="button" class="menu-btn" onclick="switchMenu(this,1)">📈 주차별 분석</button>
-    <button type="button" class="menu-btn" onclick="switchMenu(this,2)">🔮 연말 예측</button>
-
-    <div style="border-top:1px solid var(--card-border);margin:12px 0"></div>
-
-    <div class="sb-section">데이터 상태</div>
-    <div class="sb-data">
-      <div class="sb-data-row"><span class="sb-data-label">최신 데이터</span><span class="sb-data-val">2026-06-16</span></div>
-      <div class="sb-data-row"><span class="sb-data-label">기준월</span><span class="sb-data-val">2026-06</span></div>
-      <div class="sb-data-row"><span class="sb-data-label">경과 근무일</span><span class="sb-data-val">12일</span></div>
-      <div class="sb-data-row"><span class="sb-data-label">자동 갱신</span><span class="sb-data-val">12h</span></div>
-    </div>
-
-    <div class="sb-stat" style="margin-top:auto">
-      <div class="sb-stat-val">48,321</div>
-      <div class="sb-stat-label">누적 입고 (2022~2026.06)</div>
+    <button type="button" class="menu-btn active" onclick="switchTab(this,0)"><span>📊</span> 월별 KPI</button>
+    <button type="button" class="menu-btn" onclick="switchTab(this,1)"><span>📝</span> 주차별 분석</button>
+    <button type="button" class="menu-btn" onclick="switchTab(this,2)"><span>🔮</span> 연말 예측</button>
+    <hr class="sb-hr">
+    <div class="sb-status">
+      <div class="sb-status-title">데이터 상태</div>
+      <div class="sb-row">
+        <span class="sb-label">최신 데이터</span>
+        <span class="sb-val live-val"><span class="live-dot"></span>2026년 06월 17일</span>
+      </div>
+      <div class="sb-row"><span class="sb-label">기준월</span><span class="sb-val">2026년 06월</span></div>
+      <div class="sb-row"><span class="sb-label">이번 주 경과</span><span class="sb-val">3일 (전날 기준)</span></div>
+      <div class="sb-row"><span class="sb-label">자동 갱신</span><span class="sb-val">12시간마다</span></div>
     </div>
   </div>
 
-  <!-- Main -->
+  <!-- Light Main -->
   <div class="main">
+
+    <!-- ─── TAB 0: 월별 KPI ─────────────────────────── -->
     <div id="tab0" class="tab-content active">
-      <div class="page-title">📊 월별 KPI</div>
-      <div class="page-sub">기준: 2026년 6월 (경과 근무일 12일 기준)</div>
-
-      <div class="kpi-grid">
-        <div class="kpi-card">
-          <div class="kpi-label">이번달 일평균</div>
-          <div class="kpi-val">38.4</div>
-          <div class="kpi-delta na">대/영업일</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">전년 동월 일평균</div>
-          <div class="kpi-val">35.6</div>
-          <div class="kpi-delta na">(동기간 기준)</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">YoY %</div>
-          <div class="kpi-val">+7.9%</div>
-          <div class="kpi-delta up">▲ 전년 대비 성장</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">YTD 일평균</div>
-          <div class="kpi-val">36.8</div>
-          <div class="kpi-delta up">▲ 연환산 8,418대</div>
-        </div>
+      <div class="page-banner">
+        <div class="banner-title">입고 분석 대시보드</div>
+        <div class="banner-sub">삼천리모터스 BMW · 2026년 06월 기준 · 7개 지점</div>
       </div>
+      <div class="content">
 
-      <div class="chart-row cols-2">
-        <div class="chart-card">
-          <div class="chart-title">월별 일평균 추이 (전체·일반·사고)</div>
-          <canvas id="lineChart" height="160"></canvas>
+        <div class="sec-title">📅 연도별 입고 실적 &amp; 핵심 지표</div>
+        <div class="year-row">
+          <div class="yc">
+            <div class="yc-year">2022년</div>
+            <div class="yc-total">82,136<span class="u"> 대</span></div>
+            <div class="yc-yoy" style="color:var(--text3)">기준연도</div>
+            <div class="yc-row"><span class="yc-l">일반</span><span class="yc-v">75,911대</span></div>
+            <div class="yc-row"><span class="yc-l">사고</span><span class="yc-v" style="color:#dc2626">6,225대</span></div>
+            <hr class="yc-hr">
+            <div class="yc-row"><span class="yc-l">전체 일평균</span><span class="yc-v">332.5대/일</span></div>
+            <div class="yc-row"><span class="yc-l">일반 일평균</span><span class="yc-v">307.3대/일</span></div>
+            <div class="yc-row"><span class="yc-l" style="color:#dc2626">사고 일평균</span><span class="yc-v" style="color:#dc2626">25.2대/일</span></div>
+          </div>
+          <div class="yc">
+            <div class="yc-year">2023년</div>
+            <div class="yc-total">102,714<span class="u"> 대</span></div>
+            <div class="yc-yoy up">▲25.1% YoY</div>
+            <div class="yc-row"><span class="yc-l">일반</span><span class="yc-v">93,662대 <span class="yc-pct up">▲23.4%</span></span></div>
+            <div class="yc-row"><span class="yc-l">사고</span><span class="yc-v" style="color:#dc2626">9,052대 <span class="yc-pct up">▲45.4%</span></span></div>
+            <hr class="yc-hr">
+            <div class="yc-row"><span class="yc-l">전체 일평균</span><span class="yc-v">417.5대/일</span></div>
+            <div class="yc-row"><span class="yc-l">일반 일평균</span><span class="yc-v">380.7대/일</span></div>
+            <div class="yc-row"><span class="yc-l" style="color:#dc2626">사고 일평균</span><span class="yc-v" style="color:#dc2626">36.8대/일</span></div>
+          </div>
+          <div class="yc">
+            <div class="yc-year">2024년</div>
+            <div class="yc-total">110,797<span class="u"> 대</span></div>
+            <div class="yc-yoy up">▲7.9% YoY</div>
+            <div class="yc-row"><span class="yc-l">일반</span><span class="yc-v">100,449대 <span class="yc-pct up">▲7.2%</span></span></div>
+            <div class="yc-row"><span class="yc-l">사고</span><span class="yc-v" style="color:#dc2626">10,348대 <span class="yc-pct up">▲14.3%</span></span></div>
+            <hr class="yc-hr">
+            <div class="yc-row"><span class="yc-l">전체 일평균</span><span class="yc-v">452.2대/일</span></div>
+            <div class="yc-row"><span class="yc-l">일반 일평균</span><span class="yc-v">410.0대/일</span></div>
+            <div class="yc-row"><span class="yc-l" style="color:#dc2626">사고 일평균</span><span class="yc-v" style="color:#dc2626">42.2대/일</span></div>
+          </div>
+          <div class="yc">
+            <div class="yc-year">2025년</div>
+            <div class="yc-total">113,077<span class="u"> 대</span></div>
+            <div class="yc-yoy up">▲2.1% YoY</div>
+            <div class="yc-row"><span class="yc-l">일반</span><span class="yc-v">102,573대 <span class="yc-pct up">▲2.1%</span></span></div>
+            <div class="yc-row"><span class="yc-l">사고</span><span class="yc-v" style="color:#dc2626">10,504대 <span class="yc-pct up">▲1.5%</span></span></div>
+            <hr class="yc-hr">
+            <div class="yc-row"><span class="yc-l">전체 일평균</span><span class="yc-v">463.4대/일</span></div>
+            <div class="yc-row"><span class="yc-l">일반 일평균</span><span class="yc-v">420.6대/일</span></div>
+            <div class="yc-row"><span class="yc-l" style="color:#dc2626">사고 일평균</span><span class="yc-v" style="color:#dc2626">43.0대/일</span></div>
+          </div>
+          <div class="yc now">
+            <div class="yc-year">2026년 <span class="yc-badge">진행중</span></div>
+            <div class="yc-total">55,638<span class="u"> 대</span></div>
+            <div class="yc-yoy up">▲3.7% YoY</div>
+            <div class="yc-row"><span class="yc-l">일반</span><span class="yc-v" style="color:#1d4ed8">50,582대 <span class="yc-pct up">▲3.9%</span></span></div>
+            <div class="yc-row"><span class="yc-l">사고</span><span class="yc-v" style="color:#dc2626">5,056대 <span class="yc-pct up">▲1.4%</span></span></div>
+            <hr class="yc-hr">
+            <div class="yc-row"><span class="yc-l">전체 일평균</span><span class="yc-v" style="color:#1d4ed8;font-weight:700">501.2대/일</span></div>
+            <div class="yc-row"><span class="yc-l">일반 일평균</span><span class="yc-v" style="color:#1d4ed8;font-weight:700">455.7대/일</span></div>
+            <div class="yc-row"><span class="yc-l" style="color:#dc2626">사고 일평균</span><span class="yc-v" style="color:#dc2626;font-weight:700">45.5대/일</span></div>
+            <div class="yc-ma">3개월 MA &nbsp;501.6대/일</div>
+            <div class="yc-ma">연 환산 &nbsp;&nbsp;&nbsp;123,306대</div>
+          </div>
         </div>
-        <div class="chart-card">
-          <div class="chart-title">지점별 이번달 일평균</div>
-          <canvas id="branchBar" height="160"></canvas>
+
+        <!-- AI 이번달 -->
+        <div class="ai-block">
+          <div class="ai-head">📊 데이터 분석</div>
+          <div class="ai-sub">이번달 현황 (2026년 06월)</div>
+          <div class="ai-row">
+            <span class="ai-type">일반</span>
+            <span class="ai-txt">일평균 <strong>409.1대/일</strong> · YoY <span class="up">+5.4% ✅</span> · 3MA 대비 <span class="dn">▼10.5% ⚠️</span></span>
+          </div>
+          <div class="ai-row">
+            <span class="ai-type acc">사고</span>
+            <span class="ai-txt">일평균 <strong>50.2대/일</strong> · YoY <span class="up">+25.1% ✅</span> · 3MA 대비 <span class="up">+13.4% ✅</span></span>
+          </div>
+          <div class="ai-note">📌 현재 추세 지속 시 연간 <strong>123,306대</strong> 예상</div>
         </div>
-      </div>
 
-      <div class="table-card">
-        <div class="chart-title">📋 성과 요약 테이블</div>
-        <table class="perf-table">
-          <thead>
-            <tr>
-              <th style="min-width:90px">구분</th>
-              <th>이번달</th>
-              <th>작년동월</th>
-              <th>YoY</th>
-              <th>올해누적</th>
-              <th>누적대비</th>
-              <th>3MA</th>
-              <th>MA대비</th>
-              <th>연환산</th>
-            </tr>
-          </thead>
-          <tbody id="perfTableBody"></tbody>
-        </table>
-      </div>
-    </div>
+        <!-- 비교 분석 -->
+        <div class="sec-title">📝 비교 분석</div>
+        <div class="g2">
+          <div class="cc"><div class="ct">일반 전체 일평균 비교</div><canvas id="cmpN" height="200"></canvas></div>
+          <div class="cc"><div class="ct">사고 전체 일평균 비교</div><canvas id="cmpA" height="200"></canvas></div>
+        </div>
+        <div class="g2">
+          <div class="cc"><div class="ct">일반 지점별 일평균</div><canvas id="brN" height="180"></canvas></div>
+          <div class="cc"><div class="ct">사고 지점별 일평균</div><canvas id="brA" height="180"></canvas></div>
+        </div>
 
+        <!-- 연도별 추이 -->
+        <div class="g2" style="margin-top:12px">
+          <div class="cc"><div class="ct">일반 전체 월별 추이 (2022~2026)</div><canvas id="trN" height="200"></canvas></div>
+          <div class="cc"><div class="ct">사고 전체 월별 추이 (2022~2026)</div><canvas id="trA" height="200"></canvas></div>
+        </div>
+
+        <!-- AI 연도별 분석 -->
+        <div class="ai-block" style="margin-top:12px">
+          <div class="ai-head">📊 데이터 분석</div>
+          <div class="ai-sub">연도별 흐름</div>
+          <div class="ai-row">
+            <span class="ai-type">일반</span>
+            <span class="ai-txt">2022년 307.1대 → 2023년 381.1대 → 2024년 410.8대 → 2025년 420.6대 → <strong>2026년 455.7대</strong> (진행중)</span>
+          </div>
+          <div style="font-size:11px;color:var(--text3);padding:2px 0 6px 36px">
+            🏆 최고 2025년 420.6대/일 · 최저 2022년 307.1대/일 · 올해 vs 전년 <span class="up">+8.3%</span>
+          </div>
+          <div class="ai-row">
+            <span class="ai-type acc">사고</span>
+            <span class="ai-txt">2022년 25.2대 → 2023년 36.9대 → 2024년 42.3대 → 2025년 43.1대 → <strong>2026년 45.5대</strong> (진행중)</span>
+          </div>
+          <div style="font-size:11px;color:var(--text3);padding:2px 0 10px 36px">
+            🏆 최고 2025년 43.1대/일 · 최저 2022년 25.2대/일 · 올해 vs 전년 <span class="up">+5.6%</span>
+          </div>
+
+          <div class="ai-sub">분기별 흐름 — 일반</div>
+          <table class="q-table">
+            <thead><tr><th>연도</th><th>Q1 1-3월</th><th>Q2 4-6월</th><th>Q3 7-9월</th><th>Q4 10-12월</th><th>강세분기</th><th>약세분기</th></tr></thead>
+            <tbody>
+              <tr><td>2022년</td><td>284.8대</td><td>311.3대</td><td>311.4대</td><td>320.8대</td><td class="qs">Q4</td><td class="qw">Q1</td></tr>
+              <tr><td>2023년</td><td>353.3대</td><td>393.0대</td><td>400.3대</td><td>377.5대</td><td class="qs">Q3</td><td class="qw">Q1</td></tr>
+              <tr><td>2024년</td><td>400.4대</td><td>402.1대</td><td>421.7대</td><td>419.0대</td><td class="qs">Q3</td><td class="qw">Q1</td></tr>
+              <tr><td>2025년</td><td>421.8대</td><td>397.0대</td><td>436.1대</td><td>427.3대</td><td class="qs">Q3</td><td class="qw">Q2</td></tr>
+              <tr><td>2026년</td><td>466.2대<span class="qy">+10.5%</span></td><td>440.1대<span class="qy">+10.9%</span></td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td><td class="qs">Q1</td><td class="qw">Q2</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 성과 요약 -->
+        <div class="sec-title" style="margin-top:24px">📋 성과 요약</div>
+        <div class="perf-wrap">
+          <table class="perf">
+            <thead>
+              <tr><th>구분</th><th>이번달</th><th>작년동월</th><th>YoY</th><th>올해누적</th><th>누적대비</th><th>3MA</th><th>MA대비</th><th>연환산</th></tr>
+            </thead>
+            <tbody id="perfBody"></tbody>
+          </table>
+        </div>
+
+      </div><!-- /content -->
+    </div><!-- /tab0 -->
+
+    <!-- ─── TAB 1: 주차별 분석 ────────────────────────── -->
     <div id="tab1" class="tab-content">
-      <div class="page-title">📈 주차별 분석</div>
-      <div class="page-sub">주차별 일평균 추이 및 요일 패턴 분석</div>
-
-      <div class="filter-row">
-        <span class="filter-label">지점 선택:</span>
-        <select class="filter-select" onchange="updateWeeklyCharts(this.value)">
-          <option value="all">전체</option>
-          <option value="군포">군포</option>
-          <option value="청주">청주</option>
-          <option value="천안">천안</option>
-          <option value="동탄">동탄</option>
-          <option value="안양">안양</option>
-          <option value="세종">세종</option>
-          <option value="안산">안산</option>
-        </select>
+      <div class="page-banner">
+        <div class="banner-title">주차별 분석</div>
+        <div class="banner-sub">주차별 일평균 추이 및 요일별 패턴</div>
       </div>
-
-      <div class="chart-row cols-2">
-        <div class="chart-card">
-          <div class="chart-title">주차별 일평균 비교 (2025 vs 2026)</div>
-          <canvas id="weeklyLine" height="160"></canvas>
+      <div class="content">
+        <div class="filter-bar">
+          <span class="filter-label">지점 선택:</span>
+          <select class="filter-select" onchange="updateWeekly(this.value)">
+            <option value="all">전체</option>
+            <option value="군포">군포</option>
+            <option value="청주">청주</option>
+            <option value="천안">천안</option>
+            <option value="동탄">동탄</option>
+            <option value="안양">안양</option>
+            <option value="세종">세종</option>
+            <option value="안산">안산</option>
+          </select>
         </div>
-        <div class="chart-card">
-          <div class="chart-title">동주차 YoY (%)</div>
-          <canvas id="yoyBar" height="160"></canvas>
+        <div class="g2">
+          <div class="cc"><div class="ct">주차별 일평균 비교 (2025 vs 2026)</div><canvas id="wkLine" height="200"></canvas></div>
+          <div class="cc"><div class="ct">동주차 YoY (%)</div><canvas id="wkYoy" height="200"></canvas></div>
         </div>
-      </div>
-
-      <div class="chart-row cols-2">
-        <div class="chart-card">
-          <div class="chart-title">요일별 패턴 — 일반 입고</div>
-          <canvas id="dowNormal" height="140"></canvas>
-        </div>
-        <div class="chart-card">
-          <div class="chart-title">요일별 패턴 — 사고 입고</div>
-          <canvas id="dowAccident" height="140"></canvas>
+        <div class="g2">
+          <div class="cc"><div class="ct">요일별 패턴 — 일반 입고</div><canvas id="dowN" height="180"></canvas></div>
+          <div class="cc"><div class="ct">요일별 패턴 — 사고 입고</div><canvas id="dowA" height="180"></canvas></div>
         </div>
       </div>
     </div>
 
+    <!-- ─── TAB 2: 연말 예측 ──────────────────────────── -->
     <div id="tab2" class="tab-content">
-      <div class="page-title">🔮 연말 예측</div>
-      <div class="page-sub">YTD 실적 기반 선형회귀 연말 예측</div>
-
-      <div class="kpi-grid">
-        <div class="kpi-card">
-          <div class="kpi-label">YTD 누적 입고</div>
-          <div class="kpi-val">4,053</div>
-          <div class="kpi-delta na">2026.01~06</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">연말 예측 (선형회귀)</div>
-          <div class="kpi-val">8,418</div>
-          <div class="kpi-delta up">▲ +5.3% YoY</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">예측 성장률</div>
-          <div class="kpi-val">+5.3%</div>
-          <div class="kpi-delta up">vs 2025년 7,992대</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">남은 영업일</div>
-          <div class="kpi-val">134</div>
-          <div class="kpi-delta na">2026.06~12</div>
-        </div>
+      <div class="page-banner">
+        <div class="banner-title">연말 예측</div>
+        <div class="banner-sub">YTD 실적 기반 선형회귀 연말 예측</div>
       </div>
-
-      <div class="chart-card">
-        <div class="chart-title">연말 예측 — YTD 누적 + 선형회귀 (2025 vs 2026)</div>
-        <canvas id="forecastChart" height="200"></canvas>
+      <div class="content">
+        <div class="kpi-row">
+          <div class="kc"><div class="kc-l">YTD 누적 입고</div><div class="kc-v">55,638</div><div class="kc-d up">2026.01~06</div></div>
+          <div class="kc"><div class="kc-l">연말 예측 (선형회귀)</div><div class="kc-v">123,306</div><div class="kc-d up">▲ +9.1% YoY</div></div>
+          <div class="kc"><div class="kc-l">예측 성장률</div><div class="kc-v">+9.1%</div><div class="kc-d" style="color:var(--text3)">vs 2025년 113,077대</div></div>
+          <div class="kc"><div class="kc-l">남은 영업일</div><div class="kc-v">134</div><div class="kc-d" style="color:var(--text3)">2026.06~12</div></div>
+        </div>
+        <div class="cc">
+          <div class="ct">연말 예측 — YTD 누적 (2025 vs 2026 + 선형회귀)</div>
+          <canvas id="fcChart" height="250"></canvas>
+        </div>
       </div>
     </div>
-  </div>
-</div>
+
+  </div><!-- /main -->
+</div><!-- /layout -->
 
 <script>
-// ── Demo data ──────────────────────────────────────────────────────────
-const MONTHS = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-const monthlyAll    = [34.2,36.1,38.4,37.8,39.2,38.4,null,null,null,null,null,null];
-const monthlyNormal = [28.1,29.6,31.2,30.9,31.8,31.1,null,null,null,null,null,null];
-const monthlyAcc    = [ 6.1, 6.5, 7.2, 6.9, 7.4, 7.3,null,null,null,null,null,null];
+// ── Data ──────────────────────────────────────────────────
+const MON = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+const BR  = ['군포','청주','천안','동탄','안양','세종','안산'];
 
-const branches = ['군포','청주','천안','동탄','안양','세종','안산'];
-const branchAvg = [6.4,7.1,5.8,6.9,5.2,3.8,5.3];
+// Comparison (작년동월/올해누적/3MA/이번달)
+const CMP_L = ['작년동월','올해 누적','3개월MA','이번달(06월)'];
+const cmpN = [388.3,455.7,457.3,409.1];
+const cmpA = [40.2,45.5,44.3,50.2];
+const brN  = [66.5,77.9,75.8,69.2,58.0,28.4,33.2];
+const brA  = [8.2,9.4,7.9,8.1,6.3,4.2,6.1];
 
-const PERF = [
-  {name:'전체',  curr:38.4,yoy:35.6,yoyPct:7.9,  ytd:36.8,ytdPct:4.2, ma:37.1,maPct:3.5, ann:8418},
-  {name:'일반',  curr:31.1,yoy:28.9,yoyPct:7.6,  ytd:29.8,ytdPct:4.4, ma:30.1,maPct:3.3, ann:6821},
-  {name:'사고',  curr: 7.3,yoy: 6.7,yoyPct:8.9,  ytd: 7.0,ytdPct:4.5, ma: 7.0,maPct:4.3, ann:1601},
-  null,
-  {name:'일반 군포',curr:6.4,yoy:5.9,yoyPct:8.5,ytd:6.1,ytdPct:5.2,ma:6.2,maPct:3.2,ann:1388},
-  {name:'일반 청주',curr:7.1,yoy:6.6,yoyPct:7.6,ytd:6.8,ytdPct:4.4,ma:6.9,maPct:2.9,ann:1556},
-  {name:'일반 천안',curr:5.8,yoy:5.4,yoyPct:7.4,ytd:5.6,ytdPct:3.7,ma:5.7,maPct:1.8,ann:1281},
-  {name:'일반 동탄',curr:6.9,yoy:6.3,yoyPct:9.5,ytd:6.6,ytdPct:4.8,ma:6.7,maPct:3.0,ann:1510},
-  {name:'일반 안양',curr:5.2,yoy:4.9,yoyPct:6.1,ytd:5.0,ytdPct:4.2,ma:5.1,maPct:2.0,ann:1144},
-  {name:'일반 세종',curr:3.8,yoy:3.5,yoyPct:8.6,ytd:3.6,ytdPct:5.6,ma:3.7,maPct:2.7,ann: 822},
-  {name:'일반 안산',curr:5.3,yoy:4.9,yoyPct:8.2,ytd:5.1,ytdPct:3.9,ma:5.2,maPct:1.9,ann:1166},
-];
-
-const weekLabels = ['W01','W02','W03','W04','W05','W06','W07','W08','W09','W10','W11','W12','W13','W14','W15','W16','W17','W18','W19','W20','W21','W22','W23'];
-const weekly25 = [33,35,36,34,37,36,38,35,37,39,38,36,38,40,39,37,40,41,38,39,42,40,38];
-const weekly26 = [35,37,39,36,39,38,40,37,40,41,40,38,40,42,41,39,42,43,40,41,44,42,null];
-
-const dowLabels = ['월','화','수','목','금'];
-const dowNorm = [30.1,32.4,31.8,30.6,28.9];
-const dowAcc  = [6.8, 7.2, 7.1, 6.9, 6.5];
-
-// 연말 예측 데이터
-const fcMonths = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-const ytd25 = [612,1148,1710,2262,2826,3372,3938,4492,5042,5600,6142,7992];
-const ytd26 = [636,1194,1774,2346,2928,4053,null,null,null,null,null,null];
-const fcst26 = [null,null,null,null,null,4053,4820,5556,6298,7011,7720,8418];
-
-function fmt(v,d=1){ return v==null?'-':v.toFixed(d) }
-function pctClass(v){ return v>0?'up-val':v<0?'dn-val':'' }
-function pctStr(v){ return v==null?'-':(v>0?'+':'')+v.toFixed(1)+'%' }
-
-// ── Performance table ──────────────────────────────────────────────────
-const tbody = document.getElementById('perfTableBody');
-PERF.forEach(r => {
-  if(r===null){
-    tbody.innerHTML += `<tr class="section-head"><td colspan="9">지점별 (일반 기준)</td></tr>`;
-    return;
-  }
-  tbody.innerHTML += `<tr>
-    <td>${r.name}</td>
-    <td>${fmt(r.curr)}</td>
-    <td>${fmt(r.yoy)}</td>
-    <td class="${pctClass(r.yoyPct)}">${pctStr(r.yoyPct)}</td>
-    <td>${fmt(r.ytd)}</td>
-    <td class="${pctClass(r.ytdPct)}">${pctStr(r.ytdPct)}</td>
-    <td>${fmt(r.ma)}</td>
-    <td class="${pctClass(r.maPct)}">${pctStr(r.maPct)}</td>
-    <td>${r.ann?.toLocaleString()??'-'}</td>
-  </tr>`;
-});
-
-// ── Chart defaults ─────────────────────────────────────────────────────
-const baseOpts = {
-  responsive:true,maintainAspectRatio:true,
-  plugins:{legend:{labels:{color:'#94a3b8',font:{size:11}}}},
-  scales:{
-    x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#64748b',font:{size:11}}},
-    y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#64748b',font:{size:11}}}
+// Multi-year monthly
+const TR = {
+  n:{
+    2022:[280,275,298,303,312,316,308,315,314,319,322,308],
+    2023:[348,356,358,388,398,402,393,408,403,381,375,372],
+    2024:[396,402,403,400,408,405,415,422,439,420,419,418],
+    2025:[418,420,428,395,401,392,430,438,441,428,430,425],
+    2026:[462,474,462,438,446,409,null,null,null,null,null,null],
+  },
+  a:{
+    2022:[24,23,26,25,26,27,24,25,25,26,27,25],
+    2023:[34,35,36,36,38,39,38,40,40,36,35,34],
+    2024:[40,41,42,42,43,44,43,44,43,42,42,42],
+    2025:[41,42,43,43,44,43,43,44,44,43,44,43],
+    2026:[44,46,48,50,52,50,null,null,null,null,null,null],
   }
 };
+const YC={2022:'#a78bfa',2023:'#22c55e',2024:'#f97316',2025:'#eab308',2026:'#1d4ed8'};
 
-// Tab 0 charts
-new Chart(document.getElementById('lineChart'),{
-  type:'line',
-  data:{labels:MONTHS.slice(0,6),datasets:[
-    {label:'전체',data:monthlyAll.slice(0,6),borderColor:'#4f8ef7',backgroundColor:'rgba(79,142,247,.08)',tension:.4,fill:true,pointRadius:3},
-    {label:'일반',data:monthlyNormal.slice(0,6),borderColor:'#34d399',tension:.4,pointRadius:3},
-    {label:'사고',data:monthlyAcc.slice(0,6),borderColor:'#f87171',tension:.4,pointRadius:3},
+// Weekly
+const WL = Array.from({length:22},(_,i)=>`W${String(i+1).padStart(2,'0')}`);
+const w25=[420,432,448,412,438,435,450,422,440,462,455,442,458,472,468,450,475,480,462,468,482,474];
+const w26=[440,452,468,432,458,455,470,442,460,482,475,462,478,492,488,470,495,500,482,488,502,null];
+const DOW=['월','화','수','목','금'];
+const dN=[424,448,438,421,395],dA=[48,53,51,49,44];
+
+// Forecast
+const fc25=[9128,17836,27312,36064,44702,53372,62060,71204,80136,88636,97328,113077];
+const fc26=[9828,19524,29412,38660,47848,55638,null,null,null,null,null,null];
+const fcP =[null,null,null,null,null,55638,65200,74800,84400,94000,103600,123306];
+
+// Perf table
+const PERF=[
+  {n:'전체',   c:459.3,y:428.5,yP:+7.2, t:501.2,tP:-8.4, m:501.6,mP:-8.4, a:'123,306'},
+  {n:'일반',   c:409.1,y:388.3,yP:+5.4, t:455.7,tP:-10.2,m:457.3,mP:-10.5,a:'112,101'},
+  {n:'사고',   c:50.2, y:40.2, yP:+25.1,t:45.5, tP:+10.3, m:44.3, mP:+13.4,a:'11,205'},
+  null,
+  {n:'└일반 군포',c:66.5,y:63.2,yP:+5.3, t:74.5,tP:-10.8,m:75.8,mP:-12.3,a:'–'},
+  {n:'└일반 청주',c:77.9,y:60.2,yP:+29.5,t:82.5,tP:-5.6, m:82.9,mP:-6.0, a:'–'},
+  {n:'└일반 천안',c:75.8,y:75.5,yP:+0.3, t:85.0,tP:-10.9,m:85.2,mP:-11.1,a:'–'},
+  {n:'└일반 동탄',c:69.2,y:69.0,yP:+0.4, t:76.2,tP:-9.1, m:77.2,mP:-10.3,a:'–'},
+  {n:'└일반 안양',c:58.0,y:58.2,yP:-0.3, t:68.0,tP:-14.6,m:66.6,mP:-12.9,a:'–'},
+  {n:'└일반 세종',c:28.4,y:30.3,yP:-6.1, t:33.7,tP:-15.7,m:33.6,mP:-15.4,a:'–'},
+  {n:'└일반 안산',c:33.2,y:31.9,yP:+4.2, t:35.7,tP:-7.0, m:36.0,mP:-7.6, a:'–'},
+];
+
+// ── Perf table render ──────────────────────────────────────
+const tb = document.getElementById('perfBody');
+PERF.forEach(r=>{
+  if(!r){tb.innerHTML+=`<tr class="grp"><td colspan="9">지점별 (일반 기준)</td></tr>`;return}
+  const pc=v=>v>0?'up':'dn', pf=v=>(v>0?'+':'')+v.toFixed(1)+'%';
+  tb.innerHTML+=`<tr><td>${r.n}</td><td>${r.c}</td><td>${r.y}</td>
+    <td class="${pc(r.yP)}">${pf(r.yP)}</td><td>${r.t}</td>
+    <td class="${pc(r.tP)}">${pf(r.tP)}</td><td>${r.m}</td>
+    <td class="${pc(r.mP)}">${pf(r.mP)}</td><td>${r.a}</td></tr>`;
+});
+
+// ── Chart base ─────────────────────────────────────────────
+const G='rgba(0,0,0,.07)', T='#94a3b8';
+const BO={responsive:true,maintainAspectRatio:true,
+  plugins:{legend:{labels:{color:'#475569',font:{size:11}}}},
+  scales:{x:{grid:{color:G},ticks:{color:T,font:{size:11}}},y:{grid:{color:G},ticks:{color:T,font:{size:11}}}}
+};
+
+// Comparison charts
+new Chart(document.getElementById('cmpN'),{type:'bar',
+  data:{labels:CMP_L,datasets:[{label:'일반 일평균',data:cmpN,backgroundColor:['#cbd5e1','#93c5fd','#a78bfa','#1d4ed8'],borderRadius:5}]},
+  options:{...BO,plugins:{legend:{display:false}}}
+});
+new Chart(document.getElementById('cmpA'),{type:'bar',
+  data:{labels:CMP_L,datasets:[{label:'사고 일평균',data:cmpA,backgroundColor:['#fca5a5','#f87171','#ef4444','#b91c1c'],borderRadius:5}]},
+  options:{...BO,plugins:{legend:{display:false}}}
+});
+
+// Branch charts
+new Chart(document.getElementById('brN'),{type:'bar',
+  data:{labels:BR,datasets:[{label:'일반 일평균',data:brN,backgroundColor:'#3b82f6',borderRadius:4}]},
+  options:{...BO,plugins:{legend:{display:false}}}
+});
+new Chart(document.getElementById('brA'),{type:'bar',
+  data:{labels:BR,datasets:[{label:'사고 일평균',data:brA,backgroundColor:'#ef4444',borderRadius:4}]},
+  options:{...BO,plugins:{legend:{display:false}}}
+});
+
+// Trend lines
+function mkDS(key){
+  return [2022,2023,2024,2025].map(y=>({
+    label:String(y),data:TR[key][y],borderColor:YC[y],tension:.3,pointRadius:2,fill:false
+  })).concat([{label:'2026',data:TR[key][2026],borderColor:YC[2026],tension:.3,pointRadius:2,fill:false,borderWidth:2.5}]);
+}
+new Chart(document.getElementById('trN'),{type:'line',data:{labels:MON,datasets:mkDS('n')},options:{...BO}});
+new Chart(document.getElementById('trA'),{type:'line',data:{labels:MON,datasets:mkDS('a')},options:{...BO}});
+
+// Weekly
+let wkChart = new Chart(document.getElementById('wkLine'),{type:'line',
+  data:{labels:WL,datasets:[
+    {label:'2025',data:w25,borderColor:'#94a3b8',tension:.3,pointRadius:2,borderDash:[4,2]},
+    {label:'2026',data:w26,borderColor:'#1d4ed8',tension:.3,pointRadius:2,borderWidth:2},
   ]},
-  options:{...baseOpts}
+  options:{...BO}
 });
-
-new Chart(document.getElementById('branchBar'),{
-  type:'bar',
-  data:{labels:branches,datasets:[{
-    label:'일평균',data:branchAvg,
-    backgroundColor:'rgba(79,142,247,.6)',borderColor:'rgba(79,142,247,.9)',borderWidth:1,borderRadius:4
-  }]},
-  options:{...baseOpts,indexAxis:'y',plugins:{legend:{display:false}}}
+const yoyD=w25.map((v,i)=>w26[i]!=null?+((w26[i]-v)/v*100).toFixed(1):null);
+new Chart(document.getElementById('wkYoy'),{type:'bar',
+  data:{labels:WL,datasets:[{label:'YoY %',data:yoyD,backgroundColor:yoyD.map(v=>v===null?'transparent':v>=0?'rgba(29,78,216,.65)':'rgba(220,38,38,.65)'),borderRadius:3}]},
+  options:{...BO,plugins:{legend:{display:false}}}
 });
+new Chart(document.getElementById('dowN'),{type:'bar',data:{labels:DOW,datasets:[{label:'일반 일평균',data:dN,backgroundColor:'#3b82f6',borderRadius:4}]},options:{...BO,plugins:{legend:{display:false}}}});
+new Chart(document.getElementById('dowA'),{type:'bar',data:{labels:DOW,datasets:[{label:'사고 일평균',data:dA,backgroundColor:'#ef4444',borderRadius:4}]},options:{...BO,plugins:{legend:{display:false}}}});
 
-// Tab 1 charts
-let weeklyLineChart = new Chart(document.getElementById('weeklyLine'),{
-  type:'line',
-  data:{labels:weekLabels.slice(0,22),datasets:[
-    {label:'2025',data:weekly25.slice(0,22),borderColor:'#64748b',tension:.3,borderDash:[4,2],pointRadius:2},
-    {label:'2026',data:weekly26.slice(0,22),borderColor:'#4f8ef7',backgroundColor:'rgba(79,142,247,.07)',tension:.3,fill:true,pointRadius:2},
+// Forecast
+new Chart(document.getElementById('fcChart'),{type:'line',
+  data:{labels:MON,datasets:[
+    {label:'2025 실적',data:fc25,borderColor:'#94a3b8',tension:.3,pointRadius:3,borderDash:[5,3]},
+    {label:'2026 실적',data:fc26,borderColor:'#1d4ed8',tension:.3,pointRadius:3},
+    {label:'2026 예측(선형회귀)',data:fcP,borderColor:'#22c55e',tension:.3,pointRadius:3,borderDash:[6,3],backgroundColor:'rgba(34,197,94,.06)',fill:true},
   ]},
-  options:{...baseOpts}
+  options:{...BO}
 });
 
-const yoyData = weekly25.slice(0,22).map((v,i)=>weekly26[i]!=null?((weekly26[i]-v)/v*100):null);
-let yoyBarChart = new Chart(document.getElementById('yoyBar'),{
-  type:'bar',
-  data:{labels:weekLabels.slice(0,22),datasets:[{
-    label:'YoY %',data:yoyData,
-    backgroundColor:yoyData.map(v=>v===null?'transparent':v>=0?'rgba(52,211,153,.6)':'rgba(248,113,113,.6)'),
-    borderRadius:3
-  }]},
-  options:{...baseOpts,plugins:{legend:{display:false}}}
-});
-
-new Chart(document.getElementById('dowNormal'),{
-  type:'bar',
-  data:{labels:dowLabels,datasets:[{
-    label:'일반 일평균',data:dowNorm,
-    backgroundColor:'rgba(79,142,247,.65)',borderRadius:4
-  }]},
-  options:{...baseOpts,plugins:{legend:{display:false}}}
-});
-
-new Chart(document.getElementById('dowAccident'),{
-  type:'bar',
-  data:{labels:dowLabels,datasets:[{
-    label:'사고 일평균',data:dowAcc,
-    backgroundColor:'rgba(248,113,113,.55)',borderRadius:4
-  }]},
-  options:{...baseOpts,plugins:{legend:{display:false}}}
-});
-
-// Tab 2 chart
-new Chart(document.getElementById('forecastChart'),{
-  type:'line',
-  data:{labels:fcMonths,datasets:[
-    {label:'2025 실적',data:ytd25,borderColor:'#64748b',tension:.3,borderDash:[4,2],pointRadius:3},
-    {label:'2026 실적',data:ytd26,borderColor:'#4f8ef7',tension:.3,pointRadius:3},
-    {label:'2026 예측',data:fcst26,borderColor:'#34d399',tension:.3,borderDash:[6,3],pointRadius:3,
-      backgroundColor:'rgba(52,211,153,.06)',fill:true},
-  ]},
-  options:{...baseOpts}
-});
-
-// ── UI interactions ────────────────────────────────────────────────────
-function switchMenu(btn, idx) {
+// ── UI ────────────────────────────────────────────────────
+function switchTab(btn,idx){
   document.querySelectorAll('.menu-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  document.querySelectorAll('.tab-content').forEach((c,i)=>{
-    c.classList.toggle('active', i===idx);
-  });
+  document.querySelectorAll('.tab-content').forEach((c,i)=>c.classList.toggle('active',i===idx));
 }
-
-function updateWeeklyCharts(branch) {
-  // Demo: just jitter data slightly for different branches
-  const offset = {all:0,군포:-1.2,청주:0.8,천안:-2.1,동탄:1.5,안양:-2.8,세종:-5.1,안산:-1.8}[branch]??0;
-  weeklyLineChart.data.datasets[1].data = weekly26.map(v=>v!=null?+(v+offset).toFixed(1):null);
-  weeklyLineChart.update();
+function updateWeekly(br){
+  const off={all:0,군포:-12,청주:14,천안:8,동탄:6,안양:-22,세종:-64,안산:-42}[br]??0;
+  wkChart.data.datasets[1].data=w26.map(v=>v!=null?Math.round(v+off):null);
+  wkChart.update();
 }
 </script>
 </body>
