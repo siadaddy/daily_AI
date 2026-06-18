@@ -193,9 +193,10 @@ def _generate_image_hf(prompt: str) -> bytes | None:
                     json={"inputs": full_prompt, "parameters": {"width": 768, "height": 768}},
                     timeout=120,
                 )
-                if r.status_code == 402:
-                    print(f"    ⚠️  HF {token_label} 크레딧 소진 (402) — 다음 키 시도...")
-                    break  # 이 토큰은 포기, 다음 토큰으로
+                if r.status_code in (402, 403):
+                    reason = "크레딧 소진" if r.status_code == 402 else "권한 없음 (토큰에 Inference Provider 권한 필요)"
+                    print(f"    ⚠️  HF {token_label} {reason} ({r.status_code}) — 다음 키 시도...")
+                    break  # 재시도 무의미, 즉시 다음 토큰으로
                 if r.status_code == 503:
                     print(f"    ⚠️  503 모델 로딩 중...")
                     continue
