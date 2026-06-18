@@ -56,6 +56,30 @@ const PORTFOLIO_ITEMS: PortfolioItem[] = [
     href: '/works/SA대시보드_demo.html',
     status: 'demo',
   },
+  {
+    title: '차량 등록 기준 지역 시각화',
+    description: 'KIADA 데이터 크롤링 → 행정구역별 BMW 등록 대수 choropleth 지도 (시도→시군구 드릴다운)',
+    emoji: '🗺️',
+    tags: ['Python', 'GeoPandas', 'Folium', 'Kakao API'],
+    href: '/works/vehicle-reg-map.html',
+    status: 'demo',
+  },
+  {
+    title: '딜러 & 지점 매출 시각화',
+    description: 'DFR 기준 84개 딜러·지점의 YTD 판매량·성장률을 버블 맵과 성과 테이블로 시각화',
+    emoji: '📍',
+    tags: ['Python', 'GeoPandas', 'Folium', 'Kakao API'],
+    href: '/works/dealer-sales-map.html',
+    status: 'demo',
+  },
+  {
+    title: '차량 입고 대수 분석 대시보드',
+    description: '4년치 일 단위 입고 데이터로 주차별 KPI·YoY 비교·연말 예측·요일 패턴 분석',
+    emoji: '📊',
+    tags: ['Python', 'Streamlit', 'Plotly', 'Google Sheets API'],
+    href: 'https://intake-dashboard-nvkkwjrlsuapds4kub79hw.streamlit.app/',
+    status: 'live',
+  },
 ]
 
 const STATUS_LABEL: Record<string, { label: string; cls: string }> = {

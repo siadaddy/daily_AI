@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BMW 딜러&지점 매출 시각화 — DEMO</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #080c14; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, rgba(28,105,212,0.12) 0%, rgba(10,14,26,0.98) 100%);
+    border-bottom: 1px solid rgba(28,105,212,0.2);
+    padding: 13px 20px;
+    display: flex; align-items: center; gap: 14px; flex-shrink: 0;
+  }
+  .header-logo { width: 34px; height: 34px; background: #1c69d4; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 12px; color: #fff; }
+  .header-title { font-size: 15px; font-weight: 700; color: #fff; }
+  .header-sub { font-size: 11px; color: #64748b; margin-top: 1px; }
+  .demo-badge { margin-left: auto; background: rgba(28,105,212,0.2); border: 1px solid rgba(28,105,212,0.4); color: #60a5fa; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 1px; }
+
+  /* Stats */
+  .stats-bar { display: flex; background: #0d1117; border-bottom: 1px solid #1e293b; flex-shrink: 0; }
+  .stat { flex: 1; padding: 9px 14px; border-right: 1px solid #1e293b; text-align: center; }
+  .stat:last-child { border-right: none; }
+  .stat-val { font-size: 17px; font-weight: 800; color: #1c69d4; font-family: monospace; }
+  .stat-label { font-size: 10px; color: #64748b; margin-top: 1px; }
+
+  /* Layout: map + table */
+  .body-wrap { display: flex; flex-direction: column; flex: 1; }
+  .map-section { position: relative; flex: 1; min-height: 380px; }
+  #map { width: 100%; height: 100%; min-height: 380px; background: #080c14; }
+
+  /* Legend */
+  .legend {
+    position: absolute; bottom: 24px; left: 14px; z-index: 1000;
+    background: rgba(8,12,20,0.93); border: 1px solid #1e293b; border-radius: 8px;
+    padding: 11px 14px; min-width: 155px;
+  }
+  .legend-title { font-size: 10px; font-weight: 700; color: #94a3b8; margin-bottom: 7px; letter-spacing: 0.5px; text-transform: uppercase; }
+  .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 11px; color: #cbd5e1; }
+  .legend-dot { border-radius: 50%; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.25); }
+  .legend-hr { border: none; border-top: 1px solid #1e293b; margin: 7px 0; }
+  .legend-size { display: flex; align-items: flex-end; gap: 6px; margin-top: 4px; }
+  .bubble { border-radius: 50%; background: rgba(28,105,212,0.35); border: 1px solid #1c69d4; flex-shrink: 0; }
+
+  /* Tooltip / Popup */
+  .leaflet-tooltip { background: rgba(8,12,20,0.95) !important; border: 1px solid #1e293b !important; border-radius: 8px !important; color: #e2e8f0 !important; padding: 9px 13px !important; font-family: 'Segoe UI', sans-serif !important; font-size: 12px !important; box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important; }
+  .tt-title { font-weight: 700; color: #fff; font-size: 13px; margin-bottom: 5px; }
+  .tt-row { display: flex; justify-content: space-between; gap: 14px; margin-top: 3px; }
+  .tt-key { color: #64748b; font-size: 10px; }
+  .tt-val { color: #60a5fa; font-weight: 700; font-size: 11px; }
+  .tt-pos { color: #34d399; }
+  .tt-neg { color: #f87171; }
+
+  .leaflet-popup-content-wrapper { background: rgba(8,12,20,0.97) !important; border: 1px solid #1e293b !important; border-radius: 10px !important; color: #e2e8f0 !important; box-shadow: 0 8px 32px rgba(0,0,0,0.6) !important; }
+  .leaflet-popup-tip { background: rgba(8,12,20,0.97) !important; }
+  .popup-title { font-weight: 700; font-size: 14px; color: #fff; margin-bottom: 8px; }
+  .popup-type { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; margin-left: 5px; vertical-align: middle; }
+  .popup-row { display: flex; justify-content: space-between; gap: 18px; margin-top: 5px; }
+  .popup-key { font-size: 11px; color: #64748b; }
+  .popup-val { font-size: 12px; font-weight: 600; }
+  .bar-wrap { margin-top: 8px; }
+  .bar-bg { background: #1e293b; border-radius: 3px; height: 5px; margin-top: 3px; }
+  .bar-fill { height: 5px; border-radius: 3px; background: #1c69d4; }
+
+  /* Table section */
+  .table-section { background: #0d1117; border-top: 1px solid #1e293b; overflow-x: auto; flex-shrink: 0; }
+  .table-header { padding: 10px 16px 6px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #1e293b; }
+  .table-header-title { font-size: 12px; font-weight: 700; color: #94a3b8; letter-spacing: 0.5px; text-transform: uppercase; }
+  table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  thead th { padding: 6px 12px; text-align: right; color: #64748b; font-weight: 600; border-bottom: 1px solid #1e293b; white-space: nowrap; }
+  thead th:first-child { text-align: left; }
+  tbody tr { border-bottom: 1px solid rgba(30,41,59,0.6); transition: background 0.15s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(28,105,212,0.06); }
+  td { padding: 7px 12px; text-align: right; white-space: nowrap; }
+  td:first-child { text-align: left; }
+  .dealer-badge { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; margin-right: 5px; }
+  .type-badge { display: inline-block; padding: 1px 5px; border-radius: 3px; font-size: 9px; color: #94a3b8; border: 1px solid #334155; margin-left: 3px; }
+  .up { color: #34d399; } .dn { color: #f87171; } .neu { color: #94a3b8; }
+  .bar-mini { display: inline-block; height: 3px; border-radius: 2px; vertical-align: middle; margin-left: 4px; }
+  .rank-num { color: #64748b; font-size: 10px; width: 18px; display: inline-block; }
+
+  /* watermark */
+  .watermark { position: fixed; bottom: 36px; right: 16px; z-index: 2000; font-size: 10px; color: rgba(100,116,139,0.4); letter-spacing: 2px; font-weight: 700; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">BMW</div>
+  <div>
+    <div class="header-title">딜러 & 지점 매출 시각화</div>
+    <div class="header-sub">YTD 판매량 · 전년 대비 성장률 · 딜러 유형별 분포</div>
+  </div>
+  <div class="demo-badge">DEMO</div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-val">84</div><div class="stat-label">전국 딜러·지점</div></div>
+  <div class="stat"><div class="stat-val">12,847</div><div class="stat-label">YTD 총 판매</div></div>
+  <div class="stat"><div class="stat-val">+8.4%</div><div class="stat-label">전년 대비 성장</div></div>
+  <div class="stat"><div class="stat-val">2026.05</div><div class="stat-label">기준 월</div></div>
+</div>
+
+<div class="body-wrap">
+  <div class="map-section">
+    <div id="map"></div>
+
+    <div class="legend">
+      <div class="legend-title">딜러 유형</div>
+      <div class="legend-item"><div class="legend-dot" style="width:11px;height:11px;background:#1c69d4;"></div>Full Service [F]</div>
+      <div class="legend-item"><div class="legend-dot" style="width:11px;height:11px;background:#a78bfa;"></div>Mechanic [M]</div>
+      <div class="legend-item"><div class="legend-dot" style="width:11px;height:11px;background:#34d399;"></div>Body & Paint [B]</div>
+      <div class="legend-item"><div class="legend-dot" style="width:11px;height:11px;background:#f59e0b;"></div>SCL ★</div>
+      <div class="legend-hr"></div>
+      <div class="legend-title">버블 크기 = YTD 판매</div>
+      <div class="legend-size">
+        <div><div class="bubble" style="width:8px;height:8px;"></div><div style="font-size:9px;color:#64748b;text-align:center;margin-top:2px;">소</div></div>
+        <div><div class="bubble" style="width:14px;height:14px;"></div><div style="font-size:9px;color:#64748b;text-align:center;margin-top:2px;">중</div></div>
+        <div><div class="bubble" style="width:22px;height:22px;"></div><div style="font-size:9px;color:#64748b;text-align:center;margin-top:2px;">대</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-section">
+    <div class="table-header">
+      <div class="table-header-title">딜러 성과 순위</div>
+      <span style="font-size:10px;color:#475569;margin-left:auto;">YTD 기준 · 전 지점 (DEMO 데이터)</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>딜러명</th>
+          <th>유형</th>
+          <th>YTD 판매</th>
+          <th>시장점유</th>
+          <th>전년 평균</th>
+          <th>YoY %</th>
+          <th>워런티</th>
+        </tr>
+      </thead>
+      <tbody id="dealer-table"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="watermark">DEMO DATA · NOT REAL</div>
+
+<script>
+// ── DEMO DATA ──────────────────────────────────────────────
+const DEALERS = [
+  { name:'딜러D 분당점', type:'SCL', lat:37.3840, lng:127.1250, ytd:1482, ms:11.5, prev:1320, warranty:96.2 },
+  { name:'딜러A 강남점', type:'F',   lat:37.5172, lng:127.0512, ytd:1241, ms: 9.7, prev:1190, warranty:94.8 },
+  { name:'딜러C 수원점', type:'F',   lat:37.2700, lng:127.0286, ytd: 983, ms: 7.7, prev: 921, warranty:93.1 },
+  { name:'딜러F 부산점', type:'F',   lat:35.1631, lng:129.1680, ytd: 847, ms: 6.6, prev: 803, warranty:91.4 },
+  { name:'딜러E 인천점', type:'F',   lat:37.4106, lng:126.6900, ytd: 734, ms: 5.7, prev: 712, warranty:90.7 },
+  { name:'딜러H 대구점', type:'F',   lat:35.8588, lng:128.6370, ytd: 691, ms: 5.4, prev: 650, warranty:89.3 },
+  { name:'딜러I 대전점', type:'F',   lat:36.3624, lng:127.3620, ytd: 628, ms: 4.9, prev: 589, warranty:88.6 },
+  { name:'딜러L 창원점', type:'F',   lat:35.2320, lng:128.6870, ytd: 587, ms: 4.6, prev: 571, warranty:92.0 },
+  { name:'딜러P 고양점', type:'F',   lat:37.6584, lng:126.8320, ytd: 541, ms: 4.2, prev: 498, warranty:90.1 },
+  { name:'딜러Q 용인점', type:'M',   lat:37.2411, lng:127.1776, ytd: 493, ms: 3.8, prev: 501, warranty:87.4 },
+  { name:'딜러R 화성점', type:'M',   lat:37.1997, lng:126.8314, ytd: 458, ms: 3.6, prev: 431, warranty:86.9 },
+  { name:'딜러B 강서점', type:'M',   lat:37.5509, lng:126.8495, ytd: 412, ms: 3.2, prev: 385, warranty:88.2 },
+  { name:'딜러G 부산서점', type:'M', lat:35.1972, lng:128.9940, ytd: 387, ms: 3.0, prev: 394, warranty:85.7 },
+  { name:'딜러J 광주점', type:'B',   lat:35.1531, lng:126.8560, ytd: 364, ms: 2.8, prev: 342, warranty:91.5 },
+  { name:'딜러K 울산점', type:'M',   lat:35.5450, lng:129.3180, ytd: 348, ms: 2.7, prev: 329, warranty:84.3 },
+  { name:'딜러S 청주점', type:'F',   lat:36.6424, lng:127.4890, ytd: 321, ms: 2.5, prev: 298, warranty:87.8 },
+  { name:'딜러T 천안점', type:'M',   lat:36.8151, lng:127.1139, ytd: 294, ms: 2.3, prev: 311, warranty:83.1 },
+  { name:'딜러U 포항점', type:'B',   lat:36.0190, lng:129.3435, ytd: 273, ms: 2.1, prev: 259, warranty:85.9 },
+  { name:'딜러V 전주점', type:'M',   lat:35.8242, lng:127.1480, ytd: 248, ms: 1.9, prev: 241, warranty:82.4 },
+  { name:'딜러W 제주점', type:'F',   lat:33.4996, lng:126.5312, ytd: 241, ms: 1.9, prev: 228, warranty:88.0 },
+];
+
+const TYPE_COLOR = { F:'#1c69d4', M:'#a78bfa', B:'#34d399', SCL:'#f59e0b' };
+const TYPE_LABEL = { F:'Full Svc', M:'Mechanic', B:'Body&Paint', SCL:'SCL★' };
+const maxYTD = Math.max(...DEALERS.map(d=>d.ytd));
+
+function fmt(n) { return n.toLocaleString('ko-KR'); }
+function yoy(d) { return (((d.ytd - d.prev) / d.prev) * 100).toFixed(1); }
+
+// ── MAP ────────────────────────────────────────────────────
+const map = L.map('map', { center:[36.5, 127.8], zoom:7, zoomControl:false });
+L.control.zoom({ position:'bottomright' }).addTo(map);
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution:'&copy; <a href="https://carto.com/">CARTO</a>',
+  subdomains:'abcd', maxZoom:19
+}).addTo(map);
+
+DEALERS.forEach((d, i) => {
+  const color = TYPE_COLOR[d.type];
+  const isSCL = d.type === 'SCL';
+  const r = Math.max(8, Math.sqrt(d.ytd / maxYTD) * 38) * (isSCL ? 1.35 : 1);
+  const yoyVal = parseFloat(yoy(d));
+
+  const marker = L.circleMarker([d.lat, d.lng], {
+    radius: r,
+    color: '#fff',
+    fillColor: color,
+    fillOpacity: isSCL ? 0.85 : 0.65,
+    weight: isSCL ? 2.5 : 1.5,
+  });
+
+  const yoyClass = yoyVal > 0 ? 'tt-pos' : yoyVal < 0 ? 'tt-neg' : '';
+  const arrow = yoyVal > 0 ? '▲' : yoyVal < 0 ? '▼' : '–';
+
+  marker.bindTooltip(`
+    <div class="tt-title">${d.name}${isSCL ? ' ★' : ''}</div>
+    <div class="tt-row"><span class="tt-key">유형</span><span class="tt-val">${TYPE_LABEL[d.type]}</span></div>
+    <div class="tt-row"><span class="tt-key">YTD 판매</span><span class="tt-val">${fmt(d.ytd)} 대</span></div>
+    <div class="tt-row"><span class="tt-key">시장점유</span><span class="tt-val">${d.ms}%</span></div>
+    <div class="tt-row"><span class="tt-key">전년비</span><span class="tt-val ${yoyClass}">${arrow} ${Math.abs(yoyVal)}%</span></div>
+  `, { sticky:true });
+
+  marker.bindPopup(`
+    <div class="popup-title">${d.name}
+      <span class="popup-type" style="background:${color}22;color:${color};border:1px solid ${color}44;">${d.type}</span>
+    </div>
+    <div class="popup-row"><span class="popup-key">YTD 판매</span><span class="popup-val" style="color:#60a5fa;">${fmt(d.ytd)} 대</span></div>
+    <div class="popup-row"><span class="popup-key">시장점유</span><span class="popup-val">${d.ms}%</span></div>
+    <div class="popup-row"><span class="popup-key">전년 평균</span><span class="popup-val">${fmt(d.prev)} 대</span></div>
+    <div class="popup-row"><span class="popup-key">YoY 성장</span><span class="popup-val ${yoyVal>0?'up':'dn'}">${yoyVal>0?'▲':'▼'} ${Math.abs(yoyVal)}%</span></div>
+    <div class="popup-row"><span class="popup-key">워런티</span><span class="popup-val">${d.warranty}%</span></div>
+    <div class="bar-wrap">
+      <div style="font-size:10px;color:#64748b;margin-bottom:2px;">YTD 점유 비중</div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${d.ms*5}%;background:${color};"></div></div>
+    </div>
+  `);
+
+  marker.addTo(map);
+});
+
+// ── TABLE ──────────────────────────────────────────────────
+const tbody = document.getElementById('dealer-table');
+[...DEALERS].sort((a,b)=>b.ytd-a.ytd).forEach((d, i) => {
+  const color = TYPE_COLOR[d.type];
+  const yoyVal = parseFloat(yoy(d));
+  const arrow = yoyVal > 0 ? '▲' : yoyVal < 0 ? '▼' : '–';
+  const cls = yoyVal > 0 ? 'up' : yoyVal < 0 ? 'dn' : 'neu';
+  const barW = Math.round((d.ytd / maxYTD) * 80);
+
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td>
+      <span class="rank-num">${i+1}</span>
+      <span class="dealer-badge" style="background:${color}22;color:${color};">${d.type}</span>
+      ${d.name}
+    </td>
+    <td><span class="type-badge">${TYPE_LABEL[d.type]}</span></td>
+    <td>${fmt(d.ytd)} <span class="bar-mini" style="width:${barW}px;background:${color}55;"></span></td>
+    <td>${d.ms}%</td>
+    <td>${fmt(d.prev)}</td>
+    <td class="${cls}">${arrow} ${Math.abs(yoyVal)}%</td>
+    <td>${d.warranty}%</td>
+  `;
+  tbody.appendChild(tr);
+});
+</script>
+</body>
+</html>
