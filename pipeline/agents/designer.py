@@ -206,6 +206,7 @@ def _generate_image_hf(prompt: str) -> bytes | None:
                 if len(r.content) < 1000:
                     print("    ⚠️  응답 크기 너무 작음")
                     continue
+                print(f"    ✅ HF {token_label} 이미지 생성 성공 (시도 {attempt})")
                 return r.content
             except Exception as e:
                 print(f"    ❌ HF 이미지 오류 ({token_label}): {e}")
