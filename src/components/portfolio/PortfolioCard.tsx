@@ -6,7 +6,7 @@ interface PortfolioItem {
   emoji: string
   tags: string[]
   href: string
-  status?: 'live' | 'ended' | 'demo'
+  status?: 'live' | 'ended' | 'demo' | 'wip'
   category: Category
 }
 
@@ -40,6 +40,15 @@ const PORTFOLIO_ITEMS: PortfolioItem[] = [
     category: 'personal',
   },
   // ── 업무 프로젝트 ─────────────────────────────────────────
+  {
+    title: '통합 대시보드 자동화',
+    description: 'MyDMS 리포트 자동 추출 · PostgreSQL DB 적재 · Next.js 통합 대시보드 · 텔레그램 봇 알림',
+    emoji: '🤖',
+    tags: ['Python', 'PostgreSQL', 'Next.js', 'Telegram Bot', 'Recharts'],
+    href: '/works/dashboard-auto.html',
+    status: 'wip',
+    category: 'work',
+  },
   {
     title: '딜러 & 지점 매출 시각화',
     description: 'DFR 기준 84개 딜러·지점의 YTD 판매량·성장률을 버블 맵과 성과 테이블로 시각화',
@@ -76,15 +85,6 @@ const PORTFOLIO_ITEMS: PortfolioItem[] = [
     status: 'demo',
     category: 'work',
   },
-  {
-    title: '통합 대시보드 자동화',
-    description: 'MyDMS 리포트 자동 추출 · PostgreSQL DB 적재 · Next.js 통합 대시보드 · 텔레그램 봇 알림',
-    emoji: '🤖',
-    tags: ['Python', 'PostgreSQL', 'Next.js', 'Telegram Bot', 'Recharts'],
-    href: '/works/dashboard-auto.html',
-    status: 'live',
-    category: 'work',
-  },
   // ── 교육 ─────────────────────────────────────────────────
   {
     title: '커피 입지 최적화 분석',
@@ -116,6 +116,7 @@ const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
   live:  { label: 'LIVE',  cls: 'badge-green'  },
   demo:  { label: 'DEMO',  cls: 'badge-blue'   },
   ended: { label: 'ENDED', cls: 'badge-purple' },
+  wip:   { label: '작업중', cls: 'badge-orange' },
 }
 
 export function PortfolioSection() {

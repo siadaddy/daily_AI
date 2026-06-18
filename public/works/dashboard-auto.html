@@ -3,340 +3,254 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>통합 대시보드 자동화 — DEMO</title>
+<title>통합 대시보드 자동화 — 로드맵</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 :root {
-  --sidebar-bg: #1a1d23;
-  --main-bg: #0e1117;
-  --card-bg: #1c2030;
-  --card-border: #2d3149;
-  --text: #e2e8f0;
-  --text2: #94a3b8;
-  --text3: #64748b;
-  --accent: #4f8ef7;
-  --accent2: #a78bfa;
-  --up: #34d399;
-  --dn: #f87171;
-  --bmw: #1c69d4;
+  --bg:#0e1117; --card:#1c2030; --border:#2d3149;
+  --text:#e2e8f0; --text2:#94a3b8; --text3:#64748b;
+  --accent:#4f8ef7; --green:#34d399; --orange:#fb923c; --purple:#a78bfa;
+  --track:#1e2535;
 }
-* { margin:0; padding:0; box-sizing:border-box; }
-html, body { height:100%; font-family:'Noto Sans KR', sans-serif; background:var(--main-bg); color:var(--text); overflow:hidden; }
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{min-height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text)}
+body{padding:60px 0 80px}
 
-.layout { display:flex; height:100vh; }
-.sidebar { width:220px; flex-shrink:0; background:var(--sidebar-bg); border-right:1px solid var(--card-border); display:flex; flex-direction:column; padding:16px 0; overflow-y:auto; }
-.main { flex:1; overflow-y:auto; padding:20px 24px; }
+/* back btn */
+.back-btn{position:fixed;top:12px;left:12px;z-index:9999;background:rgba(28,32,48,.92);border:1px solid rgba(79,142,247,.35);color:#94a3b8;font-size:12px;font-weight:600;padding:6px 14px;border-radius:20px;text-decoration:none;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 2px 10px rgba(0,0,0,.4);transition:all .15s}
+.back-btn:hover{background:rgba(79,142,247,.15);color:#e2e8f0}
 
-/* ── Back button ── */
-.back-btn {
-  position:fixed; top:12px; left:12px; z-index:9999;
-  background:rgba(28,32,48,0.92); border:1px solid rgba(79,142,247,0.35);
-  color:#94a3b8; font-size:12px; font-weight:600; padding:6px 14px;
-  border-radius:20px; text-decoration:none; backdrop-filter:blur(8px);
-  box-shadow:0 2px 10px rgba(0,0,0,0.4); transition:all 0.15s;
-}
-.back-btn:hover { background:rgba(79,142,247,0.15); color:#e2e8f0; border-color:rgba(79,142,247,0.6); }
-
-/* ── Sidebar ── */
-.sb-logo { padding:0 16px 16px; border-bottom:1px solid var(--card-border); }
-.sb-logo-title { font-size:13px; font-weight:700; color:var(--text); line-height:1.4; }
-.sb-logo-sub { font-size:10px; color:var(--text3); margin-top:3px; }
-.demo-pill { display:inline-block; background:rgba(79,142,247,0.15); border:1px solid rgba(79,142,247,0.3); color:var(--accent); font-size:9px; font-weight:700; padding:1px 7px; border-radius:10px; letter-spacing:1px; margin-top:6px; }
-
-.sb-section { padding:14px 16px 4px; font-size:10px; font-weight:600; color:var(--text3); text-transform:uppercase; letter-spacing:1px; }
-.sb-chips { display:flex; flex-wrap:wrap; gap:4px; padding:4px 16px 8px; }
-.chip { padding:3px 9px; border-radius:10px; font-size:10px; font-weight:600; cursor:pointer; border:1px solid transparent; transition:all 0.15s; background:rgba(255,255,255,0.06); color:var(--text2); }
-.chip.on { background:rgba(79,142,247,0.18); border-color:rgba(79,142,247,0.4); color:var(--accent); }
-
-.sb-filter { padding:8px 16px; }
-.sb-label { font-size:10px; color:var(--text3); margin-bottom:5px; }
-.sb-select { width:100%; background:#252836; border:1px solid var(--card-border); border-radius:6px; color:var(--text); font-size:12px; font-family:'Noto Sans KR',sans-serif; padding:6px 10px; cursor:pointer; }
-.sb-select:focus { outline:none; border-color:var(--accent); }
-
-.sb-stat { margin:10px 16px; background:var(--card-bg); border-radius:8px; padding:10px 12px; border:1px solid var(--card-border); }
-.sb-stat-val { font-size:20px; font-weight:800; font-family:monospace; color:var(--accent); }
-.sb-stat-label { font-size:10px; color:var(--text3); margin-top:2px; }
+/* page wrapper */
+.page{max-width:860px;margin:0 auto;padding:0 24px}
 
 /* ── Header ── */
-.page-header { margin-bottom:18px; }
-.page-title { font-size:18px; font-weight:700; color:var(--text); }
-.page-sub { font-size:12px; color:var(--text3); margin-top:4px; }
-.badge-live { display:inline-flex; align-items:center; gap:4px; background:rgba(52,211,153,0.12); border:1px solid rgba(52,211,153,0.3); color:var(--up); font-size:10px; font-weight:700; padding:2px 10px; border-radius:10px; letter-spacing:0.5px; margin-left:10px; vertical-align:middle; }
-.badge-live::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--up); animation:pulse 1.5s infinite; }
-@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+.header{text-align:center;margin-bottom:52px;padding-top:20px}
+.header-emoji{font-size:48px;margin-bottom:14px}
+.header-title{font-size:28px;font-weight:800;color:var(--text);margin-bottom:8px}
+.header-sub{font-size:14px;color:var(--text3);margin-bottom:20px}
+.badge-row{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 14px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.5px}
+.badge-wip{background:rgba(251,146,60,.12);border:1px solid rgba(251,146,60,.3);color:var(--orange)}
+.badge-wip::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.badge-phase{background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.2);color:var(--accent)}
 
-/* ── KPI cards ── */
-.kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px; }
-.kpi-card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:10px; padding:14px 16px; }
-.kpi-label { font-size:10px; color:var(--text3); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; }
-.kpi-val { font-size:26px; font-weight:800; font-family:monospace; color:var(--text); }
-.kpi-delta { font-size:12px; margin-top:4px; font-weight:600; }
-.kpi-delta.up { color:var(--up); }
-.kpi-delta.dn { color:var(--dn); }
-.kpi-delta.na { color:var(--text3); }
+/* progress bar */
+.progress-wrap{max-width:440px;margin:24px auto 0;text-align:left}
+.progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:6px}
+.progress-track{height:8px;background:var(--track);border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--green) 0%,var(--accent) 60%,var(--orange) 100%);width:62.5%}
 
-/* ── Chart area ── */
-.chart-row { display:grid; gap:12px; margin-bottom:14px; }
-.chart-row.cols-2 { grid-template-columns:1.6fr 1fr; }
-.chart-card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:10px; padding:16px; }
-.chart-title { font-size:12px; font-weight:600; color:var(--text2); margin-bottom:12px; }
-.chart-wrap { position:relative; }
+/* ── Timeline ── */
+.timeline{position:relative;padding-left:48px}
+.timeline::before{content:'';position:absolute;left:20px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--green),var(--green),var(--accent),var(--orange),var(--track))}
 
-/* ── Log table ── */
-.log-card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:10px; padding:16px; margin-bottom:14px; }
-.log-title { font-size:12px; font-weight:600; color:var(--text2); margin-bottom:12px; }
-.log-table { width:100%; border-collapse:collapse; font-size:12px; }
-.log-table th { color:var(--text3); font-weight:600; text-align:left; padding:6px 10px; border-bottom:1px solid var(--card-border); font-size:10px; text-transform:uppercase; letter-spacing:0.5px; }
-.log-table td { padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text2); }
-.log-table tr:last-child td { border-bottom:none; }
-.log-table tr:hover td { background:rgba(255,255,255,0.02); }
-.status-ok { color:var(--up); font-weight:700; font-size:10px; }
-.status-fail { color:var(--dn); font-weight:700; font-size:10px; }
-.status-skip { color:var(--text3); font-weight:700; font-size:10px; }
+.phase{position:relative;margin-bottom:36px}
+.phase:last-child{margin-bottom:0}
 
-/* ── Pipeline status ── */
-.pipeline { display:flex; align-items:center; gap:0; margin-bottom:18px; background:var(--card-bg); border:1px solid var(--card-border); border-radius:10px; padding:14px 20px; overflow-x:auto; }
-.pipe-step { display:flex; flex-direction:column; align-items:center; gap:4px; min-width:90px; }
-.pipe-icon { font-size:22px; }
-.pipe-label { font-size:10px; color:var(--text3); text-align:center; }
-.pipe-arrow { font-size:18px; color:var(--card-border); padding:0 6px; margin-bottom:14px; }
-.pipe-step.done .pipe-icon { filter:drop-shadow(0 0 4px var(--up)); }
-.pipe-step.wip .pipe-icon { filter:drop-shadow(0 0 4px var(--accent)); animation:pulse 1.5s infinite; }
+/* node on timeline */
+.phase-node{position:absolute;left:-36px;top:18px;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid}
+.node-done{background:rgba(52,211,153,.15);border-color:var(--green)}
+.node-wip{background:rgba(79,142,247,.15);border-color:var(--accent);animation:glow 2s ease-in-out infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(79,142,247,0)}50%{box-shadow:0 0 0 4px rgba(79,142,247,.25)}}
+.node-todo{background:rgba(100,116,139,.1);border-color:var(--border)}
+
+/* phase card */
+.phase-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px 24px;transition:border-color .2s}
+.phase-card:hover{border-color:rgba(79,142,247,.3)}
+.phase-card.done{border-left:3px solid var(--green)}
+.phase-card.wip{border-left:3px solid var(--accent)}
+.phase-card.todo{border-left:3px solid var(--border);opacity:.75}
+
+.phase-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:12px}
+.phase-title-wrap{}
+.phase-num{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.phase-title{font-size:16px;font-weight:700;color:var(--text)}
+.phase-period{font-size:11px;color:var(--text3);margin-top:3px}
+.phase-status{flex-shrink:0}
+.status-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap}
+.pill-done{background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.25);color:var(--green)}
+.pill-wip{background:rgba(79,142,247,.12);border:1px solid rgba(79,142,247,.25);color:var(--accent)}
+.pill-todo{background:rgba(100,116,139,.1);border:1px solid var(--border);color:var(--text3)}
+
+/* checklist */
+.checklist{list-style:none;display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
+.checklist li{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text2)}
+.checklist li::before{flex-shrink:0;margin-top:1px}
+.checklist li.done::before{content:'✓';color:var(--green);font-weight:700}
+.checklist li.wip::before{content:'◎';color:var(--accent)}
+.checklist li.todo::before{content:'○';color:var(--text3)}
+
+/* tag chips */
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{padding:3px 10px;border-radius:99px;font-size:10px;font-weight:600;background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.2);color:var(--accent)}
+.tag.g{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.2);color:var(--green)}
+.tag.o{background:rgba(251,146,60,.08);border-color:rgba(251,146,60,.2);color:var(--orange)}
+.tag.p{background:rgba(167,139,250,.08);border-color:rgba(167,139,250,.2);color:var(--purple)}
+
+/* ── Tech stack ── */
+.stack-section{margin-top:52px;padding-top:36px;border-top:1px solid var(--border)}
+.stack-title{text-align:center;font-size:13px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:20px}
+.stack-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.stack-item{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 16px;font-size:12px;font-weight:600;color:var(--text2)}
+.stack-icon{font-size:18px}
 </style>
 </head>
 <body>
 <a href="/?tab=portfolio" class="back-btn">← My Works</a>
 
-<div class="layout">
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <div class="sb-logo">
-      <div class="sb-logo-title">통합 대시보드<br>자동화</div>
-      <div class="sb-logo-sub">SCL Motors 내부 시스템</div>
-      <div class="demo-pill">DEMO</div>
+<div class="page">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-emoji">🤖</div>
+    <div class="header-title">통합 대시보드 자동화</div>
+    <div class="header-sub">MyDMS 리포트 추출 · PostgreSQL 적재 · Next.js 대시보드 · 텔레그램 봇</div>
+    <div class="badge-row">
+      <span class="badge badge-wip">작업중</span>
+      <span class="badge badge-phase">4 Phase</span>
+      <span class="badge badge-phase">Phase 3 진행 중</span>
     </div>
-
-    <div class="sb-section">지점 선택</div>
-    <div class="sb-chips">
-      <span class="chip on" onclick="toggleChip(this)">전체</span>
-      <span class="chip on" onclick="toggleChip(this)">군포</span>
-      <span class="chip on" onclick="toggleChip(this)">청주</span>
-      <span class="chip on" onclick="toggleChip(this)">천안</span>
-      <span class="chip on" onclick="toggleChip(this)">동탄</span>
-      <span class="chip on" onclick="toggleChip(this)">안양</span>
-      <span class="chip on" onclick="toggleChip(this)">세종</span>
-      <span class="chip on" onclick="toggleChip(this)">안산</span>
-    </div>
-
-    <div class="sb-filter">
-      <div class="sb-label">조회 기간</div>
-      <select class="sb-select">
-        <option>2026년 1월~6월</option>
-        <option>2025년 전체</option>
-        <option>2024년 전체</option>
-      </select>
-    </div>
-
-    <div class="sb-filter" style="margin-top:4px;">
-      <div class="sb-label">리포트 종류</div>
-      <select class="sb-select">
-        <option>전체</option>
-        <option>Turn Over RAW</option>
-        <option>월별 매출 현황</option>
-        <option>SA 실적 리포트</option>
-        <option>부품 수불 내역</option>
-      </select>
-    </div>
-
-    <div class="sb-stat" style="margin-top:auto;">
-      <div class="sb-stat-val">98.2%</div>
-      <div class="sb-stat-label">DB 적재 성공률</div>
-    </div>
-    <div class="sb-stat">
-      <div class="sb-stat-val" style="color:var(--up);">342</div>
-      <div class="sb-stat-label">누적 자동화 실행 수</div>
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span>전체 진행률</span>
+        <span>62.5% (Phase 2.5/4)</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill"></div></div>
     </div>
   </div>
 
-  <!-- Main -->
-  <div class="main">
-    <div class="page-header">
-      <div class="page-title">
-        통합 대시보드 자동화
-        <span class="badge-live">진행 중</span>
-      </div>
-      <div class="page-sub">MyDMS 리포트 자동 추출 · PostgreSQL 적재 · 텔레그램 봇 · DEMO 데이터 기준</div>
-    </div>
+  <!-- Timeline -->
+  <div class="timeline">
 
-    <!-- Pipeline -->
-    <div class="pipeline">
-      <div class="pipe-step done">
-        <span class="pipe-icon">📋</span>
-        <span class="pipe-label">MyDMS<br>리포트 요청</span>
-      </div>
-      <span class="pipe-arrow">→</span>
-      <div class="pipe-step done">
-        <span class="pipe-icon">🤖</span>
-        <span class="pipe-label">텔레그램 봇<br>트리거</span>
-      </div>
-      <span class="pipe-arrow">→</span>
-      <div class="pipe-step done">
-        <span class="pipe-icon">📥</span>
-        <span class="pipe-label">RAW 데이터<br>자동 다운로드</span>
-      </div>
-      <span class="pipe-arrow">→</span>
-      <div class="pipe-step done">
-        <span class="pipe-icon">🔄</span>
-        <span class="pipe-label">전처리 &<br>정합성 검증</span>
-      </div>
-      <span class="pipe-arrow">→</span>
-      <div class="pipe-step done">
-        <span class="pipe-icon">🗄️</span>
-        <span class="pipe-label">PostgreSQL<br>DB 적재</span>
-      </div>
-      <span class="pipe-arrow">→</span>
-      <div class="pipe-step wip">
-        <span class="pipe-icon">📊</span>
-        <span class="pipe-label">통합 대시보드<br>시각화</span>
+    <!-- Phase 1 -->
+    <div class="phase">
+      <div class="phase-node node-done">✅</div>
+      <div class="phase-card done">
+        <div class="phase-head">
+          <div class="phase-title-wrap">
+            <div class="phase-num">Phase 1</div>
+            <div class="phase-title">텔레그램 봇 + MyDMS 자동 추출</div>
+            <div class="phase-period">2025년 11월 — 2026년 1월 · 완료</div>
+          </div>
+          <div class="phase-status"><span class="status-pill pill-done">✓ 완료</span></div>
+        </div>
+        <ul class="checklist">
+          <li class="done">텔레그램 봇 서버 구축 (python-telegram-bot)</li>
+          <li class="done">Gmail OTP 자동 인증 + 세션 재사용 로직</li>
+          <li class="done">MyDMS 로그인 → 리포트 목록 파싱</li>
+          <li class="done">Turn Over RAW 데이터 자동 다운로드</li>
+          <li class="done">다운로드 완료 시 텔레그램 알림 발송</li>
+        </ul>
+        <div class="tags">
+          <span class="tag g">Python</span>
+          <span class="tag g">python-telegram-bot</span>
+          <span class="tag g">Selenium</span>
+          <span class="tag g">Gmail API</span>
+        </div>
       </div>
     </div>
 
-    <!-- KPI -->
-    <div class="kpi-grid">
-      <div class="kpi-card">
-        <div class="kpi-label">총 리포트 수신</div>
-        <div class="kpi-val">1,247</div>
-        <div class="kpi-delta up">▲ +128 (YTD)</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">당월 자동화 실행</div>
-        <div class="kpi-val">58</div>
-        <div class="kpi-delta up">▲ +6 vs 전월</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">DB 적재 성공률</div>
-        <div class="kpi-val">98.2%</div>
-        <div class="kpi-delta up">▲ +0.4%p</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">텔레그램 발송 수</div>
-        <div class="kpi-val">342</div>
-        <div class="kpi-delta na">누적</div>
-      </div>
-    </div>
-
-    <!-- Charts -->
-    <div class="chart-row cols-2">
-      <div class="chart-card">
-        <div class="chart-title">월별 리포트 수신 건수</div>
-        <div class="chart-wrap"><canvas id="lineChart" height="160"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">지점별 처리량</div>
-        <div class="chart-wrap"><canvas id="barChart" height="160"></canvas></div>
+    <!-- Phase 2 -->
+    <div class="phase">
+      <div class="phase-node node-done">✅</div>
+      <div class="phase-card done">
+        <div class="phase-head">
+          <div class="phase-title-wrap">
+            <div class="phase-num">Phase 2</div>
+            <div class="phase-title">PostgreSQL DB 설계 & ETL 파이프라인</div>
+            <div class="phase-period">2026년 2월 — 2026년 3월 · 완료</div>
+          </div>
+          <div class="phase-status"><span class="status-pill pill-done">✓ 완료</span></div>
+        </div>
+        <ul class="checklist">
+          <li class="done">PostgreSQL 스키마 설계 (지점별 입고/매출/SA 테이블)</li>
+          <li class="done">RAW 데이터 전처리 & 정합성 검증 모듈</li>
+          <li class="done">upsert 기반 incremental 적재 (중복 방지)</li>
+          <li class="done">적재 결과 텔레그램 보고 (성공/실패/행수)</li>
+          <li class="done">GitHub Actions 스케줄 자동화 (매일 08:00)</li>
+        </ul>
+        <div class="tags">
+          <span class="tag g">PostgreSQL</span>
+          <span class="tag g">pandas</span>
+          <span class="tag g">SQLAlchemy</span>
+          <span class="tag g">GitHub Actions</span>
+        </div>
       </div>
     </div>
 
-    <!-- Log Table -->
-    <div class="log-card">
-      <div class="log-title">최근 자동화 실행 로그</div>
-      <table class="log-table">
-        <thead>
-          <tr>
-            <th>실행 시각</th>
-            <th>지점</th>
-            <th>리포트 종류</th>
-            <th>행 수</th>
-            <th>소요(초)</th>
-            <th>상태</th>
-          </tr>
-        </thead>
-        <tbody id="logBody"></tbody>
-      </table>
+    <!-- Phase 3 -->
+    <div class="phase">
+      <div class="phase-node node-wip">🔄</div>
+      <div class="phase-card wip">
+        <div class="phase-head">
+          <div class="phase-title-wrap">
+            <div class="phase-num">Phase 3</div>
+            <div class="phase-title">Next.js 통합 대시보드</div>
+            <div class="phase-period">2026년 4월 — 진행 중</div>
+          </div>
+          <div class="phase-status"><span class="status-pill pill-wip">◎ 진행 중</span></div>
+        </div>
+        <ul class="checklist">
+          <li class="done">Next.js 16 프로젝트 초기화 + PostgreSQL 연결 (pg 드라이버)</li>
+          <li class="done">지점별 월별 입고 API 엔드포인트</li>
+          <li class="wip">Recharts 기반 월별 KPI 차트 (일반/사고 분리)</li>
+          <li class="wip">지점 필터 + 기간 선택 UI</li>
+          <li class="todo">주차별 분석 페이지</li>
+          <li class="todo">연말 예측 (선형회귀) 시각화</li>
+          <li class="todo">배포 (Vercel 또는 자체 서버)</li>
+        </ul>
+        <div class="tags">
+          <span class="tag">Next.js 16</span>
+          <span class="tag">TypeScript</span>
+          <span class="tag">Recharts</span>
+          <span class="tag">PostgreSQL</span>
+          <span class="tag">Tailwind CSS</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 4 -->
+    <div class="phase">
+      <div class="phase-node node-todo">📋</div>
+      <div class="phase-card todo">
+        <div class="phase-head">
+          <div class="phase-title-wrap">
+            <div class="phase-num">Phase 4</div>
+            <div class="phase-title">자동 스케줄링 & 이상 탐지 알림</div>
+            <div class="phase-period">예정</div>
+          </div>
+          <div class="phase-status"><span class="status-pill pill-todo">○ 예정</span></div>
+        </div>
+        <ul class="checklist">
+          <li class="todo">일일 자동 실행 리포트 → 텔레그램/슬랙 발송</li>
+          <li class="todo">전월 대비 이상치 감지 (±σ 알림)</li>
+          <li class="todo">주간 KPI 요약 자동 생성 (AI 분석 포함)</li>
+          <li class="todo">리포트 종류 확장 (부품 수불, SA 실적, 매출 현황)</li>
+        </ul>
+        <div class="tags">
+          <span class="tag o">Telegram Bot API</span>
+          <span class="tag o">Claude AI</span>
+          <span class="tag o">Cron</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Tech stack -->
+  <div class="stack-section">
+    <div class="stack-title">기술 스택</div>
+    <div class="stack-grid">
+      <div class="stack-item"><span class="stack-icon">🐍</span>Python</div>
+      <div class="stack-item"><span class="stack-icon">🗄️</span>PostgreSQL</div>
+      <div class="stack-item"><span class="stack-icon">▲</span>Next.js 16</div>
+      <div class="stack-item"><span class="stack-icon">📨</span>Telegram Bot</div>
+      <div class="stack-item"><span class="stack-icon">📊</span>Recharts</div>
+      <div class="stack-item"><span class="stack-icon">📋</span>Google Sheets API</div>
+      <div class="stack-item"><span class="stack-icon">⚙️</span>GitHub Actions</div>
+      <div class="stack-item"><span class="stack-icon">🤖</span>Claude AI</div>
     </div>
   </div>
 </div>
-
-<script>
-const LOGS = [
-  { time:'2026-06-18 08:02', branch:'군포', report:'Turn Over RAW', rows:1843, sec:4.2, ok:true },
-  { time:'2026-06-18 08:03', branch:'청주', report:'Turn Over RAW', rows:2104, sec:5.1, ok:true },
-  { time:'2026-06-18 08:03', branch:'천안', report:'Turn Over RAW', rows:1976, sec:4.8, ok:true },
-  { time:'2026-06-18 08:04', branch:'동탄', report:'Turn Over RAW', rows:2312, sec:5.6, ok:true },
-  { time:'2026-06-18 08:04', branch:'안양', report:'Turn Over RAW', rows:1654, sec:3.9, ok:true },
-  { time:'2026-06-18 08:05', branch:'세종', report:'Turn Over RAW', rows:987,  sec:2.7, ok:true },
-  { time:'2026-06-18 08:05', branch:'안산', report:'Turn Over RAW', rows:1432, sec:3.5, ok:true },
-  { time:'2026-06-17 08:01', branch:'군포', report:'월별 매출 현황', rows:48,   sec:1.2, ok:true },
-  { time:'2026-06-17 08:02', branch:'청주', report:'월별 매출 현황', rows:51,   sec:1.3, ok:true },
-  { time:'2026-06-16 08:04', branch:'세종', report:'SA 실적 리포트', rows:214,  sec:0.9, ok:false },
-  { time:'2026-06-16 08:04', branch:'세종', report:'SA 실적 리포트', rows:214,  sec:1.1, ok:true },
-  { time:'2026-06-15 08:03', branch:'안산', report:'부품 수불 내역', rows:3201, sec:7.4, ok:true },
-];
-
-const tbody = document.getElementById('logBody');
-LOGS.forEach(r => {
-  const st = r.ok ? '<span class="status-ok">✓ 성공</span>' : '<span class="status-fail">✗ 실패</span>';
-  tbody.innerHTML += `<tr><td>${r.time}</td><td>${r.branch}</td><td>${r.report}</td><td>${r.rows.toLocaleString()}</td><td>${r.sec}</td><td>${st}</td></tr>`;
-});
-
-const months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-const lineData = [52,61,58,74,69,83,0,0,0,0,0,0];
-
-const lineCtx = document.getElementById('lineChart').getContext('2d');
-new Chart(lineCtx, {
-  type:'line',
-  data:{
-    labels: months.slice(0,6),
-    datasets:[{
-      label:'수신 건수',
-      data: lineData.slice(0,6),
-      borderColor:'#4f8ef7',
-      backgroundColor:'rgba(79,142,247,0.08)',
-      tension:0.4, fill:true,
-      pointBackgroundColor:'#4f8ef7',
-      pointRadius:4,
-    }]
-  },
-  options:{
-    responsive:true, maintainAspectRatio:true,
-    plugins:{ legend:{display:false} },
-    scales:{
-      x:{ grid:{color:'rgba(255,255,255,0.05)'}, ticks:{color:'#64748b',font:{size:11}} },
-      y:{ grid:{color:'rgba(255,255,255,0.05)'}, ticks:{color:'#64748b',font:{size:11}} }
-    }
-  }
-});
-
-const branches = ['군포','청주','천안','동탄','안양','세종','안산'];
-const counts   = [187, 214, 196, 231, 165, 98, 143];
-const barCtx = document.getElementById('barChart').getContext('2d');
-new Chart(barCtx, {
-  type:'bar',
-  data:{
-    labels: branches,
-    datasets:[{
-      label:'처리 건수',
-      data: counts,
-      backgroundColor:'rgba(79,142,247,0.6)',
-      borderColor:'rgba(79,142,247,0.9)',
-      borderWidth:1, borderRadius:4,
-    }]
-  },
-  options:{
-    indexAxis:'y',
-    responsive:true, maintainAspectRatio:true,
-    plugins:{ legend:{display:false} },
-    scales:{
-      x:{ grid:{color:'rgba(255,255,255,0.05)'}, ticks:{color:'#64748b',font:{size:11}} },
-      y:{ grid:{display:false}, ticks:{color:'#94a3b8',font:{size:11}} }
-    }
-  }
-});
-
-function toggleChip(el) {
-  el.classList.toggle('on');
-}
-</script>
 </body>
 </html>
