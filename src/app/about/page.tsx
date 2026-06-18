@@ -12,14 +12,14 @@ const PIPELINE_STEPS = [
     emoji: '🌐',
     step: 'Step 1',
     title: '뉴스 수집',
-    desc: 'RSS·웹 크롤링으로 AI, 기술, 경제, 자동차, BMW 등 10개 카테고리 뉴스 자동 수집',
+    desc: '네이버 뉴스 API로 AI, 기술, 경제, 자동차, BMW 등 9개 카테고리 뉴스 자동 수집',
     color: 'var(--bmw)',
   },
   {
     emoji: '🤖',
     step: 'Step 2',
     title: 'AI 분석·요약',
-    desc: 'Claude AI가 핵심 키워드 추출, 3줄 요약, 중요도 스코어링으로 의미 있는 뉴스만 선별',
+    desc: 'Gemini AI가 핵심 키워드 추출, 3줄 요약, 중요도 스코어링으로 의미 있는 뉴스만 선별',
     color: 'var(--accent2)',
   },
   {
@@ -66,14 +66,14 @@ const AGENTS = [
     nameEn: 'Collector Agent',
     role: '뉴스 크롤링 & 카테고리 분류',
     model: 'GitHub Actions + Python',
-    tasks: ['RSS 피드 파싱', '웹 크롤링', '중복 제거', '카테고리 태깅'],
+    tasks: ['네이버 뉴스 API 검색', '키워드별 수집', '중복 제거', '카테고리 태깅'],
   },
   {
     emoji: '🔍',
     name: '분석봇',
     nameEn: 'Analyst Agent',
     role: '핵심 인사이트 추출',
-    model: 'Claude claude-sonnet-4-6',
+    model: 'Gemini 2.5-flash / Groq llama-3.3-70b',
     tasks: ['키워드 추출', '3줄 요약', '중요도 스코어링', 'TOP 3 선정'],
   },
   {
@@ -81,7 +81,7 @@ const AGENTS = [
     name: '디자인봇',
     nameEn: 'Designer Agent',
     role: '카드뉴스 콘텐츠 생성',
-    model: 'Claude claude-sonnet-4-6',
+    model: 'Gemini 2.5-flash + HF FLUX.1',
     tasks: ['헤드라인 작성', '캡션 생성', '이미지 키워드 추출', '카드 레이아웃'],
   },
   {
@@ -89,7 +89,7 @@ const AGENTS = [
     name: '에디터봇',
     nameEn: 'Editor Agent',
     role: 'AI 에디터 리뷰 작성',
-    model: 'Claude claude-opus-4-8',
+    model: 'Gemini 2.5-flash / Groq llama-3.3-70b',
     tasks: ['일일 뉴스 종합', '흐름 분석', '블로그 포스트 작성', '인사이트 도출'],
   },
   {
@@ -107,14 +107,14 @@ const FEATURES = [
   { emoji: '📊', title: '트렌드 리포트', desc: '주간 뉴스 통계 & 카테고리별 빈도 분석 차트' },
   { emoji: '🗓️', title: '60일 아카이브', desc: '날짜 선택으로 과거 뉴스 탐색 — 흐름 추적 가능' },
   { emoji: '📈', title: '실시간 시장 지수', desc: 'KOSPI, NASDAQ, S&P500, 비트코인, 금, 유가 실시간 표시' },
-  { emoji: '🏷️', title: '카테고리 필터', desc: 'AI · 기술 · 경제 · 자동차 · BMW 등 10개 분야 필터링' },
+  { emoji: '🏷️', title: '카테고리 필터', desc: 'AI · 기술 · 경제 · 자동차 · BMW 등 9개 분야 필터링' },
   { emoji: '🌙', title: '다크 / 라이트 모드', desc: '눈에 편한 테마 전환 — 시스템 설정 연동' },
 ]
 
 const STACK = [
   { category: 'Frontend', items: ['Next.js 16', 'React 19', 'TypeScript', 'Tailwind CSS v4'] },
   { category: 'Backend', items: ['Supabase', 'PostgreSQL', 'Realtime Subscriptions'] },
-  { category: 'AI', items: ['Claude API (Anthropic)', 'claude-opus-4-8', 'claude-sonnet-4-6'] },
+  { category: 'AI', items: ['Gemini 2.5-flash', 'Groq llama-3.3-70b', 'GPT-4o-mini', 'HF FLUX.1-schnell'] },
   { category: 'Infra', items: ['GitHub Actions', 'Vercel', 'Open-Meteo', 'Yahoo Finance'] },
 ]
 
@@ -440,7 +440,7 @@ export default function AboutPage() {
             {[
               { num: '60일+', label: '누적 아카이브' },
               { num: '06:40', label: '매일 자동 업데이트' },
-              { num: '10개', label: '뉴스 카테고리' },
+              { num: '9개', label: '뉴스 카테고리' },
               { num: '5명', label: 'AI Agent 운영' },
             ].map((stat) => (
               <div
