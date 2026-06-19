@@ -121,7 +121,14 @@ export function DateNav({
                     <button
                       key={d}
                       onClick={() => handleSelect(d)}
-                      className={`dn-chip${isActive ? 'active' : ''}${isToday ? 'today' : ''}${isWeekend ? 'weekend' : ''}`}
+                      className={[
+                        'dn-chip',
+                        isActive && 'active',
+                        isToday && 'today',
+                        isWeekend && 'weekend',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
                       title={`${month}월 ${day}일 (${dow})`}
                     >
                       <span className="dn-chip-dow">{dow}</span>
