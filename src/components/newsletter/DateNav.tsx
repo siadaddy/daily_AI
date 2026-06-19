@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useCallback, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { createBrowserClient } from '@supabase/ssr'
 
 function getToday() {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(new Date())
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(
+    new Date()
+  )
 }
 
 function parseDateParts(dateStr: string) {
@@ -20,37 +21,28 @@ function parseDateParts(dateStr: string) {
   }
 }
 
-export function DateNav({ selectedDate }: { selectedDate: string }) {
+export function DateNav({
+  selectedDate,
+  dates,
+}: {
+  selectedDate: string
+  dates: string[]
+}) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [dates, setDates] = useState<string[]>([])
   const listRef = useRef<HTMLDivElement>(null)
   const today = getToday()
-
-  useEffect(() => {
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-    supabase
-      .from('card_news')
-      .select('date')
-      .order('date', { ascending: false })
-      .limit(30)
-      .then(({ data }) => {
-        const fetched = data?.map((r: { date: string }) => r.date) ?? []
-        // 오늘 콘텐츠가 아직 없어도 항상 첫 번째 칩으로 표시
-        const withToday = fetched.includes(today) ? fetched : [today, ...fetched]
-        setDates(withToday)
-      })
-  }, [])
 
   // 오늘(or 선택된) 칩으로 자동 스크롤
   useEffect(() => {
     if (!listRef.current || dates.length === 0) return
     const active = listRef.current.querySelector<HTMLElement>('.dn-chip.active')
     if (active) {
-      active.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+      active.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center',
+      })
     }
   }, [dates, selectedDate])
 
@@ -96,7 +88,14 @@ export function DateNav({ selectedDate }: { selectedDate: string }) {
       <div className="dn-inner">
         {/* 왼쪽: 라벨 */}
         <div className="dn-label">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <rect x="3" y="4" width="18" height="18" rx="2" />
             <path d="M16 2v4M8 2v4M3 10h18" />
           </svg>
@@ -122,7 +121,7 @@ export function DateNav({ selectedDate }: { selectedDate: string }) {
                     <button
                       key={d}
                       onClick={() => handleSelect(d)}
-                      className={`dn-chip${isActive ? ' active' : ''}${isToday ? ' today' : ''}${isWeekend ? ' weekend' : ''}`}
+                      className={`dn-chip${isActive ? 'active' : ''}${isToday ? 'today' : ''}${isWeekend ? 'weekend' : ''}`}
                       title={`${month}월 ${day}일 (${dow})`}
                     >
                       <span className="dn-chip-dow">{dow}</span>

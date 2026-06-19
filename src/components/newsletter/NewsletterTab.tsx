@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
+import { unstable_cache } from 'next/cache'
+import { createClient } from '@supabase/supabase-js'
 import { FeaturedCard } from './FeaturedCard'
 import { NewsCard } from './NewsCard'
 import { BlogArticle } from './BlogArticle'
@@ -20,7 +21,12 @@ const ContentInteraction = nextDynamic(
   { loading: () => null }
 )
 
-export const dynamic = 'force-dynamic'
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}
 
 function SectionTitle({
   icon,
@@ -67,66 +73,76 @@ function getToday() {
   )
 }
 
-async function fetchCardNews(date: string): Promise<ContentCard[]> {
-  try {
-    const supabase = await createClient()
-    const { data } = await supabase
-      .from('card_news')
-      .select('cards')
-      .eq('date', date)
-      .limit(1)
-      .single()
-    return (data?.cards as ContentCard[]) ?? []
-  } catch {
-    return []
-  }
-}
+const fetchCardNews = unstable_cache(
+  async (date: string): Promise<ContentCard[]> => {
+    try {
+      const { data } = await getSupabase()
+        .from('card_news')
+        .select('cards')
+        .eq('date', date)
+        .limit(1)
+        .single()
+      return (data?.cards as ContentCard[]) ?? []
+    } catch {
+      return []
+    }
+  },
+  ['card_news'],
+  { revalidate: 300 }
+)
 
-async function fetchTodayArticle(
-  date: string
-): Promise<{ title: string; content: string } | null> {
-  try {
-    const supabase = await createClient()
-    const { data } = await supabase
-      .from('articles')
-      .select('title, content')
-      .eq('date', date)
-      .limit(1)
-      .single()
-    return data ?? null
-  } catch {
-    return null
-  }
-}
+const fetchTodayArticle = unstable_cache(
+  async (date: string): Promise<{ title: string; content: string } | null> => {
+    try {
+      const { data } = await getSupabase()
+        .from('articles')
+        .select('title, content')
+        .eq('date', date)
+        .limit(1)
+        .single()
+      return data ?? null
+    } catch {
+      return null
+    }
+  },
+  ['articles'],
+  { revalidate: 300 }
+)
 
-async function fetchTodayRawNews(date: string): Promise<NewsCardType[]> {
-  try {
-    const supabase = await createClient()
-    const { data } = await supabase
-      .from('news_cards')
-      .select('*')
-      .eq('date', date)
-      .order('id', { ascending: true })
-    return data ?? []
-  } catch {
-    return []
-  }
-}
+const fetchTodayRawNews = unstable_cache(
+  async (date: string): Promise<NewsCardType[]> => {
+    try {
+      const { data } = await getSupabase()
+        .from('news_cards')
+        .select('*')
+        .eq('date', date)
+        .order('id', { ascending: true })
+      return data ?? []
+    } catch {
+      return []
+    }
+  },
+  ['news_cards'],
+  { revalidate: 300 }
+)
 
-async function fetchTodayTrend(date: string): Promise<NewsTrend | null> {
-  try {
-    const supabase = await createClient()
-    const { data } = await supabase
-      .from('news_trends')
-      .select('*')
-      .eq('date', date)
-      .limit(1)
-      .single()
-    return data ?? null
-  } catch {
-    return null
-  }
-}
+const fetchTodayTrend = unstable_cache(
+  async (date: string): Promise<NewsTrend | null> => {
+    try {
+      const { data } = await getSupabase()
+        .from('news_trends')
+        .select('*')
+        .eq('date', date)
+        .limit(1)
+        .single()
+      return data ?? null
+    } catch {
+      return null
+    }
+  },
+  ['news_trends'],
+  { revalidate: 300 }
+)
 
 export async function NewsletterTab({ date }: { date?: string }) {
   const today = getToday()
