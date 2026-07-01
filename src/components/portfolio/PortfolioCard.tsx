@@ -20,6 +20,18 @@ interface PortfolioItem {
 const PORTFOLIO_ITEMS: PortfolioItem[] = [
   // ── 개인 프로젝트 ─────────────────────────────────────────
   {
+    title: '오늘줍 — 동네 마감임박 상품 마켓플레이스',
+    description:
+      '카페·빵집·편의점 사장님이 당일 남은 상품을 할인가로 등록하면 소비자가 지도에서 찾아 예약하는 양방향 마켓플레이스',
+    emoji: '🥐',
+    tags: ['Next.js 15', 'Supabase', 'PostGIS', 'Kakao Maps', 'Realtime'],
+    href: 'https://shopping-delta-ashen.vercel.app/',
+    status: 'live',
+    category: 'personal',
+    aiUsage:
+      'AI 추천 시스템·사장님 AI 인사이트 대시보드 개발 중 — 2026 화성시 AI 공모전 출품작',
+  },
+  {
     title: 'AI 뉴스레터 자동화',
     description:
       'Claude Code + AI Agent + GitHub Actions로 매일 새벽 뉴스를 자동 수집·분석·발행',
