@@ -39,13 +39,11 @@ function makeSupabase() {
 
 // React.memo — Realtime 업데이트 시 LikeButton만 독립적으로 re-render
 const LikeButton = memo(function LikeButton({
-  contentKey,
   likeCount,
   isLiked,
   disabled,
   onToggle,
 }: {
-  contentKey: string
   likeCount: number
   isLiked: boolean
   disabled: boolean
@@ -79,7 +77,9 @@ export function ContentInteraction({ contentKey }: { contentKey: string }) {
   useEffect(() => {
     const supabase = makeSupabase()
     supabase.auth.getUser().then(({ data }) => setUser(data.user))
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user ?? null)
     })
     return () => subscription.unsubscribe()
@@ -90,14 +90,28 @@ export function ContentInteraction({ contentKey }: { contentKey: string }) {
     `interaction:${contentKey}`,
     async () => {
       const supabase = makeSupabase()
-      const { data: { user: currentUser } } = await supabase.auth.getUser()
+      const {
+        data: { user: currentUser },
+      } = await supabase.auth.getUser()
 
       const [likesRes, myLikeRes, commentsRes] = await Promise.all([
-        supabase.from('content_likes').select('id', { count: 'exact', head: true }).eq('content_key', contentKey),
+        supabase
+          .from('content_likes')
+          .select('id', { count: 'exact', head: true })
+          .eq('content_key', contentKey),
         currentUser
-          ? supabase.from('content_likes').select('id').eq('content_key', contentKey).eq('user_id', currentUser.id).maybeSingle()
+          ? supabase
+              .from('content_likes')
+              .select('id')
+              .eq('content_key', contentKey)
+              .eq('user_id', currentUser.id)
+              .maybeSingle()
           : Promise.resolve({ data: null }),
-        supabase.from('content_comments').select('*').eq('content_key', contentKey).order('created_at', { ascending: true }),
+        supabase
+          .from('content_comments')
+          .select('*')
+          .eq('content_key', contentKey)
+          .order('created_at', { ascending: true }),
       ])
 
       return {
@@ -116,21 +130,38 @@ export function ContentInteraction({ contentKey }: { contentKey: string }) {
       .channel(`comments-${contentKey}`)
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'content_comments', filter: `content_key=eq.${contentKey}` },
+        {
+          event: '*',
+          schema: 'public',
+          table: 'content_comments',
+          filter: `content_key=eq.${contentKey}`,
+        },
         () => mutate()
       )
       .subscribe()
-    return () => { supabase.removeChannel(channel) }
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [contentKey, mutate])
 
   function handleLike() {
-    if (!user) { alert('로그인 후 좋아요를 누를 수 있어요'); return }
+    if (!user) {
+      alert('로그인 후 좋아요를 누를 수 있어요')
+      return
+    }
     startTransition(async () => {
       // Optimistic update
       mutate(
-        (prev) => prev
-          ? { ...prev, likeCount: prev.isLiked ? prev.likeCount - 1 : prev.likeCount + 1, isLiked: !prev.isLiked }
-          : prev,
+        (prev) =>
+          prev
+            ? {
+                ...prev,
+                likeCount: prev.isLiked
+                  ? prev.likeCount - 1
+                  : prev.likeCount + 1,
+                isLiked: !prev.isLiked,
+              }
+            : prev,
         false
       )
       await toggleLike(contentKey)
@@ -169,7 +200,6 @@ export function ContentInteraction({ contentKey }: { contentKey: string }) {
       {/* 좋아요 + 댓글 토글 */}
       <div className="flex items-center gap-3">
         <LikeButton
-          contentKey={contentKey}
           likeCount={likeCount}
           isLiked={isLiked}
           disabled={isPending}
@@ -179,36 +209,53 @@ export function ContentInteraction({ contentKey }: { contentKey: string }) {
           onClick={() => setShowComments((p) => !p)}
           className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all hover:opacity-80"
           style={{
-            background: showComments ? 'rgba(167,139,250,0.12)' : 'var(--glass)',
+            background: showComments
+              ? 'rgba(167,139,250,0.12)'
+              : 'var(--glass)',
             border: `1px solid ${showComments ? 'rgba(167,139,250,0.4)' : 'var(--border)'}`,
             color: showComments ? 'var(--accent2)' : 'var(--muted2)',
           }}
         >
           <span>💬</span>
           <span>댓글 {comments.length > 0 ? comments.length : ''}</span>
-          <span style={{ fontSize: '9px', opacity: 0.7 }}>{showComments ? '▲' : '▼'}</span>
+          <span style={{ fontSize: '9px', opacity: 0.7 }}>
+            {showComments ? '▲' : '▼'}
+          </span>
         </button>
       </div>
 
       {/* 댓글 영역 */}
       {showComments && (
-        <div className="flex flex-col gap-2 border-t pt-3" style={{ borderColor: 'var(--border)' }}>
+        <div
+          className="flex flex-col gap-2 border-t pt-3"
+          style={{ borderColor: 'var(--border)' }}
+        >
           {comments.length === 0 && (
-            <p className="text-xs" style={{ color: 'var(--muted)' }}>첫 댓글을 남겨보세요</p>
+            <p className="text-xs" style={{ color: 'var(--muted)' }}>
+              첫 댓글을 남겨보세요
+            </p>
           )}
 
           {comments.map((c) => (
             <div key={c.id} className="flex items-start justify-between gap-2">
-              <div className="flex items-start gap-2 min-w-0">
-                <span className="mt-0.5 shrink-0 text-xs font-semibold" style={{ color: 'var(--bmw-lt)' }}>
+              <div className="flex min-w-0 items-start gap-2">
+                <span
+                  className="mt-0.5 shrink-0 text-xs font-semibold"
+                  style={{ color: 'var(--bmw-lt)' }}
+                >
                   {c.nickname}
                 </span>
-                <span className="text-xs leading-relaxed" style={{ color: 'var(--text)' }}>
+                <span
+                  className="text-xs leading-relaxed"
+                  style={{ color: 'var(--text)' }}
+                >
                   {c.comment}
                 </span>
               </div>
               <div className="flex shrink-0 items-center gap-1.5">
-                <span className="text-[11px]" style={{ color: 'var(--muted)' }}>{timeAgo(c.created_at)}</span>
+                <span className="text-[11px]" style={{ color: 'var(--muted)' }}>
+                  {timeAgo(c.created_at)}
+                </span>
                 {user?.id === c.user_id && (
                   <button
                     onClick={() => handleDelete(c.id)}
@@ -225,7 +272,10 @@ export function ContentInteraction({ contentKey }: { contentKey: string }) {
 
           {/* 댓글 입력 */}
           {user ? (
-            <form onSubmit={handleComment} className="flex flex-col gap-2 pt-1 sm:flex-row">
+            <form
+              onSubmit={handleComment}
+              className="flex flex-col gap-2 pt-1 sm:flex-row"
+            >
               <input
                 ref={inputRef}
                 value={commentText}

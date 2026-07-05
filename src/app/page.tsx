@@ -1,7 +1,6 @@
 import { Suspense } from 'react'
 import { unstable_cache } from 'next/cache'
 import { createClient } from '@supabase/supabase-js'
-import dynamic from 'next/dynamic'
 import { Header } from '@/components/layout/Header'
 import { TabNav } from '@/components/layout/TabNav'
 import { Footer } from '@/components/layout/Footer'
