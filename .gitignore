@@ -49,3 +49,15 @@ pipeline/quality_log.json
 pipeline/__pycache__/
 pipeline/utils/__pycache__/
 pipeline/agents/__pycache__/
+
+# typescript build info
+tsconfig.tsbuildinfo
+
+# vitest
+/coverage
+
+# ai-crew
+ai-crew/.env
+ai-crew/__pycache__/
+ai-crew/agents/__pycache__/
+ai-crew/utils/__pycache__/
