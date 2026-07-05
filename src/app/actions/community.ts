@@ -2,17 +2,26 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import {
+  LIMITS,
+  validateText,
+  isValidContentKey,
+  publicDbError,
+} from '@/lib/utils/validation'
 
 export async function signUp(
   email: string,
   password: string,
   nickname: string
 ) {
+  const nick = validateText(nickname, '닉네임', LIMITS.nickname)
+  if (nick.error) return { error: nick.error }
+
   const supabase = await createClient()
   const { error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { nickname } },
+    options: { data: { nickname: nick.value } },
   })
   if (error) return { error: error.message }
   return { error: null }
@@ -32,6 +41,11 @@ export async function signOut() {
 }
 
 export async function createPost(title: string, content: string) {
+  const t = validateText(title, '제목', LIMITS.postTitle)
+  if (t.error) return { error: t.error }
+  const c = validateText(content, '내용', LIMITS.postContent)
+  if (c.error) return { error: c.error }
+
   const supabase = await createClient()
   const {
     data: { user },
@@ -46,11 +60,12 @@ export async function createPost(title: string, content: string) {
 
   const { data, error } = await supabase
     .from('community_posts')
-    .insert({ user_id: user.id, nickname, title, content })
+    .insert({ user_id: user.id, nickname, title: t.value, content: c.value })
     .select()
     .single()
 
-  if (error) return { error: error.message }
+  const publicError = publicDbError(error, 'createPost')
+  if (publicError) return { error: publicError }
   return { error: null, post: data }
 }
 
@@ -68,11 +83,13 @@ export async function deletePost(postId: number) {
     .eq('id', postId)
     .eq('user_id', user.id)
 
-  if (error) return { error: error.message }
-  return { error: null }
+  return { error: publicDbError(error, 'deletePost') }
 }
 
 export async function createComment(postId: number, content: string) {
+  const c = validateText(content, '댓글', LIMITS.comment)
+  if (c.error) return { error: c.error }
+
   const supabase = await createClient()
   const {
     data: { user },
@@ -87,17 +104,22 @@ export async function createComment(postId: number, content: string) {
 
   const { error } = await supabase
     .from('community_comments')
-    .insert({ post_id: postId, user_id: user.id, nickname, content })
+    .insert({ post_id: postId, user_id: user.id, nickname, content: c.value })
 
-  if (error) return { error: error.message }
-  return { error: null }
+  return { error: publicDbError(error, 'createComment') }
 }
 
 // ── 인라인 좋아요/댓글 (content_likes, content_comments) ──────────
 
-export async function toggleLike(contentKey: string): Promise<{ error: string | null }> {
+export async function toggleLike(
+  contentKey: string
+): Promise<{ error: string | null }> {
+  if (!isValidContentKey(contentKey)) return { error: '잘못된 요청입니다' }
+
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
   if (!user) return { error: '로그인이 필요합니다' }
 
   const { data: existing } = await supabase
@@ -108,19 +130,31 @@ export async function toggleLike(contentKey: string): Promise<{ error: string | 
     .maybeSingle()
 
   if (existing) {
-    const { error } = await supabase.from('content_likes').delete().eq('id', existing.id)
-    return { error: error?.message ?? null }
+    const { error } = await supabase
+      .from('content_likes')
+      .delete()
+      .eq('id', existing.id)
+    return { error: publicDbError(error, 'toggleLike:delete') }
   } else {
     const { error } = await supabase
       .from('content_likes')
       .insert({ content_key: contentKey, user_id: user.id })
-    return { error: error?.message ?? null }
+    return { error: publicDbError(error, 'toggleLike:insert') }
   }
 }
 
-export async function addComment(contentKey: string, comment: string): Promise<{ error: string | null }> {
+export async function addComment(
+  contentKey: string,
+  comment: string
+): Promise<{ error: string | null }> {
+  if (!isValidContentKey(contentKey)) return { error: '잘못된 요청입니다' }
+  const c = validateText(comment, '댓글', LIMITS.comment)
+  if (c.error) return { error: c.error }
+
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
   if (!user) return { error: '로그인이 필요합니다' }
 
   const nickname =
@@ -130,14 +164,23 @@ export async function addComment(contentKey: string, comment: string): Promise<{
 
   const { error } = await supabase
     .from('content_comments')
-    .insert({ content_key: contentKey, user_id: user.id, nickname, comment })
+    .insert({
+      content_key: contentKey,
+      user_id: user.id,
+      nickname,
+      comment: c.value,
+    })
 
-  return { error: error?.message ?? null }
+  return { error: publicDbError(error, 'addComment') }
 }
 
-export async function deleteComment(commentId: number): Promise<{ error: string | null }> {
+export async function deleteComment(
+  commentId: number
+): Promise<{ error: string | null }> {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
   if (!user) return { error: '로그인이 필요합니다' }
 
   const { error } = await supabase
@@ -146,5 +189,5 @@ export async function deleteComment(commentId: number): Promise<{ error: string 
     .eq('id', commentId)
     .eq('user_id', user.id)
 
-  return { error: error?.message ?? null }
+  return { error: publicDbError(error, 'deleteComment') }
 }
