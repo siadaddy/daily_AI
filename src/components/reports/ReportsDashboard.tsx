@@ -10,7 +10,11 @@ import { CategoryChart } from './CategoryChart'
 import { VolumeChart } from './VolumeChart'
 import { SourcePieChart } from './SourcePieChart'
 
-const periodMap: Record<ReportPeriod, string> = { 일: 'day', 주: 'week', 월: 'month' }
+const periodMap: Record<ReportPeriod, string> = {
+  일: 'day',
+  주: 'week',
+  월: 'month',
+}
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
@@ -27,7 +31,13 @@ function ChartSkeleton({ height = 200 }: { height?: number }) {
   )
 }
 
-function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
+function SectionCard({
+  title,
+  children,
+}: {
+  title: string
+  children: React.ReactNode
+}) {
   return (
     <div className="glass-card rounded-2xl p-5">
       <h3 className="mb-4 text-sm font-bold" style={{ color: 'var(--muted2)' }}>
@@ -45,7 +55,7 @@ export function ReportsDashboard() {
   const { data, isLoading, error } = useSWR<AnalyticsPayload>(
     `/api/analytics?period=${apiPeriod}`,
     fetcher,
-    { revalidateOnFocus: false, dedupingInterval: 60_000 },
+    { revalidateOnFocus: false, dedupingInterval: 60_000 }
   )
 
   return (
@@ -130,10 +140,39 @@ export function ReportsDashboard() {
                 <div className="flex flex-wrap gap-2">
                   {data.categoryStats.slice(0, 5).map((cat) => (
                     <span key={cat.name} className="badge badge-blue text-xs">
-                      {cat.name} {cat.count}건
+                      {cat.name} {cat.count}건{' '}
+                      {cat.trend === 'up' ? (
+                        <span style={{ color: 'var(--green)' }}>▲</span>
+                      ) : cat.trend === 'down' ? (
+                        <span style={{ color: 'var(--red)' }}>▼</span>
+                      ) : null}
                     </span>
                   ))}
                 </div>
+              )}
+              {data.comparison && data.comparison.risingKeywords.length > 0 && (
+                <>
+                  <p className="text-xs" style={{ color: 'var(--muted)' }}>
+                    🔺 떠오르는 키워드
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {data.comparison.risingKeywords.map((kw) => (
+                      <span
+                        key={kw.word}
+                        className="badge badge-purple text-xs"
+                      >
+                        #{kw.word}{' '}
+                        <span
+                          style={{
+                            color: kw.isNew ? 'var(--green)' : 'var(--muted)',
+                          }}
+                        >
+                          {kw.isNew ? 'NEW' : `↑${kw.count - kw.prevCount}`}
+                        </span>
+                      </span>
+                    ))}
+                  </div>
+                </>
               )}
               {data.keywords.length > 0 && (
                 <>
@@ -142,7 +181,10 @@ export function ReportsDashboard() {
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {data.keywords.slice(0, 8).map((kw) => (
-                      <span key={kw.word} className="badge badge-purple text-xs">
+                      <span
+                        key={kw.word}
+                        className="badge badge-purple text-xs"
+                      >
                         #{kw.word}
                       </span>
                     ))}

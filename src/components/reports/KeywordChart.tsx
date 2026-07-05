@@ -1,25 +1,20 @@
 'use client'
 
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip } from 'chart.js'
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Tooltip,
+} from 'chart.js'
 import { Bar } from 'react-chartjs-2'
 import type { KeywordStat } from '@/lib/types'
-import { useChartColors } from '@/lib/hooks/useChartColors'
+import { useChartColors, withAlpha } from '@/lib/hooks/useChartColors'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip)
 
-const COLORS = [
-  'rgba(28,105,212,0.85)',
-  'rgba(77,144,240,0.80)',
-  'rgba(167,139,250,0.80)',
-  'rgba(16,185,129,0.75)',
-  'rgba(245,158,11,0.75)',
-  'rgba(239,68,68,0.75)',
-  'rgba(20,184,166,0.75)',
-  'rgba(234,179,8,0.75)',
-]
-
 export function KeywordChart({ keywords }: { keywords: KeywordStat[] }) {
-  const { grid, tick } = useChartColors()
+  const { grid, tick, series } = useChartColors()
 
   if (keywords.length === 0) {
     return (
@@ -36,7 +31,8 @@ export function KeywordChart({ keywords }: { keywords: KeywordStat[] }) {
     datasets: [
       {
         data: top.map((k) => k.count),
-        backgroundColor: top.map((_, i) => COLORS[i % COLORS.length]),
+        // 키워드는 순위(크기) 데이터 — 단일 색으로 막대 길이만 비교
+        backgroundColor: withAlpha(series[0], 0.8),
         borderRadius: 6,
         borderSkipped: false,
       },
@@ -49,7 +45,10 @@ export function KeywordChart({ keywords }: { keywords: KeywordStat[] }) {
       options={{
         indexAxis: 'y',
         responsive: true,
-        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => ` ${ctx.raw}회` } } },
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: (ctx) => ` ${ctx.raw}회` } },
+        },
         scales: {
           x: {
             grid: { color: grid },

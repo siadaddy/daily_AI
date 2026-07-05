@@ -3,24 +3,12 @@
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
 import { Doughnut } from 'react-chartjs-2'
 import type { SourceStat } from '@/lib/types'
-import { useChartColors } from '@/lib/hooks/useChartColors'
+import { useChartColors, withAlpha } from '@/lib/hooks/useChartColors'
 
 ChartJS.register(ArcElement, Tooltip, Legend)
 
-const PALETTE = [
-  'rgba(28,105,212,0.85)',
-  'rgba(167,139,250,0.85)',
-  'rgba(16,185,129,0.85)',
-  'rgba(245,158,11,0.85)',
-  'rgba(239,68,68,0.85)',
-  'rgba(77,144,240,0.85)',
-  'rgba(20,184,166,0.85)',
-  'rgba(234,179,8,0.85)',
-  'rgba(100,116,139,0.70)',
-]
-
 export function SourcePieChart({ sources }: { sources: SourceStat[] }) {
-  const { legend } = useChartColors()
+  const { legend, series, etc } = useChartColors()
 
   if (sources.length === 0) {
     return (
@@ -35,9 +23,15 @@ export function SourcePieChart({ sources }: { sources: SourceStat[] }) {
     datasets: [
       {
         data: sources.map((s) => s.count),
-        backgroundColor: sources.map((_, i) => PALETTE[i % PALETTE.length]),
+        // 슬롯 고정 배정 — '기타'와 6개 초과분은 중립색 (색 순환 금지)
+        backgroundColor: sources.map((s, i) =>
+          withAlpha(
+            s.source === '기타' || i >= series.length ? etc : series[i],
+            0.85
+          )
+        ),
         borderColor: 'rgba(0,0,0,0.2)',
-        borderWidth: 1,
+        borderWidth: 2,
       },
     ],
   }

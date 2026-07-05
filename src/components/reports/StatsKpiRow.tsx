@@ -5,21 +5,51 @@ interface KpiBox {
   label: string
   value: string
   sub?: string
+  deltaPct?: number
+}
+
+function DeltaChip({ pct, prevLabel }: { pct: number; prevLabel: string }) {
+  if (pct === 0) {
+    return (
+      <span className="text-xs" style={{ color: 'var(--muted)' }}>
+        변동 없음
+      </span>
+    )
+  }
+  const up = pct > 0
+  return (
+    <span
+      className="text-xs font-semibold"
+      style={{ color: up ? 'var(--green)' : 'var(--red)' }}
+    >
+      {up ? '▲' : '▼'} {Math.abs(pct)}%{' '}
+      <span style={{ color: 'var(--muted)' }}>vs {prevLabel}</span>
+    </span>
+  )
 }
 
 export function StatsKpiRow({ data }: { data: AnalyticsPayload }) {
+  const prevLabel =
+    data.periodLabel === '오늘'
+      ? '어제'
+      : data.periodLabel === '이번 주'
+        ? '지난 주'
+        : '지난 달'
+
   const boxes: KpiBox[] = [
     {
       icon: '📰',
       label: '총 기사수',
       value: `${data.totalArticles.toLocaleString()}건`,
       sub: data.periodLabel,
+      deltaPct: data.comparison?.totalDeltaPct,
     },
     {
       icon: '📅',
       label: '일 평균',
       value: `${data.avgPerDay}건`,
       sub: '하루 기준',
+      deltaPct: data.comparison?.avgPerDayDeltaPct,
     },
     {
       icon: '🔥',
@@ -49,11 +79,13 @@ export function StatsKpiRow({ data }: { data: AnalyticsPayload }) {
           <span className="text-lg font-bold" style={{ color: 'var(--text)' }}>
             {box.value}
           </span>
-          {box.sub && (
+          {box.deltaPct !== undefined ? (
+            <DeltaChip pct={box.deltaPct} prevLabel={prevLabel} />
+          ) : box.sub ? (
             <span className="text-xs" style={{ color: 'var(--muted2)' }}>
               {box.sub}
             </span>
-          )}
+          ) : null}
         </div>
       ))}
     </div>

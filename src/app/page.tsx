@@ -53,7 +53,12 @@ function LoadingSkeleton() {
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; date?: string }>
+  searchParams: Promise<{
+    tab?: string
+    date?: string
+    view?: string
+    report?: string
+  }>
 }) {
   const params = await searchParams
   const tab = (params.tab ?? 'newsletter') as TabId
@@ -93,7 +98,7 @@ export default async function Home({
         )}
         {tab === 'reports' && (
           <Suspense fallback={<LoadingSkeleton />}>
-            <ReportsTab />
+            <ReportsTab view={params.view} report={params.report} />
           </Suspense>
         )}
         {tab === 'music' && <MusicUniverse />}

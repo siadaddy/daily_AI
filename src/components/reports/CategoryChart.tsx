@@ -9,26 +9,22 @@ import {
 } from 'chart.js'
 import { Bar } from 'react-chartjs-2'
 import type { CategoryStat } from '@/lib/types'
-import { useChartColors } from '@/lib/hooks/useChartColors'
+import { useChartColors, withAlpha } from '@/lib/hooks/useChartColors'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip)
 
 export function CategoryChart({ stats }: { stats: CategoryStat[] }) {
-  const { grid, tick } = useChartColors()
+  const { grid, tick, series, etc } = useChartColors()
 
   const data = {
     labels: stats.map((s) => s.name),
     datasets: [
       {
         data: stats.map((s) => s.count),
-        backgroundColor: [
-          'rgba(28,105,212,0.7)',
-          'rgba(167,139,250,0.7)',
-          'rgba(16,185,129,0.7)',
-          'rgba(245,158,11,0.7)',
-          'rgba(239,68,68,0.7)',
-          'rgba(77,144,240,0.7)',
-        ],
+        // 슬롯 고정 배정 — 6개 초과분은 중립색 (색 순환 금지)
+        backgroundColor: stats.map((_, i) =>
+          withAlpha(i < series.length ? series[i] : etc, 0.75)
+        ),
         borderRadius: 8,
       },
     ],

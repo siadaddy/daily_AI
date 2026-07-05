@@ -70,8 +70,12 @@ export interface NewsTrend {
   created_at: string
 }
 
-export interface WeeklyReport {
+export type PeriodType = 'weekly' | 'monthly'
+
+// weekly_reports 테이블 — period_type으로 주간/월간 리포트를 함께 저장
+export interface PeriodReport {
   id: number
+  period_type: PeriodType
   week_start: string
   week_end: string
   summary: string
@@ -81,10 +85,13 @@ export interface WeeklyReport {
   created_at: string
 }
 
+export type WeeklyReport = PeriodReport
+
 export interface CategoryStat {
   name: string
   count: number
   trend: 'up' | 'down' | 'flat'
+  deltaPct?: number
 }
 
 export type TabId = 'newsletter' | 'reports' | 'music' | 'office' | 'portfolio'
@@ -139,6 +146,20 @@ export interface DailyVolume {
   count: number
 }
 
+export interface KeywordTrend {
+  word: string
+  count: number
+  prevCount: number
+  isNew: boolean
+}
+
+export interface AnalyticsComparison {
+  prevTotal: number
+  totalDeltaPct: number
+  avgPerDayDeltaPct: number
+  risingKeywords: KeywordTrend[]
+}
+
 export interface AnalyticsPayload {
   keywords: KeywordStat[]
   categoryStats: CategoryStat[]
@@ -148,4 +169,5 @@ export interface AnalyticsPayload {
   avgPerDay: number
   topDate: string
   periodLabel: string
+  comparison?: AnalyticsComparison
 }

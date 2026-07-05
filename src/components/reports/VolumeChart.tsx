@@ -11,12 +11,12 @@ import {
 import { Bar } from 'react-chartjs-2'
 import type { DailyVolume } from '@/lib/types'
 import dayjs from 'dayjs'
-import { useChartColors } from '@/lib/hooks/useChartColors'
+import { useChartColors, withAlpha } from '@/lib/hooks/useChartColors'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Filler)
 
 export function VolumeChart({ volumeSeries }: { volumeSeries: DailyVolume[] }) {
-  const { grid, tick } = useChartColors()
+  const { grid, tick, series } = useChartColors()
 
   if (volumeSeries.length === 0) {
     return (
@@ -32,8 +32,8 @@ export function VolumeChart({ volumeSeries }: { volumeSeries: DailyVolume[] }) {
       {
         label: '기사 수',
         data: volumeSeries.map((v) => v.count),
-        backgroundColor: 'rgba(28,105,212,0.65)',
-        borderColor: 'rgba(77,144,240,0.9)',
+        backgroundColor: withAlpha(series[0], 0.65),
+        borderColor: withAlpha(series[0], 0.9),
         borderWidth: 1,
         borderRadius: 6,
         borderSkipped: false,
