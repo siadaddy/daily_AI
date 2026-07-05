@@ -13,7 +13,7 @@ GROQ_KEYS = [
     ] if k
 ]
 GROQ_URL   = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL = "llama-3.3-70b-versatile"
+GROQ_MODEL = "openai/gpt-oss-120b"
 
 _key_cycle = itertools.cycle(range(len(GROQ_KEYS))) if GROQ_KEYS else iter([])
 

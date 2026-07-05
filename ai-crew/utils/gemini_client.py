@@ -13,7 +13,7 @@ GROQ_KEYS = [
     ] if k
 ]
 GROQ_URL   = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL = "llama-3.3-70b-versatile"   # 컨텍스트 크기용 — Groq 폴백에서만 사용
+GROQ_MODEL = "openai/gpt-oss-120b"   # 컨텍스트 크기용 — Groq 폴백에서만 사용
 
 # 라운드로빈 이터레이터 (모듈 로드 시 한 번만 생성)
 _key_cycle = itertools.cycle(range(len(GROQ_KEYS))) if GROQ_KEYS else iter([])

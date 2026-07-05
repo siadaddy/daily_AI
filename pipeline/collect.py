@@ -73,7 +73,7 @@ def ask_ai(prompt: str, system: str = "") -> str:
                 r = requests.post(
                     "https://api.groq.com/openai/v1/chat/completions",
                     headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-                    json={"model": "llama-3.3-70b-versatile", "messages": messages, "temperature": 0.4},
+                    json={"model": "openai/gpt-oss-120b", "messages": messages, "temperature": 0.4},
                     timeout=30,
                 )
                 if r.status_code == 429:
