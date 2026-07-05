@@ -36,7 +36,10 @@ export function NewsTicker() {
   return (
     <div className="ticker-bar">
       <div className="ticker-track">
-        <div className="ticker-inner" style={{ '--count': items.length } as React.CSSProperties}>
+        <div
+          className="ticker-inner"
+          style={{ '--count': items.length } as React.CSSProperties}
+        >
           {items.map((h, i) => (
             <span key={i} className="ticker-item">
               {h}

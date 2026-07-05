@@ -18,13 +18,17 @@ export function AgentStatusPanel() {
 
     const channel = supabase
       .channel('agents-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'agents' }, () => {
-        supabase
-          .from('agents')
-          .select('*')
-          .order('id')
-          .then(({ data }) => setAgents(data ?? []))
-      })
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'agents' },
+        () => {
+          supabase
+            .from('agents')
+            .select('*')
+            .order('id')
+            .then(({ data }) => setAgents(data ?? []))
+        }
+      )
       .subscribe()
 
     return () => {
@@ -57,7 +61,10 @@ export function AgentStatusPanel() {
           >
             <span className="text-xl">{agent.avatar ?? '🤖'}</span>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>
+              <p
+                className="text-sm font-medium"
+                style={{ color: 'var(--text)' }}
+              >
                 {agent.name}
               </p>
               <p className="truncate text-xs" style={{ color: 'var(--muted)' }}>
@@ -65,7 +72,7 @@ export function AgentStatusPanel() {
               </p>
             </div>
             <span
-              className="h-2 w-2 rounded-full shrink-0"
+              className="h-2 w-2 shrink-0 rounded-full"
               style={{
                 background:
                   agent.status === 'online'

@@ -56,11 +56,13 @@ export function ActivityLog() {
       </div>
       <div className="flex-1 overflow-y-auto p-3 font-mono">
         {logs.map((log) => (
-          <div key={log.id} className="mb-1 flex gap-2 text-xs animate-fade-in">
+          <div key={log.id} className="animate-fade-in mb-1 flex gap-2 text-xs">
             <span style={{ color: 'var(--muted)', flexShrink: 0 }}>
               {dayjs(log.created_at).format('HH:mm:ss')}
             </span>
-            <span style={{ color: 'var(--bmw-lt)', flexShrink: 0 }}>[{log.agent_name}]</span>
+            <span style={{ color: 'var(--bmw-lt)', flexShrink: 0 }}>
+              [{log.agent_name}]
+            </span>
             <span style={{ color: 'var(--text)' }}>{log.action}</span>
             {log.detail && (
               <span style={{ color: 'var(--muted2)' }}>— {log.detail}</span>

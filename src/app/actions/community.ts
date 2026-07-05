@@ -162,14 +162,12 @@ export async function addComment(
     user.email?.split('@')[0] ??
     '익명'
 
-  const { error } = await supabase
-    .from('content_comments')
-    .insert({
-      content_key: contentKey,
-      user_id: user.id,
-      nickname,
-      comment: c.value,
-    })
+  const { error } = await supabase.from('content_comments').insert({
+    content_key: contentKey,
+    user_id: user.id,
+    nickname,
+    comment: c.value,
+  })
 
   return { error: publicDbError(error, 'addComment') }
 }

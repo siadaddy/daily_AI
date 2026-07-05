@@ -16,11 +16,16 @@ function makeSupabase() {
 }
 
 function toKoreanError(msg: string): string {
-  if (msg.includes('Invalid login credentials')) return '이메일 또는 비밀번호가 올바르지 않습니다'
-  if (msg.includes('Email not confirmed')) return '이메일 인증이 필요합니다. 가입 시 받은 메일을 확인해주세요'
-  if (msg.includes('User already registered')) return '이미 가입된 이메일입니다. 로그인을 시도해보세요'
-  if (msg.includes('Password should be at least')) return '비밀번호는 6자 이상이어야 합니다'
-  if (msg.includes('Unable to validate email')) return '유효하지 않은 이메일 형식입니다'
+  if (msg.includes('Invalid login credentials'))
+    return '이메일 또는 비밀번호가 올바르지 않습니다'
+  if (msg.includes('Email not confirmed'))
+    return '이메일 인증이 필요합니다. 가입 시 받은 메일을 확인해주세요'
+  if (msg.includes('User already registered'))
+    return '이미 가입된 이메일입니다. 로그인을 시도해보세요'
+  if (msg.includes('Password should be at least'))
+    return '비밀번호는 6자 이상이어야 합니다'
+  if (msg.includes('Unable to validate email'))
+    return '유효하지 않은 이메일 형식입니다'
   return msg
 }
 
@@ -42,7 +47,10 @@ export function AuthModal({ onClose }: Props) {
       const supabase = makeSupabase()
 
       if (mode === 'login') {
-        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        })
         if (error) {
           setErrorMsg(toKoreanError(error.message))
         } else {
@@ -59,7 +67,9 @@ export function AuthModal({ onClose }: Props) {
           setErrorMsg(toKoreanError(error.message))
         } else if (data.user && !data.session) {
           // 이메일 인증 필요한 경우
-          setSuccessMsg('가입 완료! 이메일로 인증 링크가 발송되었습니다. 확인 후 로그인해주세요.')
+          setSuccessMsg(
+            '가입 완료! 이메일로 인증 링크가 발송되었습니다. 확인 후 로그인해주세요.'
+          )
         } else {
           router.refresh()
           onClose()

@@ -3,7 +3,10 @@
 import { useEffect, useState } from 'react'
 
 export function KospiWidget() {
-  const [data, setData] = useState<{ price: number | null; change: number | null } | null>(null)
+  const [data, setData] = useState<{
+    price: number | null
+    change: number | null
+  } | null>(null)
 
   useEffect(() => {
     fetch('/api/market')
@@ -12,7 +15,7 @@ export function KospiWidget() {
       .catch(() => {})
   }, [])
 
-  const up   = (data?.change ?? 0) >= 0
+  const up = (data?.change ?? 0) >= 0
   const sign = up ? '▲' : '▼'
 
   return (
@@ -25,7 +28,12 @@ export function KospiWidget() {
         <p className="dash-label">
           KOSPI&nbsp;
           {data?.change != null && data.price && (
-            <span style={{ color: up ? 'var(--red)' : 'var(--blue)', fontWeight: 700 }}>
+            <span
+              style={{
+                color: up ? 'var(--red)' : 'var(--blue)',
+                fontWeight: 700,
+              }}
+            >
               {sign} {Math.abs(data.change)}%
             </span>
           )}

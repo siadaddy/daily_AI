@@ -15,44 +15,29 @@ tools:
 ## 프로젝트 디자인 시스템
 
 ### CSS 커스텀 변수 (src/app/globals.css)
+
 ```css
 /* 배경/표면 */
---bg: #080c14           /* 메인 배경 (다크) */
---surface: #0d1117      /* 서브 배경 */
---card: #111827         /* 카드 배경 */
---glass: rgba(255,255,255,.04)  /* 글래스모피즘 */
-
-/* 텍스트 */
---text: #f1f5f9         /* 주요 텍스트 */
---muted: #94a3b8        /* 보조 텍스트 */
---muted2: #64748b       /* 3차 텍스트 */
-
-/* 테두리 */
---border: rgba(255,255,255,.08)
-
-/* 브랜드 컬러 */
---bmw: #1c69d4          /* 주 파란색 */
---bmw-lt: #3b82f6       /* 밝은 파란색 */
---accent2: #a78bfa      /* 보라색 */
-
-/* 상태 컬러 */
---green: #10b981
---red: #ef4444
---blue: #3b82f6
---gold: #f59e0b
-
-/* 차트 컬러 */
---chart-grid: rgba(255,255,255,.06)
---chart-tick: #64748b
---chart-legend: #94a3b8
+--bg: #080c14 /* 메인 배경 (다크) */ --surface: #0d1117 /* 서브 배경 */
+  --card: #111827 /* 카드 배경 */ --glass: rgba(255, 255, 255, 0.04)
+  /* 글래스모피즘 */ /* 텍스트 */ --text: #f1f5f9 /* 주요 텍스트 */
+  --muted: #94a3b8 /* 보조 텍스트 */ --muted2: #64748b /* 3차 텍스트 */
+  /* 테두리 */ --border: rgba(255, 255, 255, 0.08) /* 브랜드 컬러 */
+  --bmw: #1c69d4 /* 주 파란색 */ --bmw-lt: #3b82f6 /* 밝은 파란색 */
+  --accent2: #a78bfa /* 보라색 */ /* 상태 컬러 */ --green: #10b981
+  --red: #ef4444 --blue: #3b82f6 --gold: #f59e0b /* 차트 컬러 */
+  --chart-grid: rgba(255, 255, 255, 0.06) --chart-tick: #64748b
+  --chart-legend: #94a3b8;
 ```
 
 ### Tailwind CSS v4 규칙
+
 - `@import "tailwindcss"` 사용 (v3의 `@tailwind` 지시어 아님)
 - 커스텀 유틸리티: `@utility` 블록 사용
 - CSS 변수를 Tailwind 클래스로: `bg-[var(--card)]`, `text-[var(--muted)]`
 
 ### 다크 모드 (기본값)
+
 - 다크 모드가 기본 — 라이트 모드는 `[data-theme="light"]` 셀렉터로 오버라이드
 - `useTheme()` 훅 → `src/components/layout/ThemeProvider.tsx`
 
@@ -118,6 +103,7 @@ src/components/
 ## 패턴 가이드
 
 ### 새 DashboardBar 위젯 추가 패턴
+
 ```tsx
 // 1. src/components/dashboard/NewWidget.tsx 생성
 'use client'
@@ -128,11 +114,12 @@ export default function NewWidget() {
 
   useEffect(() => {
     fetch('/api/new-endpoint')
-      .then(r => r.json())
-      .then(d => setData(d.value))
+      .then((r) => r.json())
+      .then((d) => setData(d.value))
   }, [])
 
-  if (data === null) return <span className="text-[var(--muted)] text-xs">--</span>
+  if (data === null)
+    return <span className="text-xs text-[var(--muted)]">--</span>
 
   return (
     <span className="flex items-center gap-1 text-xs">
@@ -146,11 +133,12 @@ export default function NewWidget() {
 ```
 
 ### Server Component (ISR) 패턴
+
 ```tsx
 // src/components/newsletter/NewSection.tsx
 import { createServerClient } from '@/lib/supabase/server'
 
-export const revalidate = 3600  // 1시간 캐시
+export const revalidate = 3600 // 1시간 캐시
 
 export default async function NewSection({ date }: { date: string }) {
   const supabase = await createServerClient()
@@ -164,21 +152,23 @@ export default async function NewSection({ date }: { date: string }) {
 ```
 
 ### SWR + API Route 패턴 (Client Component)
+
 ```tsx
 'use client'
 import useSWR from 'swr'
 
-const fetcher = (url: string) => fetch(url).then(r => r.json())
+const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
 export default function Widget() {
   const { data, error } = useSWR('/api/endpoint', fetcher, {
-    refreshInterval: 300000  // 5분
+    refreshInterval: 300000, // 5분
   })
   // ...
 }
 ```
 
 ### Supabase Realtime 패턴 (Client Component)
+
 ```tsx
 'use client'
 import { useEffect, useState } from 'react'
@@ -191,30 +181,38 @@ export default function RealtimeComponent() {
   useEffect(() => {
     const channel = supabase
       .channel('table-changes')
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'logs'
-      }, payload => {
-        setItems(prev => [payload.new, ...prev].slice(0, 50))
-      })
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'logs',
+        },
+        (payload) => {
+          setItems((prev) => [payload.new, ...prev].slice(0, 50))
+        }
+      )
       .subscribe()
 
-    return () => { supabase.removeChannel(channel) }
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [])
   // ...
 }
 ```
 
 ### 차트 컬러 훅 사용
+
 ```tsx
 import { useChartColors } from '@/lib/hooks/useChartColors'
 
 // 컴포넌트 내부
-const colors = useChartColors()  // { grid, tick, legend }
+const colors = useChartColors() // { grid, tick, legend }
 ```
 
 ## 중요 규칙
+
 - **`createBrowserClient`는 Client Component('use client')에서만**
 - **`createServerClient`는 Server Component, Route Handler, Server Action에서만**
 - Canvas 애니메이션은 RAF + useEffect cleanup 패턴 유지 (DOM 애니메이션 금지)

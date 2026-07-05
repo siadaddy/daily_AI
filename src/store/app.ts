@@ -11,7 +11,9 @@ interface AppStore {
 }
 
 function todayKST(): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(new Date())
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(
+    new Date()
+  )
 }
 
 export const useAppStore = create<AppStore>((set) => ({

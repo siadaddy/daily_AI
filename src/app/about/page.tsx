@@ -66,7 +66,12 @@ const AGENTS = [
     nameEn: 'Collector Agent',
     role: '뉴스 크롤링 & 카테고리 분류',
     model: 'GitHub Actions + Python',
-    tasks: ['네이버 뉴스 API 검색', '키워드별 수집', '중복 제거', '카테고리 태깅'],
+    tasks: [
+      '네이버 뉴스 API 검색',
+      '키워드별 수집',
+      '중복 제거',
+      '카테고리 태깅',
+    ],
   },
   {
     emoji: '🔍',
@@ -82,7 +87,12 @@ const AGENTS = [
     nameEn: 'Designer Agent',
     role: '카드뉴스 콘텐츠 생성',
     model: 'Gemini 2.5-flash + HF FLUX.1',
-    tasks: ['헤드라인 작성', '캡션 생성', '이미지 키워드 추출', '카드 레이아웃'],
+    tasks: [
+      '헤드라인 작성',
+      '캡션 생성',
+      '이미지 키워드 추출',
+      '카드 레이아웃',
+    ],
   },
   {
     emoji: '✍️',
@@ -90,7 +100,12 @@ const AGENTS = [
     nameEn: 'Editor Agent',
     role: 'AI 에디터 리뷰 작성',
     model: 'Gemini 2.5-flash / Groq llama-3.3-70b',
-    tasks: ['일일 뉴스 종합', '흐름 분석', '블로그 포스트 작성', '인사이트 도출'],
+    tasks: [
+      '일일 뉴스 종합',
+      '흐름 분석',
+      '블로그 포스트 작성',
+      '인사이트 도출',
+    ],
   },
   {
     emoji: '📋',
@@ -103,19 +118,60 @@ const AGENTS = [
 ]
 
 const FEATURES = [
-  { emoji: '📰', title: 'AI 뉴스레터', desc: '매일 자동 생성되는 카드뉴스 — 아침에 열면 이미 준비되어 있음' },
-  { emoji: '📊', title: '트렌드 리포트', desc: '주간 뉴스 통계 & 카테고리별 빈도 분석 차트' },
-  { emoji: '🗓️', title: '60일 아카이브', desc: '날짜 선택으로 과거 뉴스 탐색 — 흐름 추적 가능' },
-  { emoji: '📈', title: '실시간 시장 지수', desc: 'KOSPI, NASDAQ, S&P500, 비트코인, 금, 유가 실시간 표시' },
-  { emoji: '🏷️', title: '카테고리 필터', desc: 'AI · 기술 · 경제 · 자동차 · BMW 등 9개 분야 필터링' },
-  { emoji: '🌙', title: '다크 / 라이트 모드', desc: '눈에 편한 테마 전환 — 시스템 설정 연동' },
+  {
+    emoji: '📰',
+    title: 'AI 뉴스레터',
+    desc: '매일 자동 생성되는 카드뉴스 — 아침에 열면 이미 준비되어 있음',
+  },
+  {
+    emoji: '📊',
+    title: '트렌드 리포트',
+    desc: '주간 뉴스 통계 & 카테고리별 빈도 분석 차트',
+  },
+  {
+    emoji: '🗓️',
+    title: '60일 아카이브',
+    desc: '날짜 선택으로 과거 뉴스 탐색 — 흐름 추적 가능',
+  },
+  {
+    emoji: '📈',
+    title: '실시간 시장 지수',
+    desc: 'KOSPI, NASDAQ, S&P500, 비트코인, 금, 유가 실시간 표시',
+  },
+  {
+    emoji: '🏷️',
+    title: '카테고리 필터',
+    desc: 'AI · 기술 · 경제 · 자동차 · BMW 등 9개 분야 필터링',
+  },
+  {
+    emoji: '🌙',
+    title: '다크 / 라이트 모드',
+    desc: '눈에 편한 테마 전환 — 시스템 설정 연동',
+  },
 ]
 
 const STACK = [
-  { category: 'Frontend', items: ['Next.js 16', 'React 19', 'TypeScript', 'Tailwind CSS v4'] },
-  { category: 'Backend', items: ['Supabase', 'PostgreSQL', 'Realtime Subscriptions'] },
-  { category: 'AI', items: ['Gemini 2.5-flash', 'Groq llama-3.3-70b', 'GPT-4o-mini', 'HF FLUX.1-schnell'] },
-  { category: 'Infra', items: ['GitHub Actions', 'Vercel', 'Open-Meteo', 'Yahoo Finance'] },
+  {
+    category: 'Frontend',
+    items: ['Next.js 16', 'React 19', 'TypeScript', 'Tailwind CSS v4'],
+  },
+  {
+    category: 'Backend',
+    items: ['Supabase', 'PostgreSQL', 'Realtime Subscriptions'],
+  },
+  {
+    category: 'AI',
+    items: [
+      'Gemini 2.5-flash',
+      'Groq llama-3.3-70b',
+      'GPT-4o-mini',
+      'HF FLUX.1-schnell',
+    ],
+  },
+  {
+    category: 'Infra',
+    items: ['GitHub Actions', 'Vercel', 'Open-Meteo', 'Yahoo Finance'],
+  },
 ]
 
 export default function AboutPage() {
@@ -139,7 +195,7 @@ export default function AboutPage() {
           <div className="mb-4 flex items-center justify-center gap-3">
             <span className="text-5xl">🤖</span>
             <span
-              className="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-widest"
+              className="rounded-full px-3 py-1 text-xs font-bold tracking-widest uppercase"
               style={{ background: 'var(--green)', color: '#fff' }}
             >
               LIVE
@@ -160,7 +216,10 @@ export default function AboutPage() {
             AI가 뉴스를 읽고, 당신은 인사이트를 얻는다
           </p>
 
-          <p className="mb-8 text-base leading-relaxed" style={{ color: 'var(--muted2)' }}>
+          <p
+            className="mb-8 text-base leading-relaxed"
+            style={{ color: 'var(--muted2)' }}
+          >
             매일 06:40, AI Agent가 뉴스를 수집·분석·정리해 자동 발행합니다.
             <br />
             당신이 아침을 시작할 때 이미 모든 준비가 되어 있습니다.
@@ -179,7 +238,10 @@ export default function AboutPage() {
       {/* ── Problem → Solution ───────────────────── */}
       <section className="px-4 py-16">
         <div className="mx-auto max-w-5xl">
-          <h2 className="mb-10 text-center text-2xl font-bold" style={{ color: 'var(--text)' }}>
+          <h2
+            className="mb-10 text-center text-2xl font-bold"
+            style={{ color: 'var(--text)' }}
+          >
             왜 만들었나
           </h2>
 
@@ -195,14 +257,23 @@ export default function AboutPage() {
             >
               <div className="mb-4 flex items-center gap-2">
                 <span className="text-2xl">😩</span>
-                <h3 className="text-lg font-bold" style={{ color: 'var(--red)' }}>
+                <h3
+                  className="text-lg font-bold"
+                  style={{ color: 'var(--red)' }}
+                >
                   Problem
                 </h3>
               </div>
-              <p className="mb-4 font-semibold" style={{ color: 'var(--text)' }}>
+              <p
+                className="mb-4 font-semibold"
+                style={{ color: 'var(--text)' }}
+              >
                 아침마다 쏟아지는 뉴스, 다 볼 수 없잖아요
               </p>
-              <ul className="space-y-2 text-sm" style={{ color: 'var(--muted2)' }}>
+              <ul
+                className="space-y-2 text-sm"
+                style={{ color: 'var(--muted2)' }}
+              >
                 <li className="flex items-start gap-2">
                   <span style={{ color: 'var(--red)' }}>✕</span>
                   수십 개 탭을 열어 하나하나 확인하는 시간 낭비
@@ -233,14 +304,23 @@ export default function AboutPage() {
             >
               <div className="mb-4 flex items-center gap-2">
                 <span className="text-2xl">🚀</span>
-                <h3 className="text-lg font-bold" style={{ color: 'var(--green)' }}>
+                <h3
+                  className="text-lg font-bold"
+                  style={{ color: 'var(--green)' }}
+                >
                   Solution
                 </h3>
               </div>
-              <p className="mb-4 font-semibold" style={{ color: 'var(--text)' }}>
+              <p
+                className="mb-4 font-semibold"
+                style={{ color: 'var(--text)' }}
+              >
                 AI Agent가 대신 읽고 핵심만 전달
               </p>
-              <ul className="space-y-2 text-sm" style={{ color: 'var(--muted2)' }}>
+              <ul
+                className="space-y-2 text-sm"
+                style={{ color: 'var(--muted2)' }}
+              >
                 <li className="flex items-start gap-2">
                   <span style={{ color: 'var(--green)' }}>✓</span>
                   수십 개 소스 자동 수집 — 아침에 열면 이미 준비됨
@@ -266,14 +346,24 @@ export default function AboutPage() {
       {/* ── AI Pipeline Flow ─────────────────────── */}
       <section className="px-4 py-16" style={{ background: 'var(--surface)' }}>
         <div className="mx-auto max-w-6xl">
-          <div className="mb-2 text-center text-sm font-semibold uppercase tracking-widest" style={{ color: 'var(--bmw-lt)' }}>
+          <div
+            className="mb-2 text-center text-sm font-semibold tracking-widest uppercase"
+            style={{ color: 'var(--bmw-lt)' }}
+          >
             자동화 파이프라인
           </div>
-          <h2 className="mb-4 text-center text-2xl font-bold" style={{ color: 'var(--text)' }}>
+          <h2
+            className="mb-4 text-center text-2xl font-bold"
+            style={{ color: 'var(--text)' }}
+          >
             매일 06:40, 이렇게 동작합니다
           </h2>
-          <p className="mb-12 text-center text-sm" style={{ color: 'var(--muted2)' }}>
-            GitHub Actions 스케줄 트리거 → AI Agent 체인 실행 → Supabase 저장 → 웹 자동 갱신
+          <p
+            className="mb-12 text-center text-sm"
+            style={{ color: 'var(--muted2)' }}
+          >
+            GitHub Actions 스케줄 트리거 → AI Agent 체인 실행 → Supabase 저장 →
+            웹 자동 갱신
           </p>
 
           {/* Flow grid */}
@@ -300,14 +390,17 @@ export default function AboutPage() {
                 <h3 className="mb-2 font-bold" style={{ color: 'var(--text)' }}>
                   {s.title}
                 </h3>
-                <p className="text-xs leading-relaxed" style={{ color: 'var(--muted2)' }}>
+                <p
+                  className="text-xs leading-relaxed"
+                  style={{ color: 'var(--muted2)' }}
+                >
                   {s.desc}
                 </p>
 
                 {/* Connector arrow (not last item) */}
                 {i < PIPELINE_STEPS.length - 1 && (
                   <div
-                    className="absolute -right-2 top-1/2 z-10 hidden -translate-y-1/2 text-lg lg:block"
+                    className="absolute top-1/2 -right-2 z-10 hidden -translate-y-1/2 text-lg lg:block"
                     style={{ color: 'var(--muted)' }}
                   >
                     →
@@ -318,7 +411,10 @@ export default function AboutPage() {
           </div>
 
           {/* Timeline bar */}
-          <div className="mt-8 flex items-center justify-center gap-3 text-xs" style={{ color: 'var(--muted)' }}>
+          <div
+            className="mt-8 flex items-center justify-center gap-3 text-xs"
+            style={{ color: 'var(--muted)' }}
+          >
             <span>⏰ 매일 06:40 자동 시작</span>
             <span>→</span>
             <span>약 15~20분 소요</span>
@@ -331,13 +427,22 @@ export default function AboutPage() {
       {/* ── AI Agent Crew ────────────────────────── */}
       <section className="px-4 py-16">
         <div className="mx-auto max-w-5xl">
-          <div className="mb-2 text-center text-sm font-semibold uppercase tracking-widest" style={{ color: 'var(--accent2)' }}>
+          <div
+            className="mb-2 text-center text-sm font-semibold tracking-widest uppercase"
+            style={{ color: 'var(--accent2)' }}
+          >
             AI 크루
           </div>
-          <h2 className="mb-3 text-center text-2xl font-bold" style={{ color: 'var(--text)' }}>
+          <h2
+            className="mb-3 text-center text-2xl font-bold"
+            style={{ color: 'var(--text)' }}
+          >
             5명의 AI Agent가 함께 일합니다
           </h2>
-          <p className="mb-12 text-center text-sm" style={{ color: 'var(--muted2)' }}>
+          <p
+            className="mb-12 text-center text-sm"
+            style={{ color: 'var(--muted2)' }}
+          >
             각 Agent는 전문 역할을 맡아 파이프라인을 분업 처리합니다
           </p>
 
@@ -356,7 +461,10 @@ export default function AboutPage() {
                   <span className="text-3xl">{agent.emoji}</span>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-bold" style={{ color: 'var(--text)' }}>
+                      <span
+                        className="font-bold"
+                        style={{ color: 'var(--text)' }}
+                      >
                         {agent.name}
                       </span>
                       <span
@@ -372,7 +480,10 @@ export default function AboutPage() {
                   </div>
                 </div>
 
-                <p className="mb-3 text-sm font-medium" style={{ color: 'var(--bmw-lt)' }}>
+                <p
+                  className="mb-3 text-sm font-medium"
+                  style={{ color: 'var(--bmw-lt)' }}
+                >
                   {agent.role}
                 </p>
 
@@ -385,7 +496,11 @@ export default function AboutPage() {
 
                 <ul className="space-y-1">
                   {agent.tasks.map((task) => (
-                    <li key={task} className="flex items-center gap-2 text-xs" style={{ color: 'var(--muted2)' }}>
+                    <li
+                      key={task}
+                      className="flex items-center gap-2 text-xs"
+                      style={{ color: 'var(--muted2)' }}
+                    >
                       <span style={{ color: 'var(--green)' }}>▸</span>
                       {task}
                     </li>
@@ -400,7 +515,10 @@ export default function AboutPage() {
       {/* ── Features ─────────────────────────────── */}
       <section className="px-4 py-16" style={{ background: 'var(--surface)' }}>
         <div className="mx-auto max-w-5xl">
-          <h2 className="mb-10 text-center text-2xl font-bold" style={{ color: 'var(--text)' }}>
+          <h2
+            className="mb-10 text-center text-2xl font-bold"
+            style={{ color: 'var(--text)' }}
+          >
             플랫폼 기능
           </h2>
 
@@ -416,10 +534,16 @@ export default function AboutPage() {
               >
                 <span className="shrink-0 text-2xl">{f.emoji}</span>
                 <div>
-                  <h3 className="mb-1 font-bold" style={{ color: 'var(--text)' }}>
+                  <h3
+                    className="mb-1 font-bold"
+                    style={{ color: 'var(--text)' }}
+                  >
                     {f.title}
                   </h3>
-                  <p className="text-xs leading-relaxed" style={{ color: 'var(--muted2)' }}>
+                  <p
+                    className="text-xs leading-relaxed"
+                    style={{ color: 'var(--muted2)' }}
+                  >
                     {f.desc}
                   </p>
                 </div>
@@ -432,7 +556,10 @@ export default function AboutPage() {
       {/* ── Stats ────────────────────────────────── */}
       <section className="px-4 py-16">
         <div className="mx-auto max-w-4xl">
-          <h2 className="mb-10 text-center text-2xl font-bold" style={{ color: 'var(--text)' }}>
+          <h2
+            className="mb-10 text-center text-2xl font-bold"
+            style={{ color: 'var(--text)' }}
+          >
             숫자로 보는 프로젝트
           </h2>
 
@@ -470,7 +597,10 @@ export default function AboutPage() {
       {/* ── Tech Stack ───────────────────────────── */}
       <section className="px-4 py-16" style={{ background: 'var(--surface)' }}>
         <div className="mx-auto max-w-4xl">
-          <h2 className="mb-10 text-center text-2xl font-bold" style={{ color: 'var(--text)' }}>
+          <h2
+            className="mb-10 text-center text-2xl font-bold"
+            style={{ color: 'var(--text)' }}
+          >
             기술 스택
           </h2>
 
@@ -485,7 +615,7 @@ export default function AboutPage() {
                 }}
               >
                 <h3
-                  className="mb-3 text-xs font-bold uppercase tracking-widest"
+                  className="mb-3 text-xs font-bold tracking-widest uppercase"
                   style={{ color: 'var(--muted)' }}
                 >
                   {group.category}
@@ -515,11 +645,15 @@ export default function AboutPage() {
       <section className="px-4 py-20 text-center">
         <div className="mx-auto max-w-2xl">
           <p className="mb-2 text-3xl">🤖</p>
-          <h2 className="mb-3 text-2xl font-bold" style={{ color: 'var(--text)' }}>
+          <h2
+            className="mb-3 text-2xl font-bold"
+            style={{ color: 'var(--text)' }}
+          >
             오늘 아침 뉴스가 기다리고 있어요
           </h2>
           <p className="mb-8 text-sm" style={{ color: 'var(--muted2)' }}>
-            매일 06:40에 자동 업데이트됩니다. 북마크 해두고 아침마다 확인해보세요.
+            매일 06:40에 자동 업데이트됩니다. 북마크 해두고 아침마다
+            확인해보세요.
           </p>
           <Link
             href="/"

@@ -6,7 +6,6 @@ import { WeatherWidget } from '@/components/dashboard/WeatherWidget'
 import { UserButton } from '@/components/layout/UserButton'
 
 export function Header() {
-
   return (
     <header className="site-header">
       {/* 상단 그라디언트 라인 */}
@@ -20,7 +19,9 @@ export function Header() {
             className="header-logo group"
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           >
-            <div className="header-logo-icon transition-transform group-hover:scale-110">🤖</div>
+            <div className="header-logo-icon transition-transform group-hover:scale-110">
+              🤖
+            </div>
             <div>
               <h1 className="header-title">시아아빠의 AI 데일리</h1>
               <p className="header-subtitle">
@@ -40,7 +41,6 @@ export function Header() {
           </div>
         </div>
       </div>
-
     </header>
   )
 }

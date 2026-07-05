@@ -1,16 +1,16 @@
 'use client'
 
 import { ExchangeWidget } from './ExchangeWidget'
-import { DxyWidget }     from './DxyWidget'
-import { KospiWidget }   from './KospiWidget'
-import { KosdaqWidget }  from './KosdaqWidget'
-import { NasdaqWidget }  from './NasdaqWidget'
-import { Sp500Widget }   from './Sp500Widget'
-import { VixWidget }     from './VixWidget'
-import { BtcWidget }     from './BtcWidget'
-import { EthWidget }     from './EthWidget'
-import { GoldWidget }    from './GoldWidget'
-import { OilWidget }     from './OilWidget'
+import { DxyWidget } from './DxyWidget'
+import { KospiWidget } from './KospiWidget'
+import { KosdaqWidget } from './KosdaqWidget'
+import { NasdaqWidget } from './NasdaqWidget'
+import { Sp500Widget } from './Sp500Widget'
+import { VixWidget } from './VixWidget'
+import { BtcWidget } from './BtcWidget'
+import { EthWidget } from './EthWidget'
+import { GoldWidget } from './GoldWidget'
+import { OilWidget } from './OilWidget'
 
 const Divider = () => <div className="dash-divider" />
 

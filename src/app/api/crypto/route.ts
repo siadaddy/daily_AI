@@ -13,11 +13,11 @@ export async function GET() {
     const eth = data?.ethereum
     return NextResponse.json({
       btc: {
-        krw:    Math.round(btc?.krw ?? 0),
+        krw: Math.round(btc?.krw ?? 0),
         change: Math.round((btc?.krw_24h_change ?? 0) * 10) / 10,
       },
       eth: {
-        krw:    Math.round(eth?.krw ?? 0),
+        krw: Math.round(eth?.krw ?? 0),
         change: Math.round((eth?.krw_24h_change ?? 0) * 10) / 10,
       },
     })

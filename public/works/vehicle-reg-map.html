@@ -1,370 +1,749 @@
-﻿<!DOCTYPE html>
+﻿<!doctype html>
 <html lang="ko">
-<head>
-<meta charset="utf-8"/>
-<title>BMW 등록대수 지도 — DEMO</title>
-<meta name="description" content="KIADA 공시 데이터를 크롤링해 행정구역별 BMW 등록 대수를 시도→시군구 드릴다운 choropleth 지도로 자동 시각화" />
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
-<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; overflow: hidden; }
-  body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background: #f1f5f9; }
-  #map { position: relative; width: 100%; height: 100vh; z-index: 0; }
+  <head>
+    <meta charset="utf-8" />
+    <title>BMW 등록대수 지도 — DEMO</title>
+    <meta
+      name="description"
+      content="KIADA 공시 데이터를 크롤링해 행정구역별 BMW 등록 대수를 시도→시군구 드릴다운 choropleth 지도로 자동 시각화"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+      }
+      body {
+        font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+        background: #f1f5f9;
+      }
+      #map {
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        z-index: 0;
+      }
 
-  #title-panel {
-    position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
-    z-index: 1000;
-    background: rgba(255,255,255,0.92);
-    border: 1px solid rgba(0,0,0,0.10);
-    border-radius: 12px; padding: 10px 22px; text-align: center;
-    backdrop-filter: blur(8px); box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-  }
-  #title-panel .main { font-size: 15px; font-weight: 700; color: #1e293b; letter-spacing: 0.03em; }
-  #title-panel .sub  { font-size: 11px; color: #64748b; margin-top: 2px; }
+      #title-panel {
+        position: fixed;
+        top: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        padding: 10px 22px;
+        text-align: center;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+      }
+      #title-panel .main {
+        font-size: 15px;
+        font-weight: 700;
+        color: #1e293b;
+        letter-spacing: 0.03em;
+      }
+      #title-panel .sub {
+        font-size: 11px;
+        color: #64748b;
+        margin-top: 2px;
+      }
 
-  #zoom-indicator {
-    position: fixed; top: 14px; right: 14px; z-index: 1000;
-    background: rgba(255,255,255,0.88); border: 1px solid rgba(0,0,0,0.10);
-    border-radius: 10px; padding: 8px 14px; font-size: 12px; color: #64748b;
-    backdrop-filter: blur(6px);
-  }
-  #zoom-indicator .level { font-size: 13px; font-weight: 700; color: #1e293b; margin-left: 4px; }
+      #zoom-indicator {
+        position: fixed;
+        top: 14px;
+        right: 14px;
+        z-index: 1000;
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        padding: 8px 14px;
+        font-size: 12px;
+        color: #64748b;
+        backdrop-filter: blur(6px);
+      }
+      #zoom-indicator .level {
+        font-size: 13px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-left: 4px;
+      }
 
-  #legend {
-    position: fixed; bottom: 30px; left: 14px; z-index: 1000;
-    background: rgba(255,255,255,0.92); border: 1px solid rgba(0,0,0,0.10);
-    border-radius: 12px; padding: 12px 16px;
-    backdrop-filter: blur(8px); box-shadow: 0 4px 20px rgba(0,0,0,0.12); min-width: 110px;
-  }
-  #legend .leg-title { font-size: 11px; color: #94a3b8; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.06em; text-transform: uppercase; }
-  .leg-item { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 12px; color: #334155; }
-  .leg-dot  { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+      #legend {
+        position: fixed;
+        bottom: 30px;
+        left: 14px;
+        z-index: 1000;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        padding: 12px 16px;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        min-width: 110px;
+      }
+      #legend .leg-title {
+        font-size: 11px;
+        color: #94a3b8;
+        font-weight: 600;
+        margin-bottom: 8px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .leg-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 5px;
+        font-size: 12px;
+        color: #334155;
+      }
+      .leg-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 3px;
+        flex-shrink: 0;
+      }
 
-  #choro-legend {
-    position: fixed; bottom: 30px; right: 14px; z-index: 1000;
-    background: rgba(255,255,255,0.92); border: 1px solid rgba(0,0,0,0.10);
-    border-radius: 12px; padding: 12px 16px;
-    backdrop-filter: blur(8px); box-shadow: 0 4px 20px rgba(0,0,0,0.12); min-width: 160px;
-  }
-  #choro-legend .leg-title { font-size: 11px; color: #94a3b8; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.06em; text-transform: uppercase; }
-  .choro-bar { height: 12px; border-radius: 4px; background: linear-gradient(to right, #fff5f0, #fc8d59, #d73027); margin-bottom: 4px; }
-  .choro-labels { display: flex; justify-content: space-between; font-size: 10px; color: #94a3b8; }
+      #choro-legend {
+        position: fixed;
+        bottom: 30px;
+        right: 14px;
+        z-index: 1000;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        padding: 12px 16px;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        min-width: 160px;
+      }
+      #choro-legend .leg-title {
+        font-size: 11px;
+        color: #94a3b8;
+        font-weight: 600;
+        margin-bottom: 8px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .choro-bar {
+        height: 12px;
+        border-radius: 4px;
+        background: linear-gradient(to right, #fff5f0, #fc8d59, #d73027);
+        margin-bottom: 4px;
+      }
+      .choro-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 10px;
+        color: #94a3b8;
+      }
 
-  #reset-btn {
-    position: fixed; top: 14px; left: 14px; z-index: 1000;
-    background: rgba(255,255,255,0.92); border: 1px solid rgba(0,0,0,0.10);
-    border-radius: 10px; padding: 8px 14px; font-size: 12px; color: #334155;
-    cursor: pointer; backdrop-filter: blur(6px); display: none;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-  }
-  #reset-btn:hover { background: #f1f5f9; }
+      #reset-btn {
+        position: fixed;
+        top: 14px;
+        left: 14px;
+        z-index: 1000;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        padding: 8px 14px;
+        font-size: 12px;
+        color: #334155;
+        cursor: pointer;
+        backdrop-filter: blur(6px);
+        display: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      #reset-btn:hover {
+        background: #f1f5f9;
+      }
 
-  .custom-tooltip {
-    background: rgba(255,255,255,0.97) !important;
-    border: 1px solid rgba(0,0,0,0.12) !important;
-    border-radius: 8px !important; color: #334155 !important;
-    font-size: 12px !important; padding: 8px 12px !important;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.12) !important; line-height: 1.7 !important;
-    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif !important;
-  }
-  .tt-name  { font-size: 13px; font-weight: 700; color: #1e293b; }
-  .tt-num   { color: #d97706; font-weight: 600; }
-  .tt-ratio { color: #2563eb; }
-  .tt-hint  { font-size: 10px; color: #94a3b8; margin-top: 4px; }
+      .custom-tooltip {
+        background: rgba(255, 255, 255, 0.97) !important;
+        border: 1px solid rgba(0, 0, 0, 0.12) !important;
+        border-radius: 8px !important;
+        color: #334155 !important;
+        font-size: 12px !important;
+        padding: 8px 12px !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+        line-height: 1.7 !important;
+        font-family:
+          'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif !important;
+      }
+      .tt-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: #1e293b;
+      }
+      .tt-num {
+        color: #d97706;
+        font-weight: 600;
+      }
+      .tt-ratio {
+        color: #2563eb;
+      }
+      .tt-hint {
+        font-size: 10px;
+        color: #94a3b8;
+        margin-top: 4px;
+      }
 
-  .region-label {
-    background: transparent; border: none; font-weight: 700;
-    text-align: center; pointer-events: none;
-    text-shadow: 0 0 3px #fff, 0 0 3px #fff, 1px 1px 2px #fff, -1px -1px 2px #fff;
-    line-height: 1.2; white-space: nowrap;
-  }
-  .region-label .r-name { font-size: 10px; color: #475569; }
-  .region-label .r-num  { font-size: 12px; color: #b45309; font-weight: 800; }
+      .region-label {
+        background: transparent;
+        border: none;
+        font-weight: 700;
+        text-align: center;
+        pointer-events: none;
+        text-shadow:
+          0 0 3px #fff,
+          0 0 3px #fff,
+          1px 1px 2px #fff,
+          -1px -1px 2px #fff;
+        line-height: 1.2;
+        white-space: nowrap;
+      }
+      .region-label .r-name {
+        font-size: 10px;
+        color: #475569;
+      }
+      .region-label .r-num {
+        font-size: 12px;
+        color: #b45309;
+        font-weight: 800;
+      }
 
-  .sc-marker {
-    padding: 4px 9px; border-radius: 6px; font-size: 10px; font-weight: 700;
-    color: #fff; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.35);
-    cursor: pointer; letter-spacing: 0.03em;
-  }
+      .sc-marker {
+        padding: 4px 9px;
+        border-radius: 6px;
+        font-size: 10px;
+        font-weight: 700;
+        color: #fff;
+        white-space: nowrap;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+        cursor: pointer;
+        letter-spacing: 0.03em;
+      }
 
-  #dealer-toggle {
-    display: inline-block; margin-top: 10px; padding: 5px 10px;
-    background: #1e293b; color: #fff; border: none; border-radius: 6px;
-    font-size: 11px; cursor: pointer; width: 100%; text-align: center;
-  }
-  #dealer-toggle:hover { background: #334155; }
-  #dealer-toggle.off { background: #94a3b8; }
+      #dealer-toggle {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 5px 10px;
+        background: #1e293b;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 11px;
+        cursor: pointer;
+        width: 100%;
+        text-align: center;
+      }
+      #dealer-toggle:hover {
+        background: #334155;
+      }
+      #dealer-toggle.off {
+        background: #94a3b8;
+      }
 
-  .leaflet-control-zoom a {
-    background: rgba(255,255,255,0.9) !important; color: #1e293b !important;
-    border-color: rgba(0,0,0,0.15) !important;
-  }
-  .leaflet-control-zoom a:hover { background: rgba(241,245,249,0.95) !important; }
+      .leaflet-control-zoom a {
+        background: rgba(255, 255, 255, 0.9) !important;
+        color: #1e293b !important;
+        border-color: rgba(0, 0, 0, 0.15) !important;
+      }
+      .leaflet-control-zoom a:hover {
+        background: rgba(241, 245, 249, 0.95) !important;
+      }
 
-  #loading {
-    position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
-    z-index: 2000; background: rgba(255,255,255,0.95); border-radius: 12px;
-    padding: 20px 32px; font-size: 13px; color: #475569;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.12); border: 1px solid rgba(0,0,0,0.08);
-  }
-</style>
-</head>
-<body>
-<a href="/?tab=portfolio" style="position:fixed;top:12px;left:12px;z-index:9999;display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:rgba(255,255,255,0.92);border:1px solid rgba(0,0,0,0.12);border-radius:20px;font-size:12px;font-weight:600;color:#1e293b;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,0.12);font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;backdrop-filter:blur(8px);transition:all 0.15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='rgba(255,255,255,0.92)'">← 포트폴리오</a>
-<div id="map"></div>
-<div id="loading">🗺 지도 데이터 불러오는 중...</div>
+      #loading {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2000;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        padding: 20px 32px;
+        font-size: 13px;
+        color: #475569;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+      }
+    </style>
+  </head>
+  <body>
+    <a
+      href="/?tab=portfolio"
+      style="
+        position: fixed;
+        top: 12px;
+        left: 12px;
+        z-index: 9999;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 7px 14px;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #1e293b;
+        text-decoration: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+        backdrop-filter: blur(8px);
+        transition: all 0.15s;
+      "
+      onmouseover="this.style.background = '#f1f5f9'"
+      onmouseout="this.style.background = 'rgba(255,255,255,0.92)'"
+      >← 포트폴리오</a
+    >
+    <div id="map"></div>
+    <div id="loading">🗺 지도 데이터 불러오는 중...</div>
 
-<div id="title-panel">
-  <div class="main">📍 BMW 차량 등록대수 시각화</div>
-  <div class="sub">🗓 적용 기간 : 2021-05 ~ 2026-05 &nbsp;|&nbsp; DEMO 데이터</div>
-</div>
+    <div id="title-panel">
+      <div class="main">📍 BMW 차량 등록대수 시각화</div>
+      <div class="sub">
+        🗓 적용 기간 : 2021-05 ~ 2026-05 &nbsp;|&nbsp; DEMO 데이터
+      </div>
+    </div>
 
-<div id="zoom-indicator">현재 단계: <span class="level" id="zoom-label">시도</span></div>
-<button id="reset-btn" onclick="resetHighlight()">✕ 전체 보기</button>
+    <div id="zoom-indicator">
+      현재 단계: <span class="level" id="zoom-label">시도</span>
+    </div>
+    <button id="reset-btn" onclick="resetHighlight()">✕ 전체 보기</button>
 
-<div id="legend">
-  <div class="leg-title">🚘 딜러</div>
-  <div id="leg-body"></div>
-  <button id="dealer-toggle" onclick="toggleDealers()">👁 마커 숨기기</button>
-</div>
+    <div id="legend">
+      <div class="leg-title">🚘 딜러</div>
+      <div id="leg-body"></div>
+      <button id="dealer-toggle" onclick="toggleDealers()">
+        👁 마커 숨기기
+      </button>
+    </div>
 
-<div id="choro-legend">
-  <div class="leg-title">📊 BMW 등록대수</div>
-  <div class="choro-bar"></div>
-  <div class="choro-labels"><span>적음</span><span>많음</span></div>
-  <div style="margin-top:8px;font-size:10px;color:#94a3b8;" id="choro-unit">단위: 시도별</div>
-</div>
+    <div id="choro-legend">
+      <div class="leg-title">📊 BMW 등록대수</div>
+      <div class="choro-bar"></div>
+      <div class="choro-labels"><span>적음</span><span>많음</span></div>
+      <div
+        style="margin-top: 8px; font-size: 10px; color: #94a3b8"
+        id="choro-unit"
+      >
+        단위: 시도별
+      </div>
+    </div>
 
-<script>
-// ── DEMO DATA ──────────────────────────────────────────────
-const SIDO_TOTAL = {
-  '11': 85432,   // 서울
-  '26': 38291,   // 부산
-  '27': 22547,   // 대구
-  '28': 29184,   // 인천
-  '29': 15832,   // 광주
-  '30': 18294,   // 대전
-  '31': 12873,   // 울산
-  '36': 4521,    // 세종
-  '41': 112847,  // 경기
-  '42': 11283,   // 강원
-  '43': 9847,    // 충북
-  '44': 13291,   // 충남
-  '45': 10543,   // 전북
-  '46': 8932,    // 전남
-  '47': 15847,   // 경북
-  '48': 18921,   // 경남
-  '50': 7287,    // 제주
-};
+    <script>
+      // ── DEMO DATA ──────────────────────────────────────────────
+      const SIDO_TOTAL = {
+        11: 85432, // 서울
+        26: 38291, // 부산
+        27: 22547, // 대구
+        28: 29184, // 인천
+        29: 15832, // 광주
+        30: 18294, // 대전
+        31: 12873, // 울산
+        36: 4521, // 세종
+        41: 112847, // 경기
+        42: 11283, // 강원
+        43: 9847, // 충북
+        44: 13291, // 충남
+        45: 10543, // 전북
+        46: 8932, // 전남
+        47: 15847, // 경북
+        48: 18921, // 경남
+        50: 7287, // 제주
+      }
 
-// 실명 매핑
-const NAME_TO_SIDO = {
-  '서울특별시':'11','부산광역시':'26','대구광역시':'27','인천광역시':'28',
-  '광주광역시':'29','대전광역시':'30','울산광역시':'31','세종특별자치시':'36',
-  '경기도':'41','강원특별자치도':'42','강원도':'42',
-  '충청북도':'43','충청남도':'44',
-  '전라북도':'45','전북특별자치도':'45',
-  '전라남도':'46','경상북도':'47','경상남도':'48','제주특별자치도':'50'
-};
+      // 실명 매핑
+      const NAME_TO_SIDO = {
+        서울특별시: '11',
+        부산광역시: '26',
+        대구광역시: '27',
+        인천광역시: '28',
+        광주광역시: '29',
+        대전광역시: '30',
+        울산광역시: '31',
+        세종특별자치시: '36',
+        경기도: '41',
+        강원특별자치도: '42',
+        강원도: '42',
+        충청북도: '43',
+        충청남도: '44',
+        전라북도: '45',
+        전북특별자치도: '45',
+        전라남도: '46',
+        경상북도: '47',
+        경상남도: '48',
+        제주특별자치도: '50',
+      }
 
-const DEALER_COLORS = { KL:'#D4880A', DT:'#D95B1A', HD:'#B03060', BV:'#6C3483', DS:'#0E7490', SCL:'#0055FF', NT:'#1A6B3A' };
-const DEALER_ORDER  = ['KL','DT','HD','BV','DS','SCL','NT'];
+      const DEALER_COLORS = {
+        KL: '#D4880A',
+        DT: '#D95B1A',
+        HD: '#B03060',
+        BV: '#6C3483',
+        DS: '#0E7490',
+        SCL: '#0055FF',
+        NT: '#1A6B3A',
+      }
+      const DEALER_ORDER = ['KL', 'DT', 'HD', 'BV', 'DS', 'SCL', 'NT']
 
-const MARKERS = [
-  { workshop:'강남서비스',    dealer:'KL',  lat:37.517, lon:127.051, color:'#D4880A' },
-  { workshop:'강서서비스',    dealer:'DT',  lat:37.551, lon:126.850, color:'#D95B1A' },
-  { workshop:'수원서비스',    dealer:'HD',  lat:37.270, lon:127.029, color:'#B03060' },
-  { workshop:'분당서비스',    dealer:'SCL', lat:37.384, lon:127.125, color:'#0055FF' },
-  { workshop:'인천서비스',    dealer:'KL',  lat:37.411, lon:126.690, color:'#D4880A' },
-  { workshop:'부산서비스',    dealer:'DT',  lat:35.163, lon:129.168, color:'#D95B1A' },
-  { workshop:'대구서비스',    dealer:'HD',  lat:35.859, lon:128.637, color:'#B03060' },
-  { workshop:'대전서비스',    dealer:'BV',  lat:36.362, lon:127.362, color:'#6C3483' },
-  { workshop:'광주서비스',    dealer:'DS',  lat:35.153, lon:126.856, color:'#0E7490' },
-  { workshop:'울산서비스',    dealer:'NT',  lat:35.545, lon:129.318, color:'#1A6B3A' },
-  { workshop:'창원서비스',    dealer:'KL',  lat:35.232, lon:128.681, color:'#D4880A' },
-  { workshop:'청주서비스',    dealer:'DT',  lat:36.642, lon:127.489, color:'#D95B1A' },
-];
+      const MARKERS = [
+        {
+          workshop: '강남서비스',
+          dealer: 'KL',
+          lat: 37.517,
+          lon: 127.051,
+          color: '#D4880A',
+        },
+        {
+          workshop: '강서서비스',
+          dealer: 'DT',
+          lat: 37.551,
+          lon: 126.85,
+          color: '#D95B1A',
+        },
+        {
+          workshop: '수원서비스',
+          dealer: 'HD',
+          lat: 37.27,
+          lon: 127.029,
+          color: '#B03060',
+        },
+        {
+          workshop: '분당서비스',
+          dealer: 'SCL',
+          lat: 37.384,
+          lon: 127.125,
+          color: '#0055FF',
+        },
+        {
+          workshop: '인천서비스',
+          dealer: 'KL',
+          lat: 37.411,
+          lon: 126.69,
+          color: '#D4880A',
+        },
+        {
+          workshop: '부산서비스',
+          dealer: 'DT',
+          lat: 35.163,
+          lon: 129.168,
+          color: '#D95B1A',
+        },
+        {
+          workshop: '대구서비스',
+          dealer: 'HD',
+          lat: 35.859,
+          lon: 128.637,
+          color: '#B03060',
+        },
+        {
+          workshop: '대전서비스',
+          dealer: 'BV',
+          lat: 36.362,
+          lon: 127.362,
+          color: '#6C3483',
+        },
+        {
+          workshop: '광주서비스',
+          dealer: 'DS',
+          lat: 35.153,
+          lon: 126.856,
+          color: '#0E7490',
+        },
+        {
+          workshop: '울산서비스',
+          dealer: 'NT',
+          lat: 35.545,
+          lon: 129.318,
+          color: '#1A6B3A',
+        },
+        {
+          workshop: '창원서비스',
+          dealer: 'KL',
+          lat: 35.232,
+          lon: 128.681,
+          color: '#D4880A',
+        },
+        {
+          workshop: '청주서비스',
+          dealer: 'DT',
+          lat: 36.642,
+          lon: 127.489,
+          color: '#D95B1A',
+        },
+      ]
 
-// ── COLOR ──────────────────────────────────────────────────
-function choroplethColor(val, max) {
-  if (!val || val <= 0) return 'rgba(255,255,255,0.04)';
-  const t = Math.sqrt(val / max);
-  if (t < 0.5) {
-    const r = Math.round(255 + (252-255)*(t/0.5));
-    const g = Math.round(245 + (141-245)*(t/0.5));
-    const b = Math.round(240 + (89-240)*(t/0.5));
-    return `rgba(${r},${g},${b},0.75)`;
-  } else {
-    const s = (t-0.5)/0.5;
-    const r = Math.round(252 + (215-252)*s);
-    const g = Math.round(141 + (48-141)*s);
-    const b = Math.round(89  + (39-89)*s);
-    return `rgba(${r},${g},${b},0.80)`;
-  }
-}
-function fmt(n) { return n ? Number(n).toLocaleString() : '-'; }
-function fmt2k(n) { return n >= 10000 ? (n/10000).toFixed(1)+'만' : Number(n).toLocaleString(); }
+      // ── COLOR ──────────────────────────────────────────────────
+      function choroplethColor(val, max) {
+        if (!val || val <= 0) return 'rgba(255,255,255,0.04)'
+        const t = Math.sqrt(val / max)
+        if (t < 0.5) {
+          const r = Math.round(255 + (252 - 255) * (t / 0.5))
+          const g = Math.round(245 + (141 - 245) * (t / 0.5))
+          const b = Math.round(240 + (89 - 240) * (t / 0.5))
+          return `rgba(${r},${g},${b},0.75)`
+        } else {
+          const s = (t - 0.5) / 0.5
+          const r = Math.round(252 + (215 - 252) * s)
+          const g = Math.round(141 + (48 - 141) * s)
+          const b = Math.round(89 + (39 - 89) * s)
+          return `rgba(${r},${g},${b},0.80)`
+        }
+      }
+      function fmt(n) {
+        return n ? Number(n).toLocaleString() : '-'
+      }
+      function fmt2k(n) {
+        return n >= 10000
+          ? (n / 10000).toFixed(1) + '만'
+          : Number(n).toLocaleString()
+      }
 
-// ── MAP ────────────────────────────────────────────────────
-const map = L.map('map', { center:[36.5,127.8], zoom:7, zoomControl:true });
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-  attribution:'&copy; OpenStreetMap &copy; CARTO', maxZoom:18
-}).addTo(map);
+      // ── MAP ────────────────────────────────────────────────────
+      const map = L.map('map', {
+        center: [36.5, 127.8],
+        zoom: 7,
+        zoomControl: true,
+      })
+      L.tileLayer(
+        'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+        {
+          attribution: '&copy; OpenStreetMap &copy; CARTO',
+          maxZoom: 18,
+        }
+      ).addTo(map)
 
-// ── FETCH GEOJSON & BUILD LAYERS ───────────────────────────
-let sidoGeoJSON = null;
-let sidoLayer = null, sidoLabels = null;
-let selectedSido = null;
+      // ── FETCH GEOJSON & BUILD LAYERS ───────────────────────────
+      let sidoGeoJSON = null
+      let sidoLayer = null,
+        sidoLabels = null
+      let selectedSido = null
 
-const maxSido = Math.max(...Object.values(SIDO_TOTAL));
-const totalSido = Object.values(SIDO_TOTAL).reduce((a,b)=>a+b,0);
+      const maxSido = Math.max(...Object.values(SIDO_TOTAL))
+      const totalSido = Object.values(SIDO_TOTAL).reduce((a, b) => a + b, 0)
 
-function getSidoCode(props) {
-  const names = [props.CTP_KOR_NM, props.name, props.name_kor, props.sidonm, props.NM_KOR];
-  for (const nm of names) {
-    if (nm && NAME_TO_SIDO[nm]) return NAME_TO_SIDO[nm];
-  }
-  // fallback: partial match
-  const allNames = Object.keys(NAME_TO_SIDO);
-  for (const nm of names) {
-    if (!nm) continue;
-    for (const key of allNames) {
-      if (nm.includes(key.slice(0,2)) || key.includes(nm.slice(0,2))) return NAME_TO_SIDO[key];
-    }
-  }
-  return null;
-}
+      function getSidoCode(props) {
+        const names = [
+          props.CTP_KOR_NM,
+          props.name,
+          props.name_kor,
+          props.sidonm,
+          props.NM_KOR,
+        ]
+        for (const nm of names) {
+          if (nm && NAME_TO_SIDO[nm]) return NAME_TO_SIDO[nm]
+        }
+        // fallback: partial match
+        const allNames = Object.keys(NAME_TO_SIDO)
+        for (const nm of names) {
+          if (!nm) continue
+          for (const key of allNames) {
+            if (nm.includes(key.slice(0, 2)) || key.includes(nm.slice(0, 2)))
+              return NAME_TO_SIDO[key]
+          }
+        }
+        return null
+      }
 
-function getSidoName(props) {
-  return props.CTP_KOR_NM || props.name || props.name_kor || props.sidonm || props.NM_KOR || '알 수 없음';
-}
+      function getSidoName(props) {
+        return (
+          props.CTP_KOR_NM ||
+          props.name ||
+          props.name_kor ||
+          props.sidonm ||
+          props.NM_KOR ||
+          '알 수 없음'
+        )
+      }
 
-function calcCentroid(geometry) {
-  const coords = geometry.coordinates;
-  let sumLat=0, sumLng=0, cnt=0;
-  function processRing(ring) { ring.forEach(pt => { sumLng+=pt[0]; sumLat+=pt[1]; cnt++; }); }
-  try {
-    if (geometry.type === 'Polygon') {
-      coords.forEach(ring => processRing(ring));
-    } else if (geometry.type === 'MultiPolygon') {
-      let maxLen=0, best=coords[0][0];
-      coords.forEach(poly => { if(poly[0].length>maxLen){ maxLen=poly[0].length; best=poly[0]; } });
-      processRing(best);
-    }
-  } catch(e) {}
-  return cnt ? L.latLng(sumLat/cnt, sumLng/cnt) : null;
-}
+      function calcCentroid(geometry) {
+        const coords = geometry.coordinates
+        let sumLat = 0,
+          sumLng = 0,
+          cnt = 0
+        function processRing(ring) {
+          ring.forEach((pt) => {
+            sumLng += pt[0]
+            sumLat += pt[1]
+            cnt++
+          })
+        }
+        try {
+          if (geometry.type === 'Polygon') {
+            coords.forEach((ring) => processRing(ring))
+          } else if (geometry.type === 'MultiPolygon') {
+            let maxLen = 0,
+              best = coords[0][0]
+            coords.forEach((poly) => {
+              if (poly[0].length > maxLen) {
+                maxLen = poly[0].length
+                best = poly[0]
+              }
+            })
+            processRing(best)
+          }
+        } catch (e) {}
+        return cnt ? L.latLng(sumLat / cnt, sumLng / cnt) : null
+      }
 
-function buildSidoLayer(geojson) {
-  return L.geoJSON(geojson, {
-    style: f => {
-      const code = getSidoCode(f.properties);
-      const v = code ? (SIDO_TOTAL[code] || 0) : 0;
-      return { fillColor: choroplethColor(v, maxSido), color:'#475569', weight:1.5, fillOpacity:1 };
-    },
-    onEachFeature: (f, layer) => {
-      const code = getSidoCode(f.properties);
-      const v = code ? (SIDO_TOTAL[code] || 0) : 0;
-      const nm = getSidoName(f.properties);
-      const pct = totalSido ? (v/totalSido*100).toFixed(1) : '0.0';
-      layer.bindTooltip(`
+      function buildSidoLayer(geojson) {
+        return L.geoJSON(geojson, {
+          style: (f) => {
+            const code = getSidoCode(f.properties)
+            const v = code ? SIDO_TOTAL[code] || 0 : 0
+            return {
+              fillColor: choroplethColor(v, maxSido),
+              color: '#475569',
+              weight: 1.5,
+              fillOpacity: 1,
+            }
+          },
+          onEachFeature: (f, layer) => {
+            const code = getSidoCode(f.properties)
+            const v = code ? SIDO_TOTAL[code] || 0 : 0
+            const nm = getSidoName(f.properties)
+            const pct = totalSido ? ((v / totalSido) * 100).toFixed(1) : '0.0'
+            layer.bindTooltip(
+              `
         <div class="tt-name">${nm}</div>
         <div>등록대수: <span class="tt-num">${fmt(v)}</span></div>
         <div>비율: <span class="tt-ratio">${pct}%</span></div>
         <div class="tt-hint">🔍 클릭 → 시군구 드릴다운 (실 데이터 미포함)</div>
-      `, {className:'custom-tooltip', sticky:true});
-    }
-  });
-}
+      `,
+              { className: 'custom-tooltip', sticky: true }
+            )
+          },
+        })
+      }
 
-function buildSidoLabels(geojson) {
-  const group = L.layerGroup();
-  geojson.features.forEach(f => {
-    const code = getSidoCode(f.properties);
-    const v = code ? (SIDO_TOTAL[code] || 0) : 0;
-    if (!v) return;
-    const center = calcCentroid(f.geometry);
-    if (!center) return;
-    const nm = getSidoName(f.properties);
-    const shortNm = nm.replace('특별시','').replace('광역시','').replace('특별자치시','').replace('특별자치도','').replace('도','').replace('특별자치도','');
-    const el = document.createElement('div');
-    el.className = 'region-label';
-    el.innerHTML = `<div class="r-name">${shortNm}</div><div class="r-num">${fmt2k(v)}</div>`;
-    const icon = L.divIcon({ html: el, className: '', iconSize: null, iconAnchor: [0, 0] });
-    group.addLayer(L.marker(center, { icon, interactive: false, keyboard: false }));
-  });
-  return group;
-}
+      function buildSidoLabels(geojson) {
+        const group = L.layerGroup()
+        geojson.features.forEach((f) => {
+          const code = getSidoCode(f.properties)
+          const v = code ? SIDO_TOTAL[code] || 0 : 0
+          if (!v) return
+          const center = calcCentroid(f.geometry)
+          if (!center) return
+          const nm = getSidoName(f.properties)
+          const shortNm = nm
+            .replace('특별시', '')
+            .replace('광역시', '')
+            .replace('특별자치시', '')
+            .replace('특별자치도', '')
+            .replace('도', '')
+            .replace('특별자치도', '')
+          const el = document.createElement('div')
+          el.className = 'region-label'
+          el.innerHTML = `<div class="r-name">${shortNm}</div><div class="r-num">${fmt2k(v)}</div>`
+          const icon = L.divIcon({
+            html: el,
+            className: '',
+            iconSize: null,
+            iconAnchor: [0, 0],
+          })
+          group.addLayer(
+            L.marker(center, { icon, interactive: false, keyboard: false })
+          )
+        })
+        return group
+      }
 
-// ── 딜러 마커 ──────────────────────────────────────────────
-const scGroup = L.featureGroup();
-MARKERS.forEach(m => {
-  const el = document.createElement('div');
-  el.className = 'sc-marker';
-  el.style.background = m.color;
-  el.textContent = m.workshop;
-  const icon = L.divIcon({ html:el, className:'', iconAnchor:[0,12] });
-  const mk = L.marker([m.lat, m.lon], { icon });
-  mk.bindTooltip(`<div class="tt-name">${m.workshop}</div><div style="font-size:11px;color:#94a3b8;">${m.dealer}</div>`, {className:'custom-tooltip'});
-  scGroup.addLayer(mk);
-});
-scGroup.addTo(map);
+      // ── 딜러 마커 ──────────────────────────────────────────────
+      const scGroup = L.featureGroup()
+      MARKERS.forEach((m) => {
+        const el = document.createElement('div')
+        el.className = 'sc-marker'
+        el.style.background = m.color
+        el.textContent = m.workshop
+        const icon = L.divIcon({ html: el, className: '', iconAnchor: [0, 12] })
+        const mk = L.marker([m.lat, m.lon], { icon })
+        mk.bindTooltip(
+          `<div class="tt-name">${m.workshop}</div><div style="font-size:11px;color:#94a3b8;">${m.dealer}</div>`,
+          { className: 'custom-tooltip' }
+        )
+        scGroup.addLayer(mk)
+      })
+      scGroup.addTo(map)
 
-// ── 범례 ───────────────────────────────────────────────────
-const legBody = document.getElementById('leg-body');
-DEALER_ORDER.forEach(d => {
-  if (!DEALER_COLORS[d]) return;
-  legBody.innerHTML += `<div class="leg-item"><div class="leg-dot" style="background:${DEALER_COLORS[d]};"></div><span>${d}</span></div>`;
-});
+      // ── 범례 ───────────────────────────────────────────────────
+      const legBody = document.getElementById('leg-body')
+      DEALER_ORDER.forEach((d) => {
+        if (!DEALER_COLORS[d]) return
+        legBody.innerHTML += `<div class="leg-item"><div class="leg-dot" style="background:${DEALER_COLORS[d]};"></div><span>${d}</span></div>`
+      })
 
-// ── GeoJSON fetch ──────────────────────────────────────────
-const GEOJSON_URLS = [
-  'https://cdn.jsdelivr.net/gh/southkorea/southkorea-maps@master/kostat/2018/json/skorea-provinces-2018-geo.json',
-  'https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2018/json/skorea-provinces-2018-geo.json',
-];
+      // ── GeoJSON fetch ──────────────────────────────────────────
+      const GEOJSON_URLS = [
+        'https://cdn.jsdelivr.net/gh/southkorea/southkorea-maps@master/kostat/2018/json/skorea-provinces-2018-geo.json',
+        'https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2018/json/skorea-provinces-2018-geo.json',
+      ]
 
-async function loadGeoJSON() {
-  for (const url of GEOJSON_URLS) {
-    try {
-      const res = await fetch(url);
-      if (!res.ok) continue;
-      return await res.json();
-    } catch(e) { continue; }
-  }
-  return null;
-}
+      async function loadGeoJSON() {
+        for (const url of GEOJSON_URLS) {
+          try {
+            const res = await fetch(url)
+            if (!res.ok) continue
+            return await res.json()
+          } catch (e) {
+            continue
+          }
+        }
+        return null
+      }
 
-loadGeoJSON().then(geojson => {
-  document.getElementById('loading').style.display = 'none';
-  if (!geojson) {
-    // fallback: circle markers (already shown via scGroup)
-    document.getElementById('zoom-label').textContent = '(지도 없음)';
-    return;
-  }
-  sidoGeoJSON = geojson;
-  sidoLayer = buildSidoLayer(geojson);
-  sidoLabels = buildSidoLabels(geojson);
-  sidoLayer.addTo(map);
-  sidoLabels.addTo(map);
-  scGroup.bringToFront();
-}).catch(() => {
-  document.getElementById('loading').style.display = 'none';
-});
+      loadGeoJSON()
+        .then((geojson) => {
+          document.getElementById('loading').style.display = 'none'
+          if (!geojson) {
+            // fallback: circle markers (already shown via scGroup)
+            document.getElementById('zoom-label').textContent = '(지도 없음)'
+            return
+          }
+          sidoGeoJSON = geojson
+          sidoLayer = buildSidoLayer(geojson)
+          sidoLabels = buildSidoLabels(geojson)
+          sidoLayer.addTo(map)
+          sidoLabels.addTo(map)
+          scGroup.bringToFront()
+        })
+        .catch(() => {
+          document.getElementById('loading').style.display = 'none'
+        })
 
-// ── 딜러 토글 ──────────────────────────────────────────────
-let dealerVisible = true;
-function toggleDealers() {
-  dealerVisible = !dealerVisible;
-  const btn = document.getElementById('dealer-toggle');
-  if (dealerVisible) { scGroup.addTo(map); btn.textContent='👁 마커 숨기기'; btn.classList.remove('off'); }
-  else { map.removeLayer(scGroup); btn.textContent='🙈 마커 보이기'; btn.classList.add('off'); }
-}
+      // ── 딜러 토글 ──────────────────────────────────────────────
+      let dealerVisible = true
+      function toggleDealers() {
+        dealerVisible = !dealerVisible
+        const btn = document.getElementById('dealer-toggle')
+        if (dealerVisible) {
+          scGroup.addTo(map)
+          btn.textContent = '👁 마커 숨기기'
+          btn.classList.remove('off')
+        } else {
+          map.removeLayer(scGroup)
+          btn.textContent = '🙈 마커 보이기'
+          btn.classList.add('off')
+        }
+      }
 
-function resetHighlight() {
-  document.getElementById('reset-btn').style.display = 'none';
-}
-</script>
-</body>
+      function resetHighlight() {
+        document.getElementById('reset-btn').style.display = 'none'
+      }
+    </script>
+  </body>
 </html>

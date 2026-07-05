@@ -3,14 +3,14 @@ import { NextResponse } from 'next/server'
 export const revalidate = 300 // 5분 캐시
 
 const TICKERS: Record<string, string> = {
-  kospi:  '%5EKS11',
+  kospi: '%5EKS11',
   kosdaq: '%5EKQ11',
   nasdaq: '%5EIXIC',
-  sp500:  '%5EGSPC',
-  vix:    '%5EVIX',
-  gold:   'GC%3DF',
-  oil:    'CL%3DF',
-  dxy:    'DX-Y.NYB',
+  sp500: '%5EGSPC',
+  vix: '%5EVIX',
+  gold: 'GC%3DF',
+  oil: 'CL%3DF',
+  dxy: 'DX-Y.NYB',
 }
 
 async function fetchTicker(encoded: string) {
@@ -27,8 +27,8 @@ async function fetchTicker(encoded: string) {
   const meta = data?.chart?.result?.[0]?.meta
   if (!meta) return { price: null, change: null }
 
-  const price  = Math.round((meta.regularMarketPrice ?? 0) * 100) / 100
-  const prev   = meta.chartPreviousClose ?? meta.previousClose ?? price
+  const price = Math.round((meta.regularMarketPrice ?? 0) * 100) / 100
+  const prev = meta.chartPreviousClose ?? meta.previousClose ?? price
   const change = prev ? Math.round(((price - prev) / prev) * 1000) / 10 : 0
   return { price, change }
 }

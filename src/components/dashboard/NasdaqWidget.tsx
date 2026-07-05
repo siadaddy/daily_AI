@@ -3,7 +3,10 @@
 import { useEffect, useState } from 'react'
 
 export function NasdaqWidget() {
-  const [data, setData] = useState<{ price: number | null; change: number | null } | null>(null)
+  const [data, setData] = useState<{
+    price: number | null
+    change: number | null
+  } | null>(null)
 
   useEffect(() => {
     fetch('/api/market')
@@ -24,7 +27,12 @@ export function NasdaqWidget() {
         <p className="dash-label">
           NASDAQ&nbsp;
           {data?.change != null && data.price && (
-            <span style={{ color: up ? 'var(--red)' : 'var(--blue)', fontWeight: 700 }}>
+            <span
+              style={{
+                color: up ? 'var(--red)' : 'var(--blue)',
+                fontWeight: 700,
+              }}
+            >
               {up ? '▲' : '▼'} {Math.abs(data.change)}%
             </span>
           )}

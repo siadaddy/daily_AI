@@ -5,9 +5,18 @@
  */
 export function highlightCaption(text: string): string {
   return text
-    .replace(/\[사실\]/g, '<span style="color:var(--green);font-weight:700">[사실]</span>')
-    .replace(/\[분석\]/g, '<span style="color:#60a5fa;font-weight:700">[분석]</span>')
-    .replace(/\[전망\]/g, '<span style="color:var(--accent2);font-weight:700">[전망]</span>')
+    .replace(
+      /\[사실\]/g,
+      '<span style="color:var(--green);font-weight:700">[사실]</span>'
+    )
+    .replace(
+      /\[분석\]/g,
+      '<span style="color:#60a5fa;font-weight:700">[분석]</span>'
+    )
+    .replace(
+      /\[전망\]/g,
+      '<span style="color:var(--accent2);font-weight:700">[전망]</span>'
+    )
     .replace(/\n/g, '<br/>')
 }
 
@@ -28,28 +37,50 @@ export function mdToHtml(md: string): string {
     const l = line.trim()
 
     if (l.startsWith('### ')) {
-      if (inList) { html += '</ul>'; inList = false }
+      if (inList) {
+        html += '</ul>'
+        inList = false
+      }
       html += `<h3>${l.slice(4)}</h3>`
     } else if (l.startsWith('## ')) {
-      if (inList) { html += '</ul>'; inList = false }
+      if (inList) {
+        html += '</ul>'
+        inList = false
+      }
       html += `<h2>${l.slice(3)}</h2>`
     } else if (l.startsWith('# ')) {
-      if (inList) { html += '</ul>'; inList = false }
+      if (inList) {
+        html += '</ul>'
+        inList = false
+      }
       html += `<h1>${l.slice(2)}</h1>`
     } else if (l.startsWith('> ')) {
-      if (inList) { html += '</ul>'; inList = false }
+      if (inList) {
+        html += '</ul>'
+        inList = false
+      }
       html += `<blockquote>${l.slice(2)}</blockquote>`
     } else if (l.startsWith('- ')) {
-      if (!inList) { html += '<ul>'; inList = true }
+      if (!inList) {
+        html += '<ul>'
+        inList = true
+      }
       html += `<li>${l.slice(2)}</li>`
     } else if (isHashtagLine(l)) {
-      if (inList) { html += '</ul>'; inList = false }
-      const tags = l.split(/\s+/).map((t) =>
-        `<span class="article-tag">${t}</span>`
-      ).join('')
+      if (inList) {
+        html += '</ul>'
+        inList = false
+      }
+      const tags = l
+        .split(/\s+/)
+        .map((t) => `<span class="article-tag">${t}</span>`)
+        .join('')
       html += `<div class="article-tags">${tags}</div>`
     } else if (l) {
-      if (inList) { html += '</ul>'; inList = false }
+      if (inList) {
+        html += '</ul>'
+        inList = false
+      }
       html += `<p>${l}</p>`
     }
   }

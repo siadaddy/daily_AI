@@ -22,7 +22,9 @@ export function RawNewsSection({ news }: { news: NewsCard[] }) {
   const [open, setOpen] = useState(false)
 
   const filtered =
-    categoryFilter === '전체' ? news : news.filter((n) => n.category === categoryFilter)
+    categoryFilter === '전체'
+      ? news
+      : news.filter((n) => n.category === categoryFilter)
 
   return (
     <section>
@@ -30,14 +32,20 @@ export function RawNewsSection({ news }: { news: NewsCard[] }) {
       <button
         onClick={() => setOpen((p) => !p)}
         className="mb-3 flex w-full items-center justify-between rounded-xl p-3 transition-colors hover:opacity-80"
-        style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+        style={{
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+        }}
       >
         <span className="font-semibold" style={{ color: 'var(--text)' }}>
           📋 전체 뉴스 ({news.length}건)
         </span>
         <span
           className="transition-transform duration-200"
-          style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', color: 'var(--muted)' }}
+          style={{
+            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+            color: 'var(--muted)',
+          }}
         >
           ▼
         </span>
@@ -53,7 +61,8 @@ export function RawNewsSection({ news }: { news: NewsCard[] }) {
                 onClick={() => setFilter(cat)}
                 className="rounded-full px-3 py-1 text-xs font-medium transition-colors"
                 style={{
-                  background: categoryFilter === cat ? 'var(--bmw)' : 'var(--glass)',
+                  background:
+                    categoryFilter === cat ? 'var(--bmw)' : 'var(--glass)',
                   color: categoryFilter === cat ? '#fff' : 'var(--muted2)',
                   border: '1px solid var(--border)',
                 }}
@@ -72,14 +81,25 @@ export function RawNewsSection({ news }: { news: NewsCard[] }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-start gap-3 rounded-xl p-3 transition-colors hover:opacity-80"
-                style={{ background: 'var(--glass)', border: '1px solid var(--border)' }}
+                style={{
+                  background: 'var(--glass)',
+                  border: '1px solid var(--border)',
+                }}
               >
-                <span className="badge badge-purple mt-0.5 shrink-0">{item.category}</span>
+                <span className="badge badge-purple mt-0.5 shrink-0">
+                  {item.category}
+                </span>
                 <div className="min-w-0">
-                  <p className="text-sm font-medium leading-snug" style={{ color: 'var(--text)' }}>
+                  <p
+                    className="text-sm leading-snug font-medium"
+                    style={{ color: 'var(--text)' }}
+                  >
                     {item.title}
                   </p>
-                  <p className="mt-1 line-clamp-1 text-xs" style={{ color: 'var(--muted)' }}>
+                  <p
+                    className="mt-1 line-clamp-1 text-xs"
+                    style={{ color: 'var(--muted)' }}
+                  >
                     {item.summary}
                   </p>
                 </div>

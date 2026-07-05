@@ -19,7 +19,10 @@ export function NewsCard({ card, idx }: { card: ContentCard; idx: number }) {
         ) : (
           <div
             className="flex h-full w-full items-center justify-center text-5xl transition-transform duration-500 group-hover:scale-105"
-            style={{ background: 'linear-gradient(135deg, var(--surface) 0%, var(--card2) 100%)' }}
+            style={{
+              background:
+                'linear-gradient(135deg, var(--surface) 0%, var(--card2) 100%)',
+            }}
           >
             📄
           </div>
@@ -30,7 +33,7 @@ export function NewsCard({ card, idx }: { card: ContentCard; idx: number }) {
       <div className="flex flex-1 flex-col p-5 pb-6">
         {/* 카드 번호 */}
         <p
-          className="mb-2 text-[0.67rem] font-black uppercase tracking-[0.12em]"
+          className="mb-2 text-[0.67rem] font-black tracking-[0.12em] uppercase"
           style={{ color: 'var(--muted)' }}
         >
           CARD {String(idx + 1).padStart(2, '0')}
@@ -38,7 +41,7 @@ export function NewsCard({ card, idx }: { card: ContentCard; idx: number }) {
 
         {/* 제목 */}
         <h3
-          className="mb-3 text-base font-bold leading-snug tracking-tight"
+          className="mb-3 text-base leading-snug font-bold tracking-tight"
           style={{ color: 'var(--text)' }}
         >
           {card.headline}

@@ -6,7 +6,10 @@ import { createBrowserClient } from '@supabase/ssr'
 import type { User } from '@supabase/supabase-js'
 
 const AuthModal = dynamic(
-  () => import('@/components/community/AuthModal').then((m) => ({ default: m.AuthModal })),
+  () =>
+    import('@/components/community/AuthModal').then((m) => ({
+      default: m.AuthModal,
+    })),
   { loading: () => null }
 )
 
@@ -23,7 +26,9 @@ export function UserButton() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUser(data.user))
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user ?? null)
     })
     return () => subscription.unsubscribe()
@@ -32,7 +37,10 @@ export function UserButton() {
   // 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
         setShowDropdown(false)
       }
     }
@@ -51,7 +59,11 @@ export function UserButton() {
         <button
           onClick={() => setShowModal(true)}
           className="rounded-full px-3 py-1 text-xs font-medium transition-opacity hover:opacity-80"
-          style={{ background: 'var(--glass)', border: '1px solid var(--border)', color: 'var(--muted2)' }}
+          style={{
+            background: 'var(--glass)',
+            border: '1px solid var(--border)',
+            color: 'var(--muted2)',
+          }}
         >
           로그인
         </button>
@@ -65,7 +77,11 @@ export function UserButton() {
       <button
         onClick={() => setShowDropdown((p) => !p)}
         className="flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition-opacity hover:opacity-80"
-        style={{ background: 'var(--glass)', border: '1px solid var(--border)', color: 'var(--bmw-lt)' }}
+        style={{
+          background: 'var(--glass)',
+          border: '1px solid var(--border)',
+          color: 'var(--bmw-lt)',
+        }}
       >
         <span>👤</span>
         <span>{nickname}</span>
@@ -74,8 +90,11 @@ export function UserButton() {
 
       {showDropdown && (
         <div
-          className="absolute right-0 top-full z-[200] mt-1 min-w-[120px] rounded-xl p-1 shadow-lg"
-          style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
+          className="absolute top-full right-0 z-[200] mt-1 min-w-[120px] rounded-xl p-1 shadow-lg"
+          style={{
+            background: 'var(--card)',
+            border: '1px solid var(--border)',
+          }}
         >
           <button
             onClick={async () => {

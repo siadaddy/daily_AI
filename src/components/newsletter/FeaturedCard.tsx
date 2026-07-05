@@ -5,7 +5,7 @@ import { highlightCaption } from '@/lib/utils/caption'
 export function FeaturedCard({ card }: { card: ContentCard }) {
   return (
     <div
-      className="glass-card grid grid-cols-1 overflow-hidden md:grid-cols-2 min-h-64 sm:min-h-80 md:min-h-[400px]"
+      className="glass-card grid min-h-64 grid-cols-1 overflow-hidden sm:min-h-80 md:min-h-[400px] md:grid-cols-2"
       style={{
         border: '1px solid rgba(28,105,212,.25)',
         boxShadow: 'var(--shadow-glow)',
@@ -25,13 +25,16 @@ export function FeaturedCard({ card }: { card: ContentCard }) {
         ) : (
           <div
             className="flex h-full min-h-56 w-full flex-col items-center justify-center gap-2"
-            style={{ background: 'linear-gradient(135deg, var(--surface) 0%, var(--card2) 100%)' }}
+            style={{
+              background:
+                'linear-gradient(135deg, var(--surface) 0%, var(--card2) 100%)',
+            }}
           >
             <span className="text-6xl">📰</span>
           </div>
         )}
         {/* 이미지 위 뱃지 */}
-        <div className="absolute left-4 top-4 z-10">
+        <div className="absolute top-4 left-4 z-10">
           <span className="badge badge-blue text-[0.65rem] font-black tracking-widest">
             🚗 AUTO · CARD 01
           </span>
@@ -44,7 +47,7 @@ export function FeaturedCard({ card }: { card: ContentCard }) {
       <div className="flex flex-col justify-start p-6 md:p-10">
         {/* 라벨 */}
         <p
-          className="mb-3 text-[0.67rem] font-black uppercase tracking-[0.14em]"
+          className="mb-3 text-[0.67rem] font-black tracking-[0.14em] uppercase"
           style={{ color: 'var(--bmw-lt)' }}
         >
           FEATURED · 오늘의 카드뉴스
@@ -52,7 +55,7 @@ export function FeaturedCard({ card }: { card: ContentCard }) {
 
         {/* 제목 */}
         <h2
-          className="mb-5 text-xl font-bold leading-snug tracking-tight md:text-2xl"
+          className="mb-5 text-xl leading-snug font-bold tracking-tight md:text-2xl"
           style={{ color: 'var(--text)' }}
         >
           {card.headline}

@@ -26,7 +26,13 @@ function getYesterday(dateStr: string) {
   return new Intl.DateTimeFormat('en-CA').format(dt)
 }
 
-export function PreparingBanner({ date, rawNews }: { date: string; rawNews: NewsCard[] }) {
+export function PreparingBanner({
+  date,
+  rawNews,
+}: {
+  date: string
+  rawNews: NewsCard[]
+}) {
   const router = useRouter()
   const [countdown, setCountdown] = useState(getTimeUntil0640KST)
   const yesterday = getYesterday(date)
@@ -46,7 +52,9 @@ export function PreparingBanner({ date, rawNews }: { date: string; rawNews: News
 
         <div>
           <p className="preparing-title">콘텐츠 준비중</p>
-          <p className="preparing-sub">AI 크리에이터가 오늘의 뉴스를 분석하고 있어요</p>
+          <p className="preparing-sub">
+            AI 크리에이터가 오늘의 뉴스를 분석하고 있어요
+          </p>
         </div>
 
         {countdown !== null ? (
