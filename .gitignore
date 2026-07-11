@@ -49,7 +49,6 @@ pipeline/quality_log.json
 pipeline/__pycache__/
 pipeline/utils/__pycache__/
 pipeline/agents/__pycache__/
-pipeline/publisher/__pycache__/
 
 # typescript build info
 tsconfig.tsbuildinfo

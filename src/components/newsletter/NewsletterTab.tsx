@@ -11,7 +11,17 @@ import type {
   NewsCard as NewsCardType,
   NewsTrend,
 } from '@/lib/types'
+import { getSiteUrl } from '@/lib/site-url'
 import nextDynamic from 'next/dynamic'
+
+function plainTextExcerpt(md: string, maxLength = 200): string {
+  const text = md
+    .replace(/\\n/g, ' ')
+    .replace(/[#>*_`-]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+  return text.length > maxLength ? `${text.slice(0, maxLength)}…` : text
+}
 
 const ContentInteraction = nextDynamic(
   () =>
@@ -91,7 +101,7 @@ const fetchCardNews = unstable_cache(
   { revalidate: 300 }
 )
 
-const fetchTodayArticle = unstable_cache(
+export const fetchTodayArticle = unstable_cache(
   async (date: string): Promise<{ title: string; content: string } | null> => {
     try {
       const { data } = await getSupabase()
@@ -180,8 +190,35 @@ export async function NewsletterTab({ date }: { date?: string }) {
   const featured = cards[0] ?? null
   const grid = cards.slice(1)
 
+  const jsonLd = article
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'NewsArticle',
+        headline: article.title,
+        description: plainTextExcerpt(article.content),
+        datePublished: `${targetDate}T06:00:00+09:00`,
+        dateModified: `${targetDate}T06:00:00+09:00`,
+        image: featured?.image_url ? [featured.image_url] : undefined,
+        url: `${getSiteUrl()}/?tab=newsletter&date=${targetDate}`,
+        publisher: {
+          '@type': 'Organization',
+          name: '시아아빠의 AI 데일리',
+        },
+        author: {
+          '@type': 'Organization',
+          name: '시아아빠의 AI 데일리',
+        },
+      }
+    : null
+
   return (
     <div className="flex flex-col gap-8">
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
       {/* 1. 카드뉴스 */}
       <section className="flex flex-col gap-6">
         <SectionTitle icon="📰" title="카드뉴스" />

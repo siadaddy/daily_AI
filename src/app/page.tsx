@@ -1,17 +1,89 @@
 import { Suspense } from 'react'
 import { unstable_cache } from 'next/cache'
 import { createClient } from '@supabase/supabase-js'
+import type { Metadata } from 'next'
 import { Header } from '@/components/layout/Header'
 import { TabNav } from '@/components/layout/TabNav'
 import { Footer } from '@/components/layout/Footer'
 import { DashboardBar } from '@/components/dashboard/DashboardBar'
 import { DateNav } from '@/components/newsletter/DateNav'
-import { NewsletterTab } from '@/components/newsletter/NewsletterTab'
+import {
+  NewsletterTab,
+  fetchTodayArticle,
+} from '@/components/newsletter/NewsletterTab'
 import { ReportsTab } from '@/components/reports/ReportsTab'
 import { OfficeTab } from '@/components/office/OfficeTab'
 import { MusicUniverse } from '@/components/music/MusicUniverse'
 import { PortfolioSection } from '@/components/portfolio/PortfolioCard'
 import type { TabId } from '@/lib/types'
+
+const TAB_META: Record<
+  Exclude<TabId, 'newsletter'>,
+  { title: string; description: string }
+> = {
+  reports: {
+    title: '리포트',
+    description: 'AI가 분석하는 주간·월간 트렌드 리포트와 비교 분석 대시보드',
+  },
+  music: {
+    title: 'Music Universe',
+    description: 'AI가 큐레이션하는 음악을 3D 우주에서 탐험하는 뮤직 유니버스',
+  },
+  office: {
+    title: 'AI Office',
+    description:
+      '뉴스를 수집·기획·집필·디자인하는 AI 에이전트들의 실시간 활동 현황',
+  },
+  portfolio: {
+    title: '포트폴리오',
+    description: '이 사이트를 만든 AI 크리에이터 파이프라인 소개',
+  },
+}
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string; date?: string }>
+}): Promise<Metadata> {
+  const params = await searchParams
+  const tab = (params.tab ?? 'newsletter') as TabId
+
+  if (tab !== 'newsletter') {
+    const meta = TAB_META[tab]
+    if (!meta) return {}
+    const title = `${meta.title} | 시아아빠의 AI 데일리`
+    return {
+      title,
+      description: meta.description,
+      alternates: { canonical: `/?tab=${tab}` },
+      openGraph: { title, description: meta.description },
+    }
+  }
+
+  const date = params.date ?? getToday()
+  const article = await fetchTodayArticle(date)
+  const canonical = date === getToday() ? '/' : `/?tab=newsletter&date=${date}`
+
+  if (!article) {
+    return { alternates: { canonical } }
+  }
+
+  const title = `${article.title} | 시아아빠의 AI 데일리`
+  const description = article.content
+    .replace(/\\n/g, ' ')
+    .replace(/[#>*_`-]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 160)
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: { title, description },
+    twitter: { title, description },
+  }
+}
 
 function getToday() {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(
