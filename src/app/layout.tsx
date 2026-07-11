@@ -46,6 +46,11 @@ export const metadata: Metadata = {
     description:
       'AI가 매일 자동 생성하는 뉴스레터 · 트렌드 리포트 · 음악 유니버스',
   },
+  verification: {
+    other: {
+      'naver-site-verification': 'OiINyrZjXP18pcwtzIkV8J0XR9_gXxjhf-UQoau69l8',
+    },
+  },
 }
 
 export default function RootLayout({
