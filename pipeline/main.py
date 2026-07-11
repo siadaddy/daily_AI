@@ -23,6 +23,7 @@ load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
 
 from agents import planner, writer, designer, music_curator, weekly_trend
 from agents.supabase_logger import update_agent_status, log_action
+from publisher import naver_blog
 
 PIPELINE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_DIR   = os.path.join(PIPELINE_DIR, "output")
@@ -232,6 +233,10 @@ def main():
     # ── Supabase 저장 ─────────────────────────────────────────
     _insert_to_supabase(today, written, images)
 
+    # ── 네이버 블로그용 콘텐츠 생성 (수동 발행용, 실패해도 계속 진행) ──
+    print("\n[네이버 블로그] 발행용 콘텐츠 생성 중...")
+    naver_post_path = naver_blog.run(today)
+
     # ── 완료 알림 ────────────────────────────────────────────
     summary = (
         f"✅ AI 크리에이터 완료!\n"
@@ -241,9 +246,10 @@ def main():
     )
     print("\n" + "━" * 50)
     print(summary)
+    naver_hint = "\n📋 네이버 블로그용 콘텐츠 준비됨 (Actions artifact 확인 후 수동 발행)" if naver_post_path else ""
     notify(
         "✅ AI 크리에이터 완료",
-        f"오늘 콘텐츠 준비됐어요!\n카드뉴스 {len(written['captions'])}개 · 이미지 {img_ok}장",
+        f"오늘 콘텐츠 준비됐어요!\n카드뉴스 {len(written['captions'])}개 · 이미지 {img_ok}장{naver_hint}",
     )
 
     # ── Step 5: 음악 큐레이션 (90일 주기) ────────────────────

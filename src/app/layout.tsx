@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, Noto_Sans_KR } from 'next/font/google'
 import { ThemeProvider } from '@/components/layout/ThemeProvider'
+import { getSiteUrl } from '@/lib/site-url'
 import './globals.css'
 
 const inter = Inter({
@@ -23,12 +24,7 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ??
-      (process.env.VERCEL_PROJECT_PRODUCTION_URL
-        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-        : 'http://localhost:3000')
-  ),
+  metadataBase: new URL(getSiteUrl()),
   title: {
     default: '시아아빠의 AI 데일리',
     template: '%s | 시아아빠의 AI 데일리',
