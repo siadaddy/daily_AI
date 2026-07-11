@@ -47,8 +47,9 @@ export const metadata: Metadata = {
       'AI가 매일 자동 생성하는 뉴스레터 · 트렌드 리포트 · 음악 유니버스',
   },
   verification: {
+    google: 'OiINyrZjXP18pcwtzIkV8J0XR9_gXxjhf-UQoau69l8',
     other: {
-      'naver-site-verification': 'OiINyrZjXP18pcwtzIkV8J0XR9_gXxjhf-UQoau69l8',
+      'naver-site-verification': '24197017690a52331e9a71eaac33b9368ee7792f',
     },
   },
 }
