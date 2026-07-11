@@ -54,6 +54,17 @@ export const metadata: Metadata = {
   },
 }
 
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: '시아아빠의 AI 데일리',
+  alternateName: '시아아빠',
+  url: getSiteUrl(),
+  logo: `${getSiteUrl()}/opengraph-image`,
+  description:
+    'AI가 매일 자동 생성하는 뉴스레터 · 트렌드 리포트 · 음악 유니버스',
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -66,6 +77,12 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-screen flex-col antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationJsonLd),
+          }}
+        />
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
