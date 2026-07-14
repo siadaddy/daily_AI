@@ -53,8 +53,11 @@ def _upload_to_supabase(image_bytes: bytes, filename: str) -> str | None:
         return None
 
 
+_IMAGE_STYLE_SUFFIX = ", bright vivid colors, clean modern design, optimistic mood, high quality"
+
+
 def run(brief: dict, writer_output: dict) -> list:
-    print("🎨 디자이너 에이전트 실행 중... (HF Flux → Supabase Storage)")
+    print("🎨 디자이너 에이전트 실행 중... (HF Flux → OpenAI → Supabase Storage)")
 
     _KST = timezone(timedelta(hours=9))
     today = datetime.now(_KST).strftime("%Y-%m-%d")
@@ -99,7 +102,10 @@ Return ONLY a JSON array, no markdown:
 
         image_bytes = _generate_image_hf(img_prompt)
         if not image_bytes:
-            print(f"    → HF 실패, PIL 카드로 대체")
+            print(f"    → HF 실패, OpenAI 시도")
+            image_bytes = _generate_image_openai(img_prompt)
+        if not image_bytes:
+            print(f"    → OpenAI도 실패, PIL 카드로 대체")
             image_bytes = _generate_image_pil_bytes(item["headline"], i)
 
         url = None
@@ -172,7 +178,7 @@ def _generate_image_hf(prompt: str) -> bytes | None:
     if not _HF_TOKENS:
         return None
 
-    full_prompt = prompt + ", bright vivid colors, clean modern design, optimistic mood, high quality"
+    full_prompt = prompt + _IMAGE_STYLE_SUFFIX
 
     for token_idx, token in enumerate(_HF_TOKENS):
         token_label = f"키{token_idx + 1}"
@@ -212,6 +218,43 @@ def _generate_image_hf(prompt: str) -> bytes | None:
             except Exception as e:
                 print(f"    ❌ HF 이미지 오류 ({token_label}): {e}")
     return None
+
+
+_OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+
+def _generate_image_openai(prompt: str) -> bytes | None:
+    """OpenAI gpt-image-1.5 (low 품질) — HF 실패 시 fallback, bytes 반환"""
+    if not _OPENAI_API_KEY:
+        return None
+
+    full_prompt = prompt + _IMAGE_STYLE_SUFFIX
+
+    try:
+        import base64
+        from openai import OpenAI
+
+        client = OpenAI(api_key=_OPENAI_API_KEY)
+        response = client.images.generate(
+            model="gpt-image-1.5",
+            prompt=full_prompt,
+            size="1024x1024",
+            quality="low",
+            n=1,
+        )
+        b64 = response.data[0].b64_json
+        if not b64:
+            print("    ⚠️  OpenAI 응답에 이미지 데이터 없음")
+            return None
+        image_bytes = base64.b64decode(b64)
+        if len(image_bytes) < 1000:
+            print("    ⚠️  OpenAI 응답 크기 너무 작음")
+            return None
+        print("    ✅ OpenAI 이미지 생성 성공")
+        return image_bytes
+    except Exception as e:
+        print(f"    ❌ OpenAI 이미지 오류: {e}")
+        return None
 
 
 def _generate_image_pil_bytes(headline: str, card_index: int) -> bytes | None:

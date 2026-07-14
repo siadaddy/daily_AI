@@ -60,6 +60,7 @@ jobs:
       GROQ_API_KEY_4: ${{ secrets.GROQ_API_KEY_4 }}
       HF_TOKEN: ${{ secrets.HF_TOKEN }}
       HF_TOKEN_2: ${{ secrets.HF_TOKEN_2 }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
 
     steps:

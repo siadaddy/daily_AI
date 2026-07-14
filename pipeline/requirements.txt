@@ -1,5 +1,6 @@
 google-generativeai
 groq
+openai
 notion-client
 requests
 python-dotenv
