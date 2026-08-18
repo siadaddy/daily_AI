@@ -68,16 +68,23 @@ const PORTFOLIO_ITEMS: PortfolioItem[] = [
   },
   // ── 업무 프로젝트 ─────────────────────────────────────────
   {
-    title: '통합 대시보드 자동화',
+    title: 'BMW 딜러사 데이터 시스템',
     description:
-      'MyDMS 리포트 자동 추출 · PostgreSQL DB 적재 · Next.js 통합 대시보드 · 텔레그램 봇 알림',
-    emoji: '🤖',
-    tags: ['Python', 'PostgreSQL', 'Next.js', 'Telegram Bot', 'Recharts'],
+      'Playwright OTP 자동 인증 스크래핑 → PostgreSQL 60만+ 행 · Next.js 18개 이상 페이지 통합 대시보드 · Telegram Bot 원격 제어 — 1인 풀스택 구축·운영',
+    emoji: '🏎️',
+    tags: [
+      'Python',
+      'Playwright',
+      'PostgreSQL',
+      'Next.js',
+      'Recharts',
+      'Leaflet',
+    ],
     href: '/works/dashboard-auto.html',
     status: 'wip',
     category: 'work',
     aiUsage:
-      '매일 수기로 다운받아 취합하던 MyDMS 리포트를 스크립트로 자동 추출·적재 — 취합 시간을 텔레그램 알림 한 줄로 대체',
+      '매일 수기로 다운받아 취합하던 DMS 리포트를 Playwright 자동화로 대체 — 18개 대시보드 페이지, 41개 SQL 마이그레이션, 32개 Python 스크립트 1인 구축·운영',
   },
   {
     title: '딜러 & 지점 매출 시각화',

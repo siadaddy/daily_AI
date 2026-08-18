@@ -1,631 +1,1071 @@
 <!doctype html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>통합 대시보드 자동화 — 로드맵</title>
-    <meta
-      name="description"
-      content="MyDMS 리포트 수기 취합 대신 Python 스크립트로 자동 추출 → PostgreSQL 적재 → 텔레그램 봇 알림까지 자동화한 로드맵"
-    />
-    <!-- 렌더링 전 테마 적용 (FOUC 방지) -->
-    <script>
-      ;(function () {
-        var t = localStorage.getItem('theme') || 'dark'
-        document.documentElement.setAttribute('data-theme', t)
-        window.addEventListener('storage', function (e) {
-          if (e.key === 'theme')
-            document.documentElement.setAttribute(
-              'data-theme',
-              e.newValue || 'dark'
-            )
-        })
-      })()
-    </script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      :root {
-        --bg: #0e1117;
-        --card: #1c2030;
-        --border: #2d3149;
-        --text: #e2e8f0;
-        --text2: #94a3b8;
-        --text3: #64748b;
-        --accent: #4f8ef7;
-        --green: #34d399;
-        --orange: #fb923c;
-        --purple: #a78bfa;
-        --track: #1e2535;
-      }
-      [data-theme='light'] {
-        --bg: #f8fafc;
-        --card: #ffffff;
-        --border: #e2e8f0;
-        --text: #0f172a;
-        --text2: #475569;
-        --text3: #94a3b8;
-        --track: #e2e8f0;
-      }
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      html,
-      body {
-        min-height: 100%;
-        font-family: 'Noto Sans KR', sans-serif;
-        background: var(--bg);
-        color: var(--text);
-      }
-      body {
-        padding: 60px 0 80px;
-      }
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BMW 딜러사 데이터 시스템 — 포트폴리오</title>
+<meta name="description" content="자동차 딜러사의 수기 리포트 다운로드를 자동화하고, 실시간 통합 대시보드로 전환한 1인 풀스택 엔지니어링 프로젝트 기록." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
 
-      /* back btn */
-      .back-btn {
-        position: fixed;
-        top: 12px;
-        left: 12px;
-        z-index: 9999;
-        background: var(--card);
-        border: 1px solid var(--border);
-        color: var(--text2);
-        font-size: 12px;
-        font-weight: 600;
-        padding: 6px 14px;
-        border-radius: 20px;
-        text-decoration: none;
-        -webkit-backdrop-filter: blur(8px);
-        backdrop-filter: blur(8px);
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
-        transition: all 0.15s;
-      }
-      .back-btn:hover {
-        background: var(--accent);
-        color: #fff;
-        border-color: var(--accent);
-      }
+:root {
+  /* light mode */
+  --bg: #f0f4f8;
+  --surface: #ffffff;
+  --surface-2: #e8edf5;
+  --border: rgba(0,0,0,0.08);
+  --text: #0f172a;
+  --text-muted: #475569;
+  --accent: #1c69d4;
+  --accent-soft: rgba(28,105,212,0.10);
+  --signal: #7c3aed;
+  --signal-soft: rgba(167,139,250,0.12);
+  --line: rgba(0,0,0,0.13);
+  --shadow: 0 1px 2px rgba(0,0,0,0.05), 0 8px 24px -12px rgba(0,0,0,0.10);
 
-      /* page wrapper */
-      .page {
-        max-width: 860px;
-        margin: 0 auto;
-        padding: 0 24px;
-      }
+  --font-display: 'Inter', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+  --font-body: 'Inter', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Consolas', 'D2Coding', 'Malgun Gothic', monospace;
 
-      /* ── Header ── */
-      .header {
-        text-align: center;
-        margin-bottom: 52px;
-        padding-top: 20px;
-      }
-      .header-emoji {
-        font-size: 48px;
-        margin-bottom: 14px;
-      }
-      .header-title {
-        font-size: 28px;
-        font-weight: 800;
-        color: var(--text);
-        margin-bottom: 8px;
-      }
-      .header-sub {
-        font-size: 14px;
-        color: var(--text3);
-        margin-bottom: 20px;
-      }
-      .badge-row {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-      .badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 4px 14px;
-        border-radius: 99px;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-      }
-      .badge-wip {
-        background: rgba(251, 146, 60, 0.12);
-        border: 1px solid rgba(251, 146, 60, 0.3);
-        color: var(--orange);
-      }
-      .badge-wip::before {
-        content: '';
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        background: var(--orange);
-        animation: pulse 1.5s infinite;
-      }
-      @keyframes pulse {
-        0%,
-        100% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0.3;
-        }
-      }
-      .badge-phase {
-        background: rgba(79, 142, 247, 0.1);
-        border: 1px solid rgba(79, 142, 247, 0.2);
-        color: var(--accent);
-      }
+  --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem;
+  --space-5: 1.5rem; --space-6: 2rem; --space-7: 3rem; --space-8: 4.5rem; --space-9: 7rem;
 
-      /* progress bar */
-      .progress-wrap {
-        max-width: 440px;
-        margin: 24px auto 0;
-        text-align: left;
-      }
-      .progress-label {
-        display: flex;
-        justify-content: space-between;
-        font-size: 11px;
-        color: var(--text3);
-        margin-bottom: 6px;
-      }
-      .progress-track {
-        height: 8px;
-        background: var(--track);
-        border-radius: 99px;
-        overflow: hidden;
-      }
-      .progress-fill {
-        height: 100%;
-        border-radius: 99px;
-        background: linear-gradient(
-          90deg,
-          var(--green) 0%,
-          var(--accent) 60%,
-          var(--orange) 100%
-        );
-        width: 62.5%;
-      }
+  color-scheme: light;
+}
 
-      /* ── Timeline ── */
-      .timeline {
-        position: relative;
-        padding-left: 48px;
-      }
-      .timeline::before {
-        content: '';
-        position: absolute;
-        left: 20px;
-        top: 0;
-        bottom: 0;
-        width: 2px;
-        background: linear-gradient(
-          to bottom,
-          var(--green),
-          var(--green),
-          var(--accent),
-          var(--orange),
-          var(--track)
-        );
-      }
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #080c14;
+    --surface: #111827;
+    --surface-2: #141c2e;
+    --border: rgba(255,255,255,0.07);
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --accent: #4d90f0;
+    --accent-soft: rgba(77,144,240,0.13);
+    --signal: #a78bfa;
+    --signal-soft: rgba(167,139,250,0.13);
+    --line: rgba(255,255,255,0.10);
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px -16px rgba(0,0,0,0.5);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #080c14; --surface: #111827; --surface-2: #141c2e; --border: rgba(255,255,255,0.07);
+  --text: #f1f5f9; --text-muted: #94a3b8;
+  --accent: #4d90f0; --accent-soft: rgba(77,144,240,0.13);
+  --signal: #a78bfa; --signal-soft: rgba(167,139,250,0.13);
+  --line: rgba(255,255,255,0.10);
+  --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px -16px rgba(0,0,0,0.5);
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --bg: #f0f4f8; --surface: #ffffff; --surface-2: #e8edf5; --border: rgba(0,0,0,0.08);
+  --text: #0f172a; --text-muted: #475569;
+  --accent: #1c69d4; --accent-soft: rgba(28,105,212,0.10);
+  --signal: #7c3aed; --signal-soft: rgba(167,139,250,0.12);
+  --line: rgba(0,0,0,0.13);
+  --shadow: 0 1px 2px rgba(0,0,0,0.05), 0 8px 24px -12px rgba(0,0,0,0.10);
+  color-scheme: light;
+}
 
-      .phase {
-        position: relative;
-        margin-bottom: 36px;
-      }
-      .phase:last-child {
-        margin-bottom: 0;
-      }
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+::selection { background: var(--accent); color: var(--bg); }
 
-      /* node on timeline */
-      .phase-node {
-        position: absolute;
-        left: -36px;
-        top: 18px;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 16px;
-        border: 2px solid;
-      }
-      .node-done {
-        background: rgba(52, 211, 153, 0.15);
-        border-color: var(--green);
-      }
-      .node-wip {
-        background: rgba(79, 142, 247, 0.15);
-        border-color: var(--accent);
-        animation: glow 2s ease-in-out infinite;
-      }
-      @keyframes glow {
-        0%,
-        100% {
-          box-shadow: 0 0 0 0 rgba(79, 142, 247, 0);
-        }
-        50% {
-          box-shadow: 0 0 0 4px rgba(79, 142, 247, 0.25);
-        }
-      }
-      .node-todo {
-        background: rgba(100, 116, 139, 0.1);
-        border-color: var(--border);
-      }
+img, svg { max-width: 100%; display: block; }
+a { color: inherit; }
+a:focus-visible, button:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
 
-      /* phase card */
-      .phase-card {
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        padding: 22px 24px;
-        transition: border-color 0.2s;
-      }
-      .phase-card:hover {
-        border-color: rgba(79, 142, 247, 0.3);
-      }
-      .phase-card.done {
-        border-left: 3px solid var(--green);
-      }
-      .phase-card.wip {
-        border-left: 3px solid var(--accent);
-      }
-      .phase-card.todo {
-        border-left: 3px solid var(--border);
-        opacity: 0.75;
-      }
+/* ---------- back button ---------- */
+.back-btn {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 9999;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  background: var(--surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.4em 0.85em;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  transition: border-color 0.15s, color 0.15s;
+}
+.back-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-      .phase-head {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        margin-bottom: 14px;
-        gap: 12px;
-      }
-      .phase-title-wrap {
-      }
-      .phase-num {
-        font-size: 10px;
-        font-weight: 700;
-        color: var(--text3);
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        margin-bottom: 4px;
-      }
-      .phase-title {
-        font-size: 16px;
-        font-weight: 700;
-        color: var(--text);
-      }
-      .phase-period {
-        font-size: 11px;
-        color: var(--text3);
-        margin-top: 3px;
-      }
-      .phase-status {
-        flex-shrink: 0;
-      }
-      .status-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 4px 12px;
-        border-radius: 99px;
-        font-size: 11px;
-        font-weight: 700;
-        white-space: nowrap;
-      }
-      .pill-done {
-        background: rgba(52, 211, 153, 0.12);
-        border: 1px solid rgba(52, 211, 153, 0.25);
-        color: var(--green);
-      }
-      .pill-wip {
-        background: rgba(79, 142, 247, 0.12);
-        border: 1px solid rgba(79, 142, 247, 0.25);
-        color: var(--accent);
-      }
-      .pill-todo {
-        background: rgba(100, 116, 139, 0.1);
-        border: 1px solid var(--border);
-        color: var(--text3);
-      }
+/* ---------- layout ---------- */
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 var(--space-5); }
+.prose { max-width: 700px; }
 
-      /* checklist */
-      .checklist {
-        list-style: none;
-        display: flex;
-        flex-direction: column;
-        gap: 7px;
-        margin-bottom: 16px;
-      }
-      .checklist li {
-        display: flex;
-        align-items: flex-start;
-        gap: 8px;
-        font-size: 13px;
-        color: var(--text2);
-      }
-      .checklist li::before {
-        flex-shrink: 0;
-        margin-top: 1px;
-      }
-      .checklist li.done::before {
-        content: '✓';
-        color: var(--green);
-        font-weight: 700;
-      }
-      .checklist li.wip::before {
-        content: '◎';
-        color: var(--accent);
-      }
-      .checklist li.todo::before {
-        content: '○';
-        color: var(--text3);
-      }
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+}
+.eyebrow::before { content: "//"; color: var(--line); }
 
-      /* tag chips */
-      .tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-      }
-      .tag {
-        padding: 3px 10px;
-        border-radius: 99px;
-        font-size: 10px;
-        font-weight: 600;
-        background: rgba(79, 142, 247, 0.1);
-        border: 1px solid rgba(79, 142, 247, 0.2);
-        color: var(--accent);
-      }
-      .tag.g {
-        background: rgba(52, 211, 153, 0.08);
-        border-color: rgba(52, 211, 153, 0.2);
-        color: var(--green);
-      }
-      .tag.o {
-        background: rgba(251, 146, 60, 0.08);
-        border-color: rgba(251, 146, 60, 0.2);
-        color: var(--orange);
-      }
-      .tag.p {
-        background: rgba(167, 139, 250, 0.08);
-        border-color: rgba(167, 139, 250, 0.2);
-        color: var(--purple);
-      }
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  margin: 0;
+}
+h2 { font-size: clamp(1.55rem, 1.15rem + 1.6vw, 2.35rem); line-height: 1.14; }
+h3 { font-size: clamp(1.1rem, 1rem + 0.5vw, 1.3rem); line-height: 1.3; font-weight: 800; }
+p { margin: 0 0 1em; color: var(--text); }
+p.lead { font-size: 1.08rem; color: var(--text-muted); }
+.section-head { max-width: 700px; margin: 0 0 var(--space-6); }
+.section-head p { color: var(--text-muted); margin-top: var(--space-3); }
 
-      /* ── Tech stack ── */
-      .stack-section {
-        margin-top: 52px;
-        padding-top: 36px;
-        border-top: 1px solid var(--border);
-      }
-      .stack-title {
-        text-align: center;
-        font-size: 13px;
-        font-weight: 600;
-        color: var(--text3);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 20px;
-      }
-      .stack-grid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        justify-content: center;
-      }
-      .stack-item {
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 8px 16px;
-        font-size: 12px;
-        font-weight: 600;
-        color: var(--text2);
-      }
-      .stack-icon {
-        font-size: 18px;
-      }
-    </style>
-  </head>
-  <body>
-    <a href="/?tab=portfolio" class="back-btn">← 포트폴리오</a>
+section { padding: var(--space-8) 0; border-bottom: 1px solid var(--border); }
+section:last-of-type { border-bottom: none; }
 
-    <div class="page">
-      <!-- Header -->
-      <div class="header">
-        <div class="header-emoji">🤖</div>
-        <div class="header-title">통합 대시보드 자동화</div>
-        <div class="header-sub">
-          MyDMS 리포트 추출 · PostgreSQL 적재 · Next.js 대시보드 · 텔레그램 봇
-        </div>
-        <div class="badge-row">
-          <span class="badge badge-wip">작업중</span>
-          <span class="badge badge-phase">4 Phase</span>
-          <span class="badge badge-phase">Phase 3 진행 중</span>
-        </div>
-        <div class="progress-wrap">
-          <div class="progress-label">
-            <span>전체 진행률</span>
-            <span>62.5% (Phase 2.5/4)</span>
-          </div>
-          <div class="progress-track"><div class="progress-fill"></div></div>
-        </div>
+/* ---------- top bar ---------- */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 40;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  transform: translateY(-100%);
+  transition: transform 0.25s ease;
+}
+.topbar.is-visible { transform: translateY(0); }
+.topbar .file {
+  color: var(--text-muted); letter-spacing: 0.03em;
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.topbar .file b { color: var(--accent); font-weight: 500; }
+.topbar .theme-toggle { flex: 0 0 auto; }
+@media (max-width: 560px) {
+  .topbar .file-prefix { display: none; }
+}
+.theme-toggle {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.4em 0.85em;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+}
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+.theme-toggle .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+/* ---------- tab bar ---------- */
+.tabbar { background: var(--surface); border-bottom: 1px solid var(--border); }
+.tabbar-row { display: flex; }
+.tab {
+  font-family: var(--font-mono);
+  font-size: 0.83rem;
+  letter-spacing: 0.02em;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin: 0 var(--space-6) -1px 0;
+  padding: var(--space-4) 0 calc(var(--space-4) - 2px);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.tab:hover { color: var(--text); }
+.tab.is-active { color: var(--accent); border-bottom-color: var(--accent); }
+@media (max-width: 560px) {
+  .tab { margin-right: var(--space-4); font-size: 0.78rem; }
+}
+
+/* ---------- hero ---------- */
+.hero {
+  padding: var(--space-9) 0 var(--space-8);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.hero-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: var(--space-7);
+}
+.wordmark {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+.hero h1 {
+  font-size: clamp(2.1rem, 1.4rem + 3.4vw, 3.6rem);
+  line-height: 1.08;
+  max-width: 15ch;
+}
+.hero .lead {
+  max-width: 46ch;
+  margin-top: var(--space-5);
+  font-size: clamp(1.02rem, 0.95rem + 0.3vw, 1.15rem);
+}
+.hero-meta {
+  margin-top: var(--space-6);
+  display: flex; flex-wrap: wrap; gap: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+}
+.chip {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  border-radius: 999px;
+  padding: 0.45em 0.9em;
+}
+.chip.role { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+
+.stat-strip {
+  margin-top: var(--space-8);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.stat {
+  padding: var(--space-5);
+  border-right: 1px solid var(--border);
+}
+.stat:last-child { border-right: none; }
+.stat .n {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  font-size: 1.5rem;
+  color: var(--accent);
+}
+.stat .l {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.3em;
+}
+
+/* ---------- before / after ---------- */
+.ba-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+  margin-top: var(--space-6);
+}
+@media (max-width: 760px) { .ba-grid { grid-template-columns: 1fr; } }
+.ba-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: var(--space-5);
+  background: var(--surface);
+}
+.ba-card h4 {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  margin: 0 0 var(--space-4);
+  text-transform: uppercase;
+}
+.ba-card.before h4 { color: var(--text-muted); }
+.ba-card.after h4 { color: var(--accent); }
+.ba-card ul { margin: 0; padding: 0; list-style: none; }
+.ba-card li {
+  padding: var(--space-2) 0;
+  border-top: 1px dashed var(--border);
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+.ba-card li:first-child { border-top: none; }
+.ba-card.after li { color: var(--text); }
+.ba-card li::before { content: "–"; color: var(--text-muted); margin-right: 0.6em; }
+.ba-card.after li::before { content: "→"; color: var(--accent); }
+
+/* ---------- architecture diagram ---------- */
+.flow {
+  margin-top: var(--space-6);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+.node {
+  flex: 1 1 150px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 10px;
+  padding: var(--space-4);
+  min-width: 150px;
+}
+.node .k {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+.node .t { font-weight: 700; margin-top: 0.35em; font-size: 0.95rem; }
+.node .d { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.4em; line-height: 1.45; }
+.node.split { border-color: var(--accent); }
+.arrow {
+  display: flex; align-items: center; justify-content: center;
+  color: var(--line);
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  flex: 0 0 auto;
+  width: 1.4rem;
+}
+@media (max-width: 900px) {
+  .flow { flex-direction: column; }
+  .arrow { width: auto; transform: rotate(90deg); padding: 0.2rem 0; }
+}
+.split-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin-top: var(--space-3); }
+@media (max-width: 500px) { .split-row { grid-template-columns: 1fr; } }
+.split-row .node { min-width: 0; }
+
+.inputs {
+  margin-top: var(--space-5);
+  display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap;
+  font-family: var(--font-mono); font-size: 0.78rem;
+}
+.inputs .lbl { color: var(--text-muted); }
+.inputs .src {
+  border: 1px dashed var(--line);
+  color: var(--text-muted);
+  border-radius: 999px;
+  padding: 0.35em 0.8em;
+}
+
+.arch-note {
+  margin-top: var(--space-6);
+  border-left: 2px solid var(--signal);
+  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-5);
+  background: var(--signal-soft);
+  border-radius: 0 8px 8px 0;
+}
+.arch-note p { margin: 0; color: var(--text); font-size: 0.95rem; }
+.arch-note .tag {
+  font-family: var(--font-mono); font-size: 0.72rem; color: var(--signal);
+  letter-spacing: 0.05em; display: block; margin-bottom: 0.5em;
+}
+
+/* ---------- engineering log ---------- */
+.log-grid {
+  margin-top: var(--space-6);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+@media (max-width: 820px) { .log-grid { grid-template-columns: 1fr; } }
+.log-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  padding: var(--space-5);
+  box-shadow: var(--shadow);
+}
+.log-head {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+.log-head h3 { font-size: 1.02rem; }
+.pill {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  border-radius: 999px;
+  padding: 0.25em 0.7em;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+.log-row { margin-top: var(--space-3); }
+.log-row .k {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 0.3em;
+}
+.log-row p { margin: 0; font-size: 0.92rem; color: var(--text); }
+.log-row.result { border-top: 1px dashed var(--border); padding-top: var(--space-3); margin-top: var(--space-4); }
+.log-row.result p { color: var(--accent); font-weight: 600; }
+
+/* ---------- dashboard surface ---------- */
+.gallery-note {
+  margin-top: var(--space-5);
+  border-left: 2px solid var(--accent);
+  background: var(--accent-soft);
+  border-radius: 0 8px 8px 0;
+  padding: var(--space-4);
+}
+.gallery-note .tag {
+  font-family: var(--font-mono); font-size: 0.72rem; color: var(--accent);
+  letter-spacing: 0.05em; display: block; margin-bottom: 0.5em;
+}
+.gallery-note p { margin: 0; color: var(--text); font-size: 0.92rem; }
+
+.category-block { margin-top: var(--space-7); }
+.category-block:first-of-type { margin-top: var(--space-6); }
+.cat-head { display: flex; align-items: baseline; gap: var(--space-3); margin-bottom: var(--space-4); }
+.cat-head .k {
+  font-family: var(--font-mono); font-size: 0.72rem; color: var(--accent);
+  letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap;
+}
+.cat-head h4 { margin: 0; font-size: 1.02rem; font-family: var(--font-display); font-weight: 800; }
+.cat-footnote { margin-top: var(--space-4); font-size: 0.86rem; color: var(--text-muted); }
+.cat-footnote code {
+  font-family: var(--font-mono); font-size: 0.92em;
+  background: var(--surface-2); border-radius: 4px; padding: 0.1em 0.4em;
+}
+
+.shot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-5);
+}
+.shot-card {
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.shot-card img {
+  width: 100%; aspect-ratio: 8 / 5; object-fit: cover; object-position: top left;
+  display: block; background: var(--surface-2);
+}
+.shot-card figcaption { padding: var(--space-4) var(--space-5); }
+.shot-card .k {
+  font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent);
+  letter-spacing: 0.05em; text-transform: uppercase; display: block;
+}
+.shot-card p { margin: 0.5em 0 0; font-size: 0.88rem; color: var(--text-muted); }
+
+/* ---------- operations ---------- */
+.ops-list { margin-top: var(--space-6); display: grid; gap: 0; border-top: 1px solid var(--border); }
+.ops-item {
+  display: grid; grid-template-columns: 2.2em 1fr; gap: var(--space-4);
+  padding: var(--space-4) 0; border-bottom: 1px solid var(--border);
+}
+.ops-item .ic { font-family: var(--font-mono); color: var(--accent); font-size: 0.85rem; padding-top: 0.15em; }
+.ops-item h4 { font-size: 0.98rem; font-family: var(--font-display); font-weight: 800; margin: 0 0 0.35em; }
+.ops-item p { margin: 0; font-size: 0.92rem; color: var(--text-muted); }
+
+/* ---------- stack ---------- */
+.stack-grid {
+  margin-top: var(--space-6);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-4);
+}
+.stack-card { border: 1px solid var(--border); border-radius: 10px; padding: var(--space-5); background: var(--surface); }
+.stack-card .k { font-family: var(--font-mono); font-size: 0.72rem; color: var(--signal); letter-spacing: 0.05em; text-transform: uppercase; }
+.stack-card ul { list-style: none; margin: var(--space-3) 0 0; padding: 0; }
+.stack-card li {
+  font-family: var(--font-mono); font-size: 0.85rem; color: var(--text);
+  padding: 0.3em 0; border-top: 1px dashed var(--border);
+}
+.stack-card li:first-child { border-top: none; }
+
+/* ---------- closing ---------- */
+.closing { padding-top: var(--space-8); }
+.closing .prose p { font-size: 1.02rem; color: var(--text-muted); }
+
+footer {
+  padding: var(--space-7) 0 var(--space-9);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+footer .disclosure {
+  border-top: 1px solid var(--border);
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  max-width: 640px;
+  line-height: 1.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; scroll-behavior: auto !important; }
+}
+html { scroll-behavior: smooth; }
+</style>
+</head>
+<body>
+
+<a class="back-btn" href="/?tab=portfolio">← 포트폴리오</a>
+
+<div class="topbar" id="topbar">
+  <span class="file"><span class="file-prefix">현재 섹션 → </span><b id="topbar-file">000_overview.sql</b></span>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="라이트/다크 모드 전환">
+    <span class="dot"></span><span id="theme-toggle-label">라이트 모드</span>
+  </button>
+</div>
+
+<main>
+
+  <header class="hero">
+    <div class="wrap">
+      <div class="hero-top">
+        <span class="wordmark">scl_agent — 딜러사 데이터 시스템</span>
+        <button class="theme-toggle" id="theme-toggle-hero" type="button" aria-label="라이트/다크 모드 전환">
+          <span class="dot"></span><span id="theme-toggle-hero-label">라이트 모드</span>
+        </button>
       </div>
-
-      <!-- Timeline -->
-      <div class="timeline">
-        <!-- Phase 1 -->
-        <div class="phase">
-          <div class="phase-node node-done">✅</div>
-          <div class="phase-card done">
-            <div class="phase-head">
-              <div class="phase-title-wrap">
-                <div class="phase-num">Phase 1</div>
-                <div class="phase-title">텔레그램 봇 + MyDMS 자동 추출</div>
-                <div class="phase-period">2025년 11월 — 2026년 1월 · 완료</div>
-              </div>
-              <div class="phase-status">
-                <span class="status-pill pill-done">✓ 완료</span>
-              </div>
-            </div>
-            <ul class="checklist">
-              <li class="done">텔레그램 봇 서버 구축 (python-telegram-bot)</li>
-              <li class="done">Gmail OTP 자동 인증 + 세션 재사용 로직</li>
-              <li class="done">MyDMS 로그인 → 리포트 목록 파싱</li>
-              <li class="done">Turn Over RAW 데이터 자동 다운로드</li>
-              <li class="done">다운로드 완료 시 텔레그램 알림 발송</li>
-            </ul>
-            <div class="tags">
-              <span class="tag g">Python</span>
-              <span class="tag g">python-telegram-bot</span>
-              <span class="tag g">Selenium</span>
-              <span class="tag g">Gmail API</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Phase 2 -->
-        <div class="phase">
-          <div class="phase-node node-done">✅</div>
-          <div class="phase-card done">
-            <div class="phase-head">
-              <div class="phase-title-wrap">
-                <div class="phase-num">Phase 2</div>
-                <div class="phase-title">
-                  PostgreSQL DB 설계 & ETL 파이프라인
-                </div>
-                <div class="phase-period">2026년 2월 — 2026년 3월 · 완료</div>
-              </div>
-              <div class="phase-status">
-                <span class="status-pill pill-done">✓ 완료</span>
-              </div>
-            </div>
-            <ul class="checklist">
-              <li class="done">
-                PostgreSQL 스키마 설계 (지점별 입고/매출/SA 테이블)
-              </li>
-              <li class="done">RAW 데이터 전처리 & 정합성 검증 모듈</li>
-              <li class="done">upsert 기반 incremental 적재 (중복 방지)</li>
-              <li class="done">적재 결과 텔레그램 보고 (성공/실패/행수)</li>
-              <li class="done">GitHub Actions 스케줄 자동화 (매일 08:00)</li>
-            </ul>
-            <div class="tags">
-              <span class="tag g">PostgreSQL</span>
-              <span class="tag g">pandas</span>
-              <span class="tag g">SQLAlchemy</span>
-              <span class="tag g">GitHub Actions</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Phase 3 -->
-        <div class="phase">
-          <div class="phase-node node-wip">🔄</div>
-          <div class="phase-card wip">
-            <div class="phase-head">
-              <div class="phase-title-wrap">
-                <div class="phase-num">Phase 3</div>
-                <div class="phase-title">Next.js 통합 대시보드</div>
-                <div class="phase-period">2026년 4월 — 진행 중</div>
-              </div>
-              <div class="phase-status">
-                <span class="status-pill pill-wip">◎ 진행 중</span>
-              </div>
-            </div>
-            <ul class="checklist">
-              <li class="done">
-                Next.js 16 프로젝트 초기화 + PostgreSQL 연결 (pg 드라이버)
-              </li>
-              <li class="done">지점별 월별 입고 API 엔드포인트</li>
-              <li class="wip">Recharts 기반 월별 KPI 차트 (일반/사고 분리)</li>
-              <li class="wip">지점 필터 + 기간 선택 UI</li>
-              <li class="todo">주차별 분석 페이지</li>
-              <li class="todo">연말 예측 (선형회귀) 시각화</li>
-              <li class="todo">배포 (Vercel 또는 자체 서버)</li>
-            </ul>
-            <div class="tags">
-              <span class="tag">Next.js 16</span>
-              <span class="tag">TypeScript</span>
-              <span class="tag">Recharts</span>
-              <span class="tag">PostgreSQL</span>
-              <span class="tag">Tailwind CSS</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Phase 4 -->
-        <div class="phase">
-          <div class="phase-node node-todo">📋</div>
-          <div class="phase-card todo">
-            <div class="phase-head">
-              <div class="phase-title-wrap">
-                <div class="phase-num">Phase 4</div>
-                <div class="phase-title">자동 스케줄링 & 이상 탐지 알림</div>
-                <div class="phase-period">예정</div>
-              </div>
-              <div class="phase-status">
-                <span class="status-pill pill-todo">○ 예정</span>
-              </div>
-            </div>
-            <ul class="checklist">
-              <li class="todo">일일 자동 실행 리포트 → 텔레그램/슬랙 발송</li>
-              <li class="todo">전월 대비 이상치 감지 (±σ 알림)</li>
-              <li class="todo">주간 KPI 요약 자동 생성 (AI 분석 포함)</li>
-              <li class="todo">
-                리포트 종류 확장 (부품 수불, SA 실적, 매출 현황)
-              </li>
-            </ul>
-            <div class="tags">
-              <span class="tag o">Telegram Bot API</span>
-              <span class="tag o">Claude AI</span>
-              <span class="tag o">Cron</span>
-            </div>
-          </div>
-        </div>
+      <p class="eyebrow">000_overview.sql — solo full-stack systems project</p>
+      <h1>매일 아침, 사람이 로그인하기 전에 데이터는 이미 도착해 있다</h1>
+      <p class="lead">공식 BMW 딜러사의 판매·입고·정산·고객만족 리포트를 매일 자동으로 추출해 PostgreSQL에 적재하고, 18개 이상의 페이지로 구성된 실시간 통합 대시보드로 전환한 프로젝트. 텔레그램으로 원격에서 파이프라인을 확인·조작할 수 있고, 데이터 대사, 자동 코드 리뷰, 실측 검증을 습관으로 만들며 1인으로 구축·운영 중입니다.</p>
+      <div class="hero-meta">
+        <span class="chip role">단독 엔지니어</span>
+        <span class="chip">스크래핑</span>
+        <span class="chip">데이터베이스</span>
+        <span class="chip">프론트엔드</span>
+        <span class="chip">DB 적재</span>
+        <span class="chip">운영</span>
       </div>
+      <div class="stat-strip">
+        <div class="stat"><div class="n">41</div><div class="l">SQL 스키마 마이그레이션</div></div>
+        <div class="stat"><div class="n">18+</div><div class="l">대시보드 페이지</div></div>
+        <div class="stat"><div class="n">32</div><div class="l">자동화 파이썬 스크립트</div></div>
+        <div class="stat"><div class="n">60만+</div><div class="l">누적 데이터 적재 행</div></div>
+      </div>
+    </div>
+  </header>
 
-      <!-- Tech stack -->
-      <div class="stack-section">
-        <div class="stack-title">기술 스택</div>
-        <div class="stack-grid">
-          <div class="stack-item"><span class="stack-icon">🐍</span>Python</div>
-          <div class="stack-item">
-            <span class="stack-icon">🗄️</span>PostgreSQL
-          </div>
-          <div class="stack-item">
-            <span class="stack-icon">▲</span>Next.js 16
-          </div>
-          <div class="stack-item">
-            <span class="stack-icon">📨</span>Telegram Bot
-          </div>
-          <div class="stack-item">
-            <span class="stack-icon">📊</span>Recharts
-          </div>
-          <div class="stack-item">
-            <span class="stack-icon">📋</span>Google Sheets API
-          </div>
-          <div class="stack-item">
-            <span class="stack-icon">⚙️</span>GitHub Actions
-          </div>
-          <div class="stack-item">
-            <span class="stack-icon">🤖</span>Claude AI
-          </div>
+  <nav class="tabbar" role="tablist" aria-label="탭 네비게이션">
+    <div class="wrap tabbar-row">
+      <button class="tab is-active" type="button" role="tab" aria-selected="true" data-tab-target="1">overview/</button>
+      <button class="tab" type="button" role="tab" aria-selected="false" data-tab-target="2">dashboard/</button>
+    </div>
+  </nav>
+
+  <section id="sec-context" data-tab="1">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">001_context.sql</p>
+        <h2>자동화 이전: 매일 반복되는 작업의 시작</h2>
+        <p>현장에서 담당자가 매일 아침 DMS 포탈에 로그인해 리포트를 받아서, 직접으로 취합 후 공유 엑셀로 가공해 배포하는 흐름에서 시작됐습니다. 지켜보기만 해도 이 과정이 자동화될 수 있다는 걸 담당자에게도 설명해 봤습니다.</p>
+      </div>
+      <div class="ba-grid">
+        <div class="ba-card before">
+          <h4>자동화 이전</h4>
+          <ul>
+            <li>매일 아침 로그인 + SMS/OTP 2단계 인증 수동 처리</li>
+            <li>리포트 4종을 수동 다운로드로 수기 취합</li>
+            <li>취합된 데이터로 엑셀 공유 파일에서 수동 관리</li>
+            <li>특정 기간 데이터는 담당자에게 요청 필요</li>
+            <li>지점 간 비교 담당자에게 수기 부탁</li>
+          </ul>
+        </div>
+        <div class="ba-card after">
+          <h4>자동화 이후</h4>
+          <ul>
+            <li>플레이라이트 OTP 자동 처리·인증까지 포함된 무인 로그인</li>
+            <li>데이터가 DB로 자동으로 적재·정제·검증됩니다</li>
+            <li>18개 이상 페이지에서 권한별로 실시간 조회</li>
+            <li>특정 기간 데이터는 원하는 시간에 언제든 자동 조회</li>
+            <li>텔레그램 봇으로 원격에서 상태확인·수동트리거·장애 알림 처리</li>
+          </ul>
         </div>
       </div>
     </div>
-  </body>
+  </section>
+
+  <section id="sec-architecture" data-tab="1">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">002_architecture.sql</p>
+        <h2>데이터의 흐름</h2>
+        <p>DMS 로그인부터 대시보드 서빙까지, 정합성과 실시간성이 서로 다른 목적으로 이원화된 파이프라인으로 운영됩니다.</p>
+      </div>
+
+      <div class="flow">
+        <div class="node">
+          <span class="k">Source</span>
+          <div class="t">딜러사 DMS 포탈</div>
+          <div class="d">Playwright로 로그인 자동화. SMS/OTP 인증까지 포함한 완전 무인 로그인</div>
+        </div>
+        <div class="arrow">→</div>
+        <div class="node">
+          <span class="t" style="margin-top: 0">원본 리포트 4종</span>
+          <div class="d">판매·입고·정산·고객만족 리포트를 원하는 날짜 범위로 수기 취합</div>
+        </div>
+        <div class="arrow">→</div>
+        <div class="node split">
+          <span class="k">Storage</span>
+          <div class="t">PostgreSQL 단일 진실 소스</div>
+          <div class="d">정밀 원장으로 안전하게 적재 검증 후 보관</div>
+        </div>
+        <div class="arrow">→</div>
+        <div class="node">
+          <span class="k">Serve</span>
+          <div class="t">대시보드 · 보고 · 알림</div>
+          <div class="d">Next.js 대시보드, 텔레그램 봇, 인쇄용 보고서로 서빙</div>
+        </div>
+      </div>
+
+      <div class="split-row">
+        <div class="node">
+          <span class="k">정밀 원장</span>
+          <div class="t">원본 그대로 완전 보관</div>
+          <div class="d">스키마 변경에도 전용 JSONB 원본 + 파생 컬럼 기반 이중화, 인보이스 단위 이력까지 보존</div>
+        </div>
+        <div class="node">
+          <span class="k">경량 실시간 데이터</span>
+          <div class="t">화면 반응성 확보</div>
+          <div class="d">자주 바뀌는 집계는 별도 실시간 테이블에서 직접 서빙. 응답 시간과 화면 로딩 속도를 최우선으로 유지</div>
+        </div>
+      </div>
+
+      <div class="inputs">
+        <span class="lbl">보조 데이터 입력 →</span>
+        <span class="src">스프레드시트 직접 연동</span>
+        <span class="src">외부 DB 재고연동</span>
+        <span class="src">고객 피드백 원시파일</span>
+      </div>
+
+      <div class="arch-note">
+        <span class="tag">설계 노트</span>
+        <p>리포트 추출과 서빙 레이어를 나누지 않으면, 서빙 로직에서 추출 상태를 직접 파악해야 합니다. 이 분리 덕분에 대시보드는 항상 DB만 바라보며, 데이터가 언제 들어오든 화면에는 즉시 반영됩니다. "정밀 원장이 먼저고 집계는 파생"이라는 원칙과 "중간에 가공된 집계가 원장인 별도 레이어"는 구별됩니다 — 화면은 항상 상위 레이어에서만 읽도록 운영됩니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="sec-log" data-tab="1">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">003_engineering_log.sql</p>
+        <h2>실제로 겪었고 직접 고친 문제들</h2>
+        <p>프로덕션에서 실측으로 발견한 문제를 원인 분석까지 마치고 고친 기록입니다. 추측이 아니라 실제 데이터로 재현하고 검증한 것만 남겼습니다.</p>
+      </div>
+
+      <div class="log-grid">
+
+        <article class="log-card">
+          <div class="log-head"><h3>조용히 부풀어 오르는 매출</h3><span class="pill">RESOLVED</span></div>
+          <div class="log-row"><span class="k">문제</span><p>진행 중인 달을 매일 재추출하는 구조에서, 내용이 그대로인 행이 재적재 때마다 새 행으로 계속 쌓였습니다.</p></div>
+          <div class="log-row"><span class="k">원인</span><p>중복 판정 기준(해시)에 "그날 리포트 안에서의 행 순번"이 섞여 있어, 순번만 바뀌어도 다른 행으로 인식됐습니다.</p></div>
+          <div class="log-row"><span class="k">해결</span><p>해시 계산에서 순번을 제외하고, 과거 데이터 전체를 새 기준으로 재해시해 중복만 골라 정리하는 1회성 마이그레이션을 실행했습니다.</p></div>
+          <div class="log-row result"><span class="k">결과</span><p>진행 중인 달을 매일 재추출해도 안전한 단일 진실 소스 확보</p></div>
+        </article>
+
+        <article class="log-card">
+          <div class="log-head"><h3>취소되지 않았는데 사라진 인보이스</h3><span class="pill">HARDENED</span></div>
+          <div class="log-row"><span class="k">문제</span><p>인보이스가 "취소"가 아니라 "수정"되면 상쇄 없이 옛 버전이 원본에서 그냥 사라지는데, DB에는 옛 버전이 남아 집계를 부풀렸습니다.</p></div>
+          <div class="log-row"><span class="k">원인</span><p>기존 로직은 "취소 쌍(+/-)"만 가정했고, 조용히 값만 바뀌는 수정 케이스는 처리하지 못했습니다.</p></div>
+          <div class="log-row"><span class="k">해결</span><p>매 적재 후 최신 원본에 더는 없는 옛 행에 타임스탬프를 찍어 "살아있는 값"과 분리하고(이력은 보존), 원본과 DB를 양방향으로 대사하는 검사를 매일 자동 실행하도록 만들었습니다.</p></div>
+          <div class="log-row result"><span class="k">결과</span><p>집계 오차 제거 + 같은 문제의 재발을 스스로 감시하는 체계 확보</p></div>
+        </article>
+
+        <article class="log-card">
+          <div class="log-head"><h3>팀원의 HTML을 안전하게 공개하기</h3><span class="pill">VERIFIED</span></div>
+          <div class="log-row"><span class="k">문제</span><p>팀원이 만든 HTML을 로그인 없이 링크로 열람 가능하게 하되, 대시보드 로그인 세션은 절대 노출되면 안 됐습니다.</p></div>
+          <div class="log-row"><span class="k">해결</span><p>Content-Security-Policy의 sandbox 격리로 이 문서를 매 요청 고유한 오리진으로 취급하게 만들어, 사용자 스크립트는 실행되지만 대시보드 쿠키·API는 접근할 수 없도록 설계했습니다.</p></div>
+          <div class="log-row"><span class="k">검증</span><p>"안전할 것"이라는 설명에서 멈추지 않고, 브라우저 자동화로 쿠키 읽기·오리진 접근·API 호출이 실제로 전부 차단되는지 직접 재현해 확인했습니다.</p></div>
+          <div class="log-row result"><span class="k">결과</span><p>새 공유 기능이 기존 인증 경계를 절대 넘지 못한다는 것을 코드 리뷰가 아니라 실측으로 증명</p></div>
+        </article>
+
+        <article class="log-card">
+          <div class="log-head"><h3>쓰기 권한을 기능 단위로 쪼개기</h3><span class="pill">SHIPPED</span></div>
+          <div class="log-row"><span class="k">문제</span><p>서로 다른 기능(계정 관리, 게시판, 파일 공유)이 하나의 넓은 쓰기 권한을 공유하면, 한 기능의 버그가 전혀 무관한 데이터를 건드릴 위험이 있었습니다.</p></div>
+          <div class="log-row"><span class="k">해결</span><p>기능마다 꼭 필요한 테이블 한두 개에만 쓰기 권한을 갖는 전용 DB 롤을 따로 만들고, 화면 조회는 항상 읽기 전용 롤만 쓰도록 코드 리뷰 규칙에 내장했습니다.</p></div>
+          <div class="log-row result"><span class="k">결과</span><p>새 기능을 추가할 때마다 최소 권한 원칙이 기본값으로 강제됨</p></div>
+        </article>
+
+        <article class="log-card">
+          <div class="log-head"><h3>React 서버 컴포넌트 경계에서 배운 것</h3><span class="pill">RESOLVED</span></div>
+          <div class="log-row"><span class="k">문제</span><p>클라이언트 컴포넌트에서 내보낸 공유 색상값을, 서버 컴포넌트 쪽에서 가져다 쓰자 렌더링에서 조용히 값이 사라져 그래프 색이 통째로 빠졌습니다.</p></div>
+          <div class="log-row"><span class="k">원인</span><p>"use client" 파일의 export는 컴포넌트든 순수한 값이든 서버 코드 입장에선 전부 참조로 취급된다는 경계 규칙을 놓쳤습니다.</p></div>
+          <div class="log-row"><span class="k">해결</span><p>공유 상수를 "use client"가 없는 중립 모듈로 분리해 양쪽 어디서나 안전하게 가져다 쓰도록 재구성했습니다.</p></div>
+          <div class="log-row result"><span class="k">결과</span><p>이후 비슷한 컴포넌트를 늘려도 같은 실수가 반복되지 않도록 원칙으로 문서화</p></div>
+        </article>
+
+        <article class="log-card">
+          <div class="log-head"><h3>같은 라인이 두 번 찍히면 사라지는 매출</h3><span class="pill">RESOLVED</span></div>
+          <div class="log-row"><span class="k">문제</span><p>한 인보이스 안에 완전히 같은 품목·같은 금액의 라인이 두 줄 있는 실거래가, 중복 방지 로직에 의해 한 줄로 붕괴돼 매출이 과소 계상됐습니다.</p></div>
+          <div class="log-row"><span class="k">원인</span><p>내용이 100% 동일한 두 행을 "재추출로 생긴 중복"과 구분할 방법이 없었습니다.</p></div>
+          <div class="log-row"><span class="k">해결</span><p>같은 파일 안에서 완전히 동일한 라인이 n번째 등장하면 해시에 등장 순번 표식을 붙여 서로 다른 행으로 인정하되, 하루 단위 재추출 시에는 여전히 같은 표식이 나오도록 설계해 중복 방지 효과는 그대로 유지했습니다.</p></div>
+          <div class="log-row result"><span class="k">결과</span><p>정상적인 반복 라인은 보존하고, 재추출로 인한 진짜 중복만 걸러내는 두 마리 토끼 확보</p></div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <section id="sec-dashboard" data-tab="2" hidden>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">004_dashboard_surface.sql</p>
+        <h2>18개 이상의 화면, 하나의 데이터 레이어</h2>
+        <p>같은 파이프라인 위에서 매출/현장 운영/고객경험/협업까지 역할별 권한으로 나뉜 화면을 제공합니다.</p>
+      </div>
+
+      <div class="gallery-note">
+        <span class="tag">실제 화면 — 13개 페이지</span>
+        <p>아래는 전부 실제 로그인해 렌더링한 프로덕션 화면입니다. 캡쳐 직후 전체 화면에 프로스티드 블러를 입혀 수치·계정·지점명은 읽히지 않지만, 레이아웃과 구성 요소는 실제 그대로입니다.</p>
+      </div>
+
+      <div class="category-block">
+        <div class="cat-head"><span class="k">매출 · 실적</span><h4>계획 대비 실적</h4></div>
+        <div class="shot-grid">
+          <figure class="shot-card">
+            <img src="./scl-images/home.webp" alt="종합 요약 홈 화면 (수치 블러 처리)" loading="lazy">
+            <figcaption>
+              <span class="k">종합 요약 홈</span>
+              <p>5개 도메인(매출·마진·커스터머페이·홀세일·입고·CSI) KPI를 게이지 + 스파크라인 카드 한 화면에 압축한 랜딩 페이지. 카드가 하나 더 늘어도 그리드가 그대로 흡수하도록 짰습니다.</p>
+            </figcaption>
+          </figure>
+          <figure class="shot-card">
+            <img src="./scl-images/summary.webp" alt="매출·마진 현황 화면 (수치 블러 처리)" loading="lazy">
+            <figcaption>
+              <span class="k">매출·마진 현황</span>
+              <p>정비매출/회계매출 게이지, 지점별 막대, 일평균 페이스 표까지 — 이 사이트에서 가장 여러 번 다듬은 화면이자 다른 페이지 컴포넌트들의 원형입니다.</p>
+            </figcaption>
+          </figure>
+          <figure class="shot-card">
+            <img src="./scl-images/targets.webp" alt="상세현황 화면 (수치 블러 처리)" loading="lazy">
+            <figcaption>
+              <span class="k">상세현황</span>
+              <p>지점 × 매출유형 계획/실적/달성율 표 — 회사가 원래 쓰던 엑셀 리포트 포맷을 그대로 웹으로 옮긴 화면입니다.</p>
+            </figcaption>
+          </figure>
+          <figure class="shot-card">
+            <img src="./scl-images/customer-pay.webp" alt="커스터머 페이 매출 현황 화면 (수치 블러 처리)" loading="lazy">
+            <figcaption>
+              <span class="k">커스터머 페이 매출 현황</span>
+              <p>고객이 직접 부담하는 매출(Retail·BSI·Insurance)만 따로 떼어 계획 대비 진척도를 보여줍니다.</p>
+            </figcaption>
+          </figure>
+          <figure class="shot-card">
+            <img src="./scl-images/wholesale.webp" alt="홀세일 현황 화면 (수치 블러 처리)" loading="lazy">
+            <figcaption>
+              <span class="k">홀세일 현황</span>
+              <p>부품구매 목표 대비 실적 아래로, 외부 MSSQL 재고 시스템을 하루 1회 연동한 재고현황까지 — 이 프로젝트에서 처음으로 PostgreSQL이 아닌 외부 DB를 직접 붙인 화면입니다.</p>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="category-block">
+        <div class="cat-head"><span class="k">현장 운영</span><h4>입고 · 인력</h4></div>
+        <div class="shot-grid">
+          <figure class="shot-card">
+            <img src="./scl-images/intake.webp" alt="입고 현황 화면 (수치 블러 처리)" loading="lazy">
+            <figcaption>
+              <span class="k">입고 현황</span>
+              <p>2022년부터의 입고 실적을 다년도 트렌드로 — 계획 없이 실적만 다루는 유일한 화면입니다.</p>
+            </figcaption>
+          </figure>
+          <figure class="shot-card">
+            <img src="./scl-images/sa-performance.webp" alt="SA성과현황 화면 (수치 블러 처리)" loading="lazy">
+            <figcaption>
+              <span class="k">SA성과현황</span>
+              <p>서비스 어드바이저 개인별 매출·마진·NPS를 산점도 포지셔닝 매트릭스로. 원본 시스템엔 없는 이름 텍스트를 재직 이력과 대조해 붙이는 게 가장 까다로웠습니다.</p>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="category-block">
+        <div class="cat-head"><span class="k">고객 경험</span><h4>만족도 · 시장 현황</h4></div>
+        <div class="shot-grid">
+          <figure class="shot-card">
+            <img src="./scl-images/csi.webp" alt="CSI(VoC/PE) 현황 화면 (수치 블러 처리)" loading="lazy">
+            <figcaption>
+              <span class="k">CSI(VoC/PE) 현황</span>
+              <p>고객만족도 원본 엑셀을 raw 그대로 적재하고 집계는 별도 단계에서 파생 — 나중에 계산 로직이 바뀌어도 원본을 다시 파싱할 필요가 없습니다.</p>
+            </figcaption>
+          </figure>
+          <figure class="shot-card">
+            <img src="./scl-images/market-map.webp" alt="지도 시각화 분석 화면 (수치 블러 처리)" loading="lazy">
+            <figcaption>
+              <span class="k">지도 시각화 분석</span>
+              <p>전국 등록현황 choropleth와 딜러사 지점 마커를 한 지도에 — 이 사이트에서 유일하게 지도 라이브러리를 쓰는 화면입니다.</p>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="category-block">
+        <div class="cat-head"><span class="k">협업 · 운영관리</span><h4>계정 · 공유 · 보고</h4></div>
+        <div class="shot-grid">
+          <figure class="shot-card">
+            <img src="./scl-images/board.webp" alt="요청사항 및 피드백 게시판 화면 (수치 블러 처리)" loading="lazy">
+            <figcaption>
+              <span class="k">요청사항 및 피드백</span>
+              <p>로그인한 모든 계정이 볼 수 있는 사내 게시판 — 답변은 관리자만 달 수 있도록 역할을 나눴습니다.</p>
+            </figcaption>
+          </figure>
+          <figure class="shot-card">
+            <img src="./scl-images/html-share.webp" alt="HTML 공유 화면 (수치 블러 처리)" loading="lazy">
+            <figcaption>
+              <span class="k">HTML 공유</span>
+              <p>팀원이 만든 HTML을 로그인 없이 공개하되 CSP sandbox로 대시보드 세션과는 완전히 격리한 화면 — 엔지니어링 로그에 나온 그 기능입니다.</p>
+            </figcaption>
+          </figure>
+          <figure class="shot-card">
+            <img src="./scl-images/admin-users.webp" alt="계정 관리 화면 (수치 블러 처리)" loading="lazy">
+            <figcaption>
+              <span class="k">계정 관리</span>
+              <p>계정별로 볼 수 있는 페이지를 체크박스로 지정합니다. 실제 권한 경계는 이 화면이 아니라 서버 쪽 코드에 있습니다 — 숨겨진 메뉴는 안내일 뿐, 보안 경계가 아니라서요.</p>
+            </figcaption>
+          </figure>
+          <figure class="shot-card">
+            <img src="./scl-images/admin-csi-exclusions.webp" alt="CSI 예외 규칙 화면 (수치 블러 처리)" loading="lazy">
+            <figcaption>
+              <span class="k">CSI 예외 규칙</span>
+              <p>지점 공사 등으로 특정 기간 응답을 집계에서 빼야 할 때, 원본은 그대로 두고 집계 단계에서만 조건부로 제외하는 규칙을 관리자가 직접 등록합니다.</p>
+            </figcaption>
+          </figure>
+        </div>
+        <p class="cat-footnote">이 밖에 인쇄용 요약 보고서(임원 보고용 A4 1페이지 요약, 텔레그램 봇 <code>/report</code>가 자동 캡쳐해 전송하는 화면)도 있습니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="sec-ops" data-tab="1">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">005_operations.sql</p>
+        <h2>새벽에도, 말일 저녁에도 혼자 돌아간다</h2>
+        <p>배포 이후가 진짜 시작이라는 생각으로, 사람이 지켜보지 않아도 스스로 감시하고 복구하는 운영 체계를 함께 만들었습니다.</p>
+      </div>
+      <div class="ops-list">
+        <div class="ops-item">
+          <span class="ic">01</span>
+          <div><h4>이중화된 스케줄 트리거</h4><p>시간 기반 트리거와 세션 기반 트리거를 함께 등록해, 서버 재시작이나 로그아웃 상황에서도 파이프라인이 조용히 멈추지 않도록 설계했습니다.</p></div>
+        </div>
+        <div class="ops-item">
+          <span class="ic">02</span>
+          <div><h4>크로스 프로세스 잠금</h4><p>스케줄러·운영 봇·대시보드 버튼이 동시에 같은 외부 세션을 건드리지 않도록 파일 기반 잠금으로 직렬화했습니다.</p></div>
+        </div>
+        <div class="ops-item">
+          <span class="ic">03</span>
+          <div><h4>원격 운영 봇</h4><p>텔레그램 봇으로 수동 트리거, 상태 확인, 장애 알림, 보고서 캡쳐까지 — 사무실 밖에서도 파이프라인을 확인·조작할 수 있습니다.</p></div>
+        </div>
+        <div class="ops-item">
+          <span class="ic">04</span>
+          <div><h4>매일 자동 대사(對査)</h4><p>원본 파일과 DB를 매일 자동으로 맞춰봐서, "원본에는 있는데 DB엔 없는" 조용한 누락을 스스로 찾아내도록 만들었습니다.</p></div>
+        </div>
+        <div class="ops-item">
+          <span class="ic">05</span>
+          <div><h4>정기 백업 · 무결성 검증</h4><p>재추출이 불가능한 과거 데이터를 지키기 위해 정기 백업과 검증 스크립트를 별도로 운영합니다.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="sec-stack" data-tab="1">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">006_stack.sql</p>
+        <h2>기술 스택</h2>
+      </div>
+      <div class="stack-grid">
+        <div class="stack-card">
+          <span class="k">Backend</span>
+          <ul>
+            <li>Python</li>
+            <li>Playwright</li>
+            <li>psycopg (PostgreSQL)</li>
+            <li>pandas</li>
+            <li>FastAPI</li>
+            <li>python-telegram-bot</li>
+          </ul>
+        </div>
+        <div class="stack-card">
+          <span class="k">Frontend</span>
+          <ul>
+            <li>Next.js 16 (App Router)</li>
+            <li>React 19 / TypeScript</li>
+            <li>Tailwind CSS v4</li>
+            <li>Recharts</li>
+            <li>Leaflet</li>
+          </ul>
+        </div>
+        <div class="stack-card">
+          <span class="k">Data</span>
+          <ul>
+            <li>PostgreSQL — JSONB + typed 컬럼 하이브리드</li>
+            <li>스프레드시트 CSV 연동</li>
+            <li>외부 RDB(MSSQL) 연동</li>
+          </ul>
+        </div>
+        <div class="stack-card">
+          <span class="k">Ops</span>
+          <ul>
+            <li>Windows Task Scheduler</li>
+            <li>Telegram Bot API</li>
+            <li>PowerShell 배포 스크립트</li>
+            <li>자동 코드 리뷰 서브에이전트 구성</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="closing" id="sec-closing">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">007_closing.sql</p>
+        <h2>혼자, 그러나 프로덕션 기준으로</h2>
+      </div>
+      <div class="prose">
+        <p>이 프로젝트에서 가장 크게 배운 것은, 기능을 만드는 일보다 "이미 만든 기능이 계속 맞다는 것을 증명하는 일"이 더 오래 걸린다는 사실이었습니다. 대사 체크, 자동 코드 리뷰, 실측 검증을 습관으로 만들면서 — 혼자 개발해도 팀 단위 프로덕션이 요구하는 신뢰도를 유지할 수 있다는 것을 확인했습니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <span>scl_agent — 딜러사 데이터 파이프라인 &amp; 통합 대시보드</span>
+      <div class="disclosure">
+        이 페이지는 실제로 설계·구축해 운영 중인 프로덕션 시스템을 바탕으로 작성했습니다. 다만 포트폴리오 공개 목적상 회사명은 익명화했고, 매출·재고 등 구체적인 영업 수치는 모두 배제했습니다. 화면 예시로 쓰인 수치는 실제 데이터가 아닌 레이아웃 설명용 예시입니다.
+      </div>
+    </div>
+  </footer>
+
+</main>
+
+<script>
+(function () {
+  var root = document.documentElement;
+
+  /* dark-mode default — align with site CI */
+  var stored = null;
+  try { stored = localStorage.getItem('theme'); } catch (e) {}
+  if (stored === 'dark' || stored === 'light') {
+    root.setAttribute('data-theme', stored);
+  } else {
+    root.setAttribute('data-theme', 'dark');
+  }
+
+  function currentIsDark() {
+    var attr = root.getAttribute('data-theme');
+    if (attr === 'dark') return true;
+    if (attr === 'light') return false;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+
+  function syncLabels() {
+    var dark = currentIsDark();
+    var label = dark ? '라이트 모드' : '다크 모드';
+    ['theme-toggle-label', 'theme-toggle-hero-label'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = label;
+    });
+  }
+
+  function toggleTheme() {
+    var next = currentIsDark() ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('theme', next); } catch (e) {}
+    syncLabels();
+  }
+
+  ['theme-toggle', 'theme-toggle-hero'].forEach(function (id) {
+    var btn = document.getElementById(id);
+    if (btn) btn.addEventListener('click', toggleTheme);
+  });
+  syncLabels();
+
+  var tabButtons = Array.prototype.slice.call(document.querySelectorAll('.tab[data-tab-target]'));
+  var tabSections = Array.prototype.slice.call(document.querySelectorAll('section[data-tab]'));
+
+  function setTab(target) {
+    tabButtons.forEach(function (btn) {
+      var active = btn.getAttribute('data-tab-target') === target;
+      btn.classList.toggle('is-active', active);
+      btn.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    tabSections.forEach(function (sec) {
+      sec.hidden = sec.getAttribute('data-tab') !== target;
+    });
+  }
+
+  tabButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      setTab(btn.getAttribute('data-tab-target'));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  var topbar = document.getElementById('topbar');
+  var topbarFile = document.getElementById('topbar-file');
+  var hero = document.querySelector('.hero');
+  var sections = Array.prototype.slice.call(document.querySelectorAll('section[id]'));
+
+  if ('IntersectionObserver' in window) {
+    var heroObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          topbar.classList.remove('is-visible');
+        } else if (entry.boundingClientRect.top < 0) {
+          topbar.classList.add('is-visible');
+        }
+      });
+    }, { threshold: 0 });
+    if (hero) heroObserver.observe(hero);
+
+    var fileMap = {};
+    sections.forEach(function (sec) {
+      var eyebrow = sec.querySelector('.eyebrow');
+      if (eyebrow) fileMap[sec.id] = eyebrow.textContent.trim();
+    });
+
+    var sectionObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting && fileMap[entry.target.id]) {
+          topbarFile.textContent = fileMap[entry.target.id];
+        }
+      });
+    }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+    sections.forEach(function (sec) { sectionObserver.observe(sec); });
+  }
+})();
+</script>
+</body>
 </html>
