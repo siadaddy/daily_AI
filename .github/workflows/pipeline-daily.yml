@@ -23,10 +23,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Python 설정
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: pip
@@ -39,11 +39,20 @@ jobs:
         run: python pipeline/collect.py
 
       - name: output 디렉터리 artifact 업로드
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: pipeline-output
           path: pipeline/output/
           retention-days: 1
+
+      - name: 실패 시 ntfy 알림
+        if: failure()
+        run: |
+          curl -s -X POST https://ntfy.sh/ \
+            -H "Content-Type: application/json" \
+            -d "{\"topic\":\"$NTFY_TOPIC\",\"title\":\"❌ AI 파이프라인 실패\",\"message\":\"collect 단계 실패. GitHub Actions 로그 확인 필요.\",\"priority\":4,\"tags\":[\"warning\"]}"
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
 
   generate:
     name: 🤖 콘텐츠 생성
@@ -65,10 +74,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Python 설정
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: pip
@@ -78,7 +87,7 @@ jobs:
         run: pip install -r pipeline/requirements.txt
 
       - name: collect artifact 다운로드
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: pipeline-output
           path: pipeline/output/
