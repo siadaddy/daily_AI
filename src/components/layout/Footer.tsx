@@ -1,6 +1,14 @@
 import Link from 'next/link'
 import { Bot } from 'lucide-react'
 
+const LINKS: { href: string; label: string; external?: boolean }[] = [
+  { href: '/about', label: '서비스 소개' },
+  { href: '/keyword', label: '키워드 아카이브' },
+  { href: '/agents', label: 'AI 에이전트' },
+  { href: '/about/ai-usage', label: 'AI 활용 고지' },
+  { href: '/feed.xml', label: 'RSS', external: true },
+]
+
 export function Footer() {
   return (
     <footer
@@ -18,15 +26,24 @@ export function Footer() {
           Next.js · Supabase · GitHub Actions
         </span>
       </p>
-      <p className="mt-2">
-        <Link
-          href="/about"
-          className="transition-colors hover:underline"
-          style={{ color: 'var(--brand-light)' }}
-        >
-          서비스 소개 →
-        </Link>
-      </p>
+      <nav
+        className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-2"
+        aria-label="사이트 링크"
+      >
+        {LINKS.map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            className="transition-colors hover:underline"
+            style={{ color: 'var(--brand-light)' }}
+            {...(link.external
+              ? { prefetch: false, target: '_blank', rel: 'noopener' }
+              : {})}
+          >
+            {link.label}
+          </Link>
+        ))}
+      </nav>
     </footer>
   )
 }

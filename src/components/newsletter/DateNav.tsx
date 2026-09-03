@@ -1,13 +1,8 @@
 'use client'
 
-import { useEffect, useCallback, useRef } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-
-function getToday() {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(
-    new Date()
-  )
-}
+import { useEffect, useRef } from 'react'
+import Link from 'next/link'
+import { getToday, newsHref } from '@/lib/dates'
 
 function parseDateParts(dateStr: string) {
   // dateStr: YYYY-MM-DD (로컬 시간으로 파싱)
@@ -28,8 +23,6 @@ export function DateNav({
   selectedDate: string
   dates: string[]
 }) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
   const listRef = useRef<HTMLDivElement>(null)
   const today = getToday()
 
@@ -45,19 +38,6 @@ export function DateNav({
       })
     }
   }, [dates, selectedDate])
-
-  const handleSelect = useCallback(
-    (date: string) => {
-      const params = new URLSearchParams(searchParams.toString())
-      if (date === today) {
-        params.delete('date')
-      } else {
-        params.set('date', date)
-      }
-      router.push(`/?${params.toString()}`)
-    },
-    [router, searchParams, today]
-  )
 
   if (dates.length === 0) {
     return (
@@ -118,9 +98,10 @@ export function DateNav({
                   const isToday = d === today
                   const isActive = d === selectedDate
                   return (
-                    <button
+                    <Link
                       key={d}
-                      onClick={() => handleSelect(d)}
+                      href={newsHref(d)}
+                      scroll={false}
                       className={[
                         'dn-chip',
                         isActive && 'active',
@@ -134,7 +115,7 @@ export function DateNav({
                       <span className="dn-chip-dow">{dow}</span>
                       <span className="dn-chip-day">{day}</span>
                       {isToday && <span className="dn-chip-dot" />}
-                    </button>
+                    </Link>
                   )
                 })}
               </div>

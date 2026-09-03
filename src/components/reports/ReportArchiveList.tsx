@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { reportHref } from '@/lib/dates'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Archive } from 'lucide-react'
 import type { PeriodReport, PeriodType } from '@/lib/types'
@@ -39,7 +40,7 @@ export function ReportArchiveList({
           return (
             <li key={r.id}>
               <Link
-                href={`/?tab=reports&view=${view}&report=${r.week_start}`}
+                href={reportHref(view, r.week_start)}
                 className="block rounded-xl px-3 py-2 transition-all duration-150"
                 style={
                   isActive

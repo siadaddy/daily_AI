@@ -218,8 +218,20 @@ def _ai_analysis(agg: dict, days_analyzed: int) -> dict:
         raise ValueError(f"JSON 파싱 실패: {raw[:300]}")
 
 
+# 이 에이전트가 쓰는 리포트의 period_type.
+# 웹앱 크론(/api/reports/generate)이 쓰는 "weekly"와 구분해 같은 주에 공존시킨다.
+PERIOD_TYPE = "weekly_ai"
+
+
 def _save_to_supabase(payload: dict) -> bool:
-    """weekly_reports 테이블에 upsert"""
+    """weekly_reports 테이블에 upsert.
+
+    주의: weekly_reports의 실제 컬럼은
+      week_start, week_end, period_type, summary, categories, insights,
+      next_focus, raw_data
+    뿐이다. 이 에이전트가 만드는 week_label/sections/top_headlines 등은
+    대응 컬럼이 없으므로 raw_data(JSONB)에 담는다.
+    """
     if not SUPABASE_URL or not SUPABASE_KEY:
         return False
     try:
@@ -228,34 +240,50 @@ def _save_to_supabase(payload: dict) -> bool:
             "apikey": SUPABASE_KEY,
             "Authorization": f"Bearer {SUPABASE_KEY}",
             "Content-Type": "application/json",
-            "Prefer": "resolution=merge-duplicates",
+            # unique 제약이 (period_type, week_start)이므로 충돌 대상을 명시한다.
+            "Prefer": "resolution=merge-duplicates,return=minimal",
         }
         today = date.today().strftime("%Y-%m-%d")
         week_start = (date.today() - timedelta(days=7)).strftime("%Y-%m-%d")
+
+        # 웹앱 CategoryStat 형태({name, count, trend})에 맞춰 준다.
+        categories = [
+            {
+                "name": c.get("name", ""),
+                "count": c.get("count", 0),
+                "trend": "flat",
+            }
+            for c in payload.get("category_counts", [])
+        ]
+
         row = {
-            "week_start":     week_start,
-            "week_end":       today,
-            "week_label":     payload.get("week_label", ""),
-            "generated_at":   today,
-            "days_analyzed":  payload.get("days_analyzed", 0),
-            "week_summary":   payload.get("week_summary", ""),
-            "hot_category":   payload.get("hot_category", ""),
-            "category_counts": payload.get("category_counts", []),
-            "sections":        payload.get("sections", []),
-            "weekly_insight":  payload.get("weekly_insight", ""),
-            "next_watch":      payload.get("next_watch", []),
-            "top_headlines":   payload.get("top_headlines", []),
+            "period_type": PERIOD_TYPE,
+            "week_start":  week_start,
+            "week_end":    today,
+            "summary":     payload.get("week_summary", ""),
+            "categories":  categories,
+            "insights":    payload.get("weekly_insight", ""),
+            "next_focus":  payload.get("next_watch", []),
+            "raw_data": {
+                "week_label":    payload.get("week_label", ""),
+                "generated_at":  today,
+                "days_analyzed": payload.get("days_analyzed", 0),
+                "hot_category":  payload.get("hot_category", ""),
+                "sections":      payload.get("sections", []),
+                "top_headlines": payload.get("top_headlines", []),
+            },
         }
         r = _req.post(
-            f"{SUPABASE_URL}/rest/v1/weekly_reports",
+            f"{SUPABASE_URL}/rest/v1/weekly_reports"
+            "?on_conflict=period_type,week_start",
             headers=headers,
             json=row,
             timeout=10,
         )
-        if r.status_code in (200, 201):
+        if r.status_code in (200, 201, 204):
             print("  ✅ Supabase weekly_reports 저장 완료")
             return True
-        print(f"  ⚠️  weekly_reports 저장 실패 ({r.status_code}): {r.text[:100]}")
+        print(f"  ⚠️  weekly_reports 저장 실패 ({r.status_code}): {r.text[:200]}")
         return False
     except Exception as e:
         print(f"  ⚠️  weekly_reports 저장 오류: {e}")

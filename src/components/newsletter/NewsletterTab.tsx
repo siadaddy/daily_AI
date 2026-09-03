@@ -1,6 +1,13 @@
 import { unstable_cache } from 'next/cache'
 import { createClient } from '@supabase/supabase-js'
-import { Newspaper, Bot, PenLine, ClipboardList, Inbox } from 'lucide-react'
+import {
+  Newspaper,
+  Bot,
+  PenLine,
+  ClipboardList,
+  Inbox,
+  MessagesSquare,
+} from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { FeaturedCard } from './FeaturedCard'
 import { NewsCard } from './NewsCard'
@@ -8,23 +15,18 @@ import { BlogArticle } from './BlogArticle'
 import { RawNewsSection } from './RawNewsSection'
 import { AiPicksSection } from './AiPicksSection'
 import { PreparingBanner } from './PreparingBanner'
+import { TalkingPointsSection } from './TalkingPointsSection'
+import { FactSummary } from './FactSummary'
 import type {
   ContentCard,
   NewsCard as NewsCardType,
   NewsTrend,
 } from '@/lib/types'
 import { isExcludedNews } from '@/lib/utils/exclude'
+import { plainTextExcerpt } from '@/lib/utils/caption'
 import { getSiteUrl } from '@/lib/site-url'
+import { newsHref, getToday } from '@/lib/dates'
 import nextDynamic from 'next/dynamic'
-
-function plainTextExcerpt(md: string, maxLength = 200): string {
-  const text = md
-    .replace(/\\n/g, ' ')
-    .replace(/[#>*_`-]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-  return text.length > maxLength ? `${text.slice(0, maxLength)}…` : text
-}
 
 const ContentInteraction = nextDynamic(
   () =>
@@ -77,12 +79,6 @@ function SectionTitle({
         </span>
       )}
     </div>
-  )
-}
-
-function getToday() {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(
-    new Date()
   )
 }
 
@@ -192,6 +188,7 @@ export async function NewsletterTab({ date }: { date?: string }) {
 
   const featured = cards[0] ?? null
   const grid = cards.slice(1)
+  const talkingPoints = trend?.talking_points?.talking_points ?? []
 
   const jsonLd = article
     ? {
@@ -202,7 +199,7 @@ export async function NewsletterTab({ date }: { date?: string }) {
         datePublished: `${targetDate}T06:00:00+09:00`,
         dateModified: `${targetDate}T06:00:00+09:00`,
         image: featured?.image_url ? [featured.image_url] : undefined,
-        url: `${getSiteUrl()}/?tab=newsletter&date=${targetDate}`,
+        url: `${getSiteUrl()}${newsHref(targetDate)}`,
         publisher: {
           '@type': 'Organization',
           name: '시아아빠의 AI 데일리',
@@ -222,6 +219,12 @@ export async function NewsletterTab({ date }: { date?: string }) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       )}
+      <FactSummary
+        date={targetDate}
+        cardCount={cards.length}
+        rawNews={rawNews}
+      />
+
       {/* 1. 카드뉴스 */}
       <section className="flex flex-col gap-6">
         <SectionTitle icon={Newspaper} title="카드뉴스" />
@@ -260,7 +263,23 @@ export async function NewsletterTab({ date }: { date?: string }) {
         </>
       )}
 
-      {/* 3. AI 편집장의 리뷰 */}
+      {/* 3. 오늘의 대화 소재 */}
+      {talkingPoints.length > 0 && (
+        <>
+          <hr style={{ borderColor: 'var(--border)', borderTopWidth: '1px' }} />
+          <section className="flex flex-col gap-4">
+            <SectionTitle
+              icon={MessagesSquare}
+              title="오늘의 대화 소재"
+              sub={`${talkingPoints.length}건`}
+            />
+            <TalkingPointsSection points={talkingPoints} />
+            <ContentInteraction contentKey={`talking_points:${targetDate}`} />
+          </section>
+        </>
+      )}
+
+      {/* 4. AI 편집장의 리뷰 */}
       {article && (
         <>
           <hr style={{ borderColor: 'var(--border)', borderTopWidth: '1px' }} />
@@ -276,7 +295,7 @@ export async function NewsletterTab({ date }: { date?: string }) {
         </>
       )}
 
-      {/* 4. 수집 뉴스 */}
+      {/* 5. 수집 뉴스 */}
       {rawNews.length > 0 && (
         <>
           <hr style={{ borderColor: 'var(--border)', borderTopWidth: '1px' }} />

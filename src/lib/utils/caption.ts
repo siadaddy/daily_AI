@@ -93,3 +93,13 @@ export function mdToHtml(md: string): string {
 export function readingMinutes(text: string): number {
   return Math.max(1, Math.round(text.replace(/\s/g, '').length / 350))
 }
+
+/** 마크다운 본문에서 메타 설명용 순수 텍스트 발췌 */
+export function plainTextExcerpt(md: string, maxLength = 200): string {
+  const text = md
+    .replace(/\\n/g, ' ')
+    .replace(/[#>*_`-]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+  return text.length > maxLength ? `${text.slice(0, maxLength)}…` : text
+}

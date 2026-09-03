@@ -1,12 +1,6 @@
 import { Suspense } from 'react'
-import { unstable_cache } from 'next/cache'
-import { createClient } from '@supabase/supabase-js'
 import type { Metadata } from 'next'
-import { Header } from '@/components/layout/Header'
-import { TabNav } from '@/components/layout/TabNav'
-import { Footer } from '@/components/layout/Footer'
-import { DashboardBar } from '@/components/dashboard/DashboardBar'
-import { DateNav } from '@/components/newsletter/DateNav'
+import { SiteShell, LoadingSkeleton } from '@/components/layout/SiteShell'
 import {
   NewsletterTab,
   fetchTodayArticle,
@@ -15,6 +9,9 @@ import { ReportsTab } from '@/components/reports/ReportsTab'
 import { OfficeTab } from '@/components/office/OfficeTab'
 import { MusicUniverse } from '@/components/music/MusicUniverse'
 import { PortfolioSection } from '@/components/portfolio/PortfolioCard'
+import { getToday, newsHref } from '@/lib/dates'
+import { fetchAvailableDates } from '@/lib/content-dates'
+import { plainTextExcerpt } from '@/lib/utils/caption'
 import type { TabId } from '@/lib/types'
 
 const TAB_META: Record<
@@ -61,20 +58,16 @@ export async function generateMetadata({
   }
 
   const date = params.date ?? getToday()
+  // 과거 날짜는 /news/[date]가 정식 경로 — 쿼리 URL은 그쪽을 가리킨다
+  const canonical = newsHref(date)
   const article = await fetchTodayArticle(date)
-  const canonical = date === getToday() ? '/' : `/?tab=newsletter&date=${date}`
 
   if (!article) {
     return { alternates: { canonical } }
   }
 
   const title = `${article.title} | 시아아빠의 AI 데일리`
-  const description = article.content
-    .replace(/\\n/g, ' ')
-    .replace(/[#>*_`-]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, 160)
+  const description = plainTextExcerpt(article.content, 160)
 
   return {
     title,
@@ -83,43 +76,6 @@ export async function generateMetadata({
     openGraph: { title, description },
     twitter: { title, description },
   }
-}
-
-function getToday() {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(
-    new Date()
-  )
-}
-
-const fetchAvailableDates = unstable_cache(
-  async (): Promise<string[]> => {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-    const { data } = await supabase
-      .from('card_news')
-      .select('date')
-      .order('date', { ascending: false })
-      .limit(30)
-    return data?.map((r: { date: string }) => r.date) ?? []
-  },
-  ['available-dates'],
-  { revalidate: 3600 }
-)
-
-function LoadingSkeleton() {
-  return (
-    <div className="flex flex-col gap-4">
-      {[1, 2, 3].map((i) => (
-        <div
-          key={i}
-          className="h-32 animate-pulse rounded-2xl"
-          style={{ background: 'var(--card)' }}
-        />
-      ))}
-    </div>
-  )
 }
 
 export default async function Home({
@@ -145,39 +101,22 @@ export default async function Home({
     : [today, ...availableDates]
 
   return (
-    <>
-      {/* 완전 고정 상단바: 헤더 + 탭 + 대시바 + 날짜 */}
-      <div className="top-bar-fixed">
-        <Header />
-        <Suspense>
-          <TabNav />
+    <SiteShell
+      dateNav={tab === 'newsletter' ? { selectedDate, dates } : undefined}
+    >
+      {tab === 'newsletter' && (
+        <Suspense fallback={<LoadingSkeleton />}>
+          <NewsletterTab date={date} />
         </Suspense>
-        {tab === 'newsletter' && (
-          <div className="top-bar-content">
-            <DashboardBar />
-            <Suspense>
-              <DateNav selectedDate={selectedDate} dates={dates} />
-            </Suspense>
-          </div>
-        )}
-      </div>
-
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 pt-4 pb-6">
-        {tab === 'newsletter' && (
-          <Suspense fallback={<LoadingSkeleton />}>
-            <NewsletterTab date={date} />
-          </Suspense>
-        )}
-        {tab === 'reports' && (
-          <Suspense fallback={<LoadingSkeleton />}>
-            <ReportsTab view={params.view} report={params.report} />
-          </Suspense>
-        )}
-        {tab === 'music' && <MusicUniverse />}
-        {tab === 'office' && <OfficeTab />}
-        {tab === 'portfolio' && <PortfolioSection />}
-      </main>
-      <Footer />
-    </>
+      )}
+      {tab === 'reports' && (
+        <Suspense fallback={<LoadingSkeleton />}>
+          <ReportsTab view={params.view} report={params.report} />
+        </Suspense>
+      )}
+      {tab === 'music' && <MusicUniverse />}
+      {tab === 'office' && <OfficeTab />}
+      {tab === 'portfolio' && <PortfolioSection />}
+    </SiteShell>
   )
 }
