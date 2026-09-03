@@ -11,7 +11,7 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.locale('ko')
 
-export function ClockWidget() {
+export function ClockWidget({ compact = false }: { compact?: boolean }) {
   const [now, setNow] = useState<dayjs.Dayjs | null>(null)
 
   // 하이드레이션 이후 첫 프레임에 시간 표시 (SSR 마크업과의 불일치 방지)
@@ -22,6 +22,14 @@ export function ClockWidget() {
   useInterval(() => {
     setNow(dayjs().tz('Asia/Seoul'))
   }, 1000)
+
+  if (compact) {
+    return (
+      <span className="font-mono text-xs text-[var(--text)]">
+        {now ? now.format('HH:mm') : '--:--'}
+      </span>
+    )
+  }
 
   return (
     <div className="dash-widget">

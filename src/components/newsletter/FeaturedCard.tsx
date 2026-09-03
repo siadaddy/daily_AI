@@ -1,15 +1,27 @@
+'use client'
+
 import Image from 'next/image'
+import { motion, useReducedMotion } from 'framer-motion'
+import { Newspaper, Sparkles, ArrowUpRight } from 'lucide-react'
 import type { ContentCard } from '@/lib/types'
 import { highlightCaption } from '@/lib/utils/caption'
 
 export function FeaturedCard({ card }: { card: ContentCard }) {
+  const prefersReducedMotion = useReducedMotion()
+
   return (
-    <div
+    <motion.div
       className="glass-card grid min-h-64 grid-cols-1 overflow-hidden sm:min-h-80 md:min-h-[400px] md:grid-cols-2"
       style={{
         border: '1px solid rgba(28,105,212,.25)',
-        boxShadow: 'var(--shadow-glow)',
+        boxShadow: 'var(--shadow-glow-brand)',
       }}
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 28 }}
+      whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+      whileHover={prefersReducedMotion ? undefined : { scale: 1.01 }}
+      whileTap={prefersReducedMotion ? undefined : { scale: 0.99 }}
     >
       {/* 좌: 이미지 영역 */}
       <div className="relative min-h-56 overflow-hidden md:min-h-full">
@@ -30,13 +42,18 @@ export function FeaturedCard({ card }: { card: ContentCard }) {
                 'linear-gradient(135deg, var(--surface) 0%, var(--card2) 100%)',
             }}
           >
-            <span className="text-6xl">📰</span>
+            <Newspaper
+              size={56}
+              strokeWidth={1.5}
+              style={{ color: 'var(--muted2)' }}
+            />
           </div>
         )}
         {/* 이미지 위 뱃지 */}
         <div className="absolute top-4 left-4 z-10">
-          <span className="badge badge-blue text-[0.65rem] font-black tracking-widest">
-            🚗 AUTO · CARD 01
+          <span className="badge badge-blue inline-flex items-center gap-1 text-[0.65rem] font-black tracking-widest">
+            <Sparkles size={11} strokeWidth={2.5} />
+            AUTO · CARD 01
           </span>
         </div>
         {/* 하단 그라디언트 (모바일에서 텍스트 가독성) */}
@@ -48,7 +65,7 @@ export function FeaturedCard({ card }: { card: ContentCard }) {
         {/* 라벨 */}
         <p
           className="mb-3 text-[0.67rem] font-black tracking-[0.14em] uppercase"
-          style={{ color: 'var(--bmw-lt)' }}
+          style={{ color: 'var(--brand-light)' }}
         >
           FEATURED · 오늘의 카드뉴스
         </p>
@@ -75,10 +92,12 @@ export function FeaturedCard({ card }: { card: ContentCard }) {
             rel="noopener noreferrer"
             className="source-btn mt-auto"
           >
-            📰 {card.source_name || '원문 보기'} →
+            <Newspaper size={12} strokeWidth={2.5} />
+            {card.source_name || '원문 보기'}
+            <ArrowUpRight size={12} strokeWidth={2.5} />
           </a>
         )}
       </div>
-    </div>
+    </motion.div>
   )
 }

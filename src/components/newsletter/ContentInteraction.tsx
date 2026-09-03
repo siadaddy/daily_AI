@@ -4,6 +4,8 @@ import { memo, useState, useEffect, useTransition, useRef } from 'react'
 import useSWR from 'swr'
 import { createBrowserClient } from '@supabase/ssr'
 import type { User } from '@supabase/supabase-js'
+import { motion, useReducedMotion } from 'framer-motion'
+import { Heart, MessageCircle, ChevronDown } from 'lucide-react'
 import { toggleLike, addComment, deleteComment } from '@/app/actions/community'
 
 interface Comment {
@@ -49,10 +51,13 @@ const LikeButton = memo(function LikeButton({
   disabled: boolean
   onToggle: () => void
 }) {
+  const prefersReducedMotion = useReducedMotion()
+
   return (
-    <button
+    <motion.button
       onClick={onToggle}
       disabled={disabled}
+      whileTap={prefersReducedMotion ? undefined : { scale: 0.9 }}
       className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all hover:opacity-80 disabled:opacity-50"
       style={{
         background: isLiked ? 'rgba(239,68,68,0.12)' : 'var(--glass)',
@@ -60,9 +65,9 @@ const LikeButton = memo(function LikeButton({
         color: isLiked ? '#ef4444' : 'var(--muted2)',
       }}
     >
-      <span>{isLiked ? '❤️' : '🤍'}</span>
+      <Heart size={14} strokeWidth={2} fill={isLiked ? '#ef4444' : 'none'} />
       <span>{likeCount}</span>
-    </button>
+    </motion.button>
   )
 })
 
@@ -213,14 +218,20 @@ export function ContentInteraction({ contentKey }: { contentKey: string }) {
               ? 'rgba(167,139,250,0.12)'
               : 'var(--glass)',
             border: `1px solid ${showComments ? 'rgba(167,139,250,0.4)' : 'var(--border)'}`,
-            color: showComments ? 'var(--accent2)' : 'var(--muted2)',
+            color: showComments ? 'var(--accent-purple)' : 'var(--muted2)',
           }}
         >
-          <span>💬</span>
+          <MessageCircle size={14} strokeWidth={2} />
           <span>댓글 {comments.length > 0 ? comments.length : ''}</span>
-          <span style={{ fontSize: '9px', opacity: 0.7 }}>
-            {showComments ? '▲' : '▼'}
-          </span>
+          <ChevronDown
+            size={12}
+            strokeWidth={2}
+            style={{
+              opacity: 0.7,
+              transform: showComments ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s',
+            }}
+          />
         </button>
       </div>
 
@@ -241,7 +252,7 @@ export function ContentInteraction({ contentKey }: { contentKey: string }) {
               <div className="flex min-w-0 items-start gap-2">
                 <span
                   className="mt-0.5 shrink-0 text-xs font-semibold"
-                  style={{ color: 'var(--bmw-lt)' }}
+                  style={{ color: 'var(--brand-light)' }}
                 >
                   {c.nickname}
                 </span>
@@ -293,7 +304,7 @@ export function ContentInteraction({ contentKey }: { contentKey: string }) {
                 type="submit"
                 disabled={isPending || !commentText.trim()}
                 className="w-full rounded-lg px-3 py-2 text-xs font-semibold transition-opacity disabled:opacity-40 sm:w-auto sm:py-1.5"
-                style={{ background: 'var(--accent2)', color: '#fff' }}
+                style={{ background: 'var(--accent-purple)', color: '#fff' }}
               >
                 {isPending ? '...' : '등록'}
               </button>

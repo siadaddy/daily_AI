@@ -13,14 +13,14 @@ const PIPELINE_STEPS = [
     step: 'Step 1',
     title: '뉴스 수집',
     desc: '네이버 뉴스 API로 AI, 기술, 경제, 자동차, BMW 등 8개 카테고리 뉴스 자동 수집',
-    color: 'var(--bmw)',
+    color: 'var(--brand)',
   },
   {
     emoji: '🤖',
     step: 'Step 2',
     title: 'AI 분석·요약',
     desc: 'Gemini AI가 핵심 키워드 추출, 3줄 요약, 중요도 스코어링으로 의미 있는 뉴스만 선별',
-    color: 'var(--accent2)',
+    color: 'var(--accent-purple)',
   },
   {
     emoji: '🎨',
@@ -41,7 +41,7 @@ const PIPELINE_STEPS = [
     step: 'Step 5',
     title: 'AI 에디터 리뷰',
     desc: '하루 전체 뉴스 흐름을 분석한 블로그 포스트를 AI 에디터가 자동 작성',
-    color: 'var(--bmw-lt)',
+    color: 'var(--brand-light)',
   },
   {
     emoji: '🗄️',
@@ -55,7 +55,7 @@ const PIPELINE_STEPS = [
     step: 'Step 7',
     title: '자동 발행',
     desc: 'GitHub Actions 스케줄로 매일 06:40 자동 실행 → 웹에 즉시 게시',
-    color: 'var(--accent2)',
+    color: 'var(--accent-purple)',
   },
 ]
 
@@ -211,7 +211,7 @@ export default function AboutPage() {
 
           <p
             className="mb-3 text-xl font-medium md:text-2xl"
-            style={{ color: 'var(--bmw-lt)' }}
+            style={{ color: 'var(--brand-light)' }}
           >
             AI가 뉴스를 읽고, 당신은 인사이트를 얻는다
           </p>
@@ -228,7 +228,7 @@ export default function AboutPage() {
           <Link
             href="/"
             className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-80"
-            style={{ background: 'var(--bmw)', color: '#fff' }}
+            style={{ background: 'var(--brand)', color: '#fff' }}
           >
             오늘의 뉴스레터 보기 →
           </Link>
@@ -348,7 +348,7 @@ export default function AboutPage() {
         <div className="mx-auto max-w-6xl">
           <div
             className="mb-2 text-center text-sm font-semibold tracking-widest uppercase"
-            style={{ color: 'var(--bmw-lt)' }}
+            style={{ color: 'var(--brand-light)' }}
           >
             자동화 파이프라인
           </div>
@@ -429,7 +429,7 @@ export default function AboutPage() {
         <div className="mx-auto max-w-5xl">
           <div
             className="mb-2 text-center text-sm font-semibold tracking-widest uppercase"
-            style={{ color: 'var(--accent2)' }}
+            style={{ color: 'var(--accent-purple)' }}
           >
             AI 크루
           </div>
@@ -482,7 +482,7 @@ export default function AboutPage() {
 
                 <p
                   className="mb-3 text-sm font-medium"
-                  style={{ color: 'var(--bmw-lt)' }}
+                  style={{ color: 'var(--brand-light)' }}
                 >
                   {agent.role}
                 </p>
@@ -581,7 +581,7 @@ export default function AboutPage() {
               >
                 <div
                   className="mb-1 text-3xl font-bold"
-                  style={{ color: 'var(--bmw-lt)' }}
+                  style={{ color: 'var(--brand-light)' }}
                 >
                   {stat.num}
                 </div>
@@ -627,7 +627,7 @@ export default function AboutPage() {
                       className="rounded-full px-3 py-1 text-xs font-medium"
                       style={{
                         background: 'rgba(28,105,212,0.12)',
-                        color: 'var(--bmw-lt)',
+                        color: 'var(--brand-light)',
                         border: '1px solid rgba(28,105,212,0.25)',
                       }}
                     >
@@ -658,7 +658,7 @@ export default function AboutPage() {
           <Link
             href="/"
             className="inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-semibold transition-opacity hover:opacity-80"
-            style={{ background: 'var(--bmw)', color: '#fff' }}
+            style={{ background: 'var(--brand)', color: '#fff' }}
           >
             뉴스레터 바로가기 →
           </Link>

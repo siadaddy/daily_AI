@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Bot, Clock, CheckCircle2, ArrowRight } from 'lucide-react'
 import type { NewsCard } from '@/lib/types'
 
 function getTimeUntil0640KST(): { hours: number; minutes: number } | null {
@@ -47,7 +48,9 @@ export function PreparingBanner({
       <div className="preparing-banner">
         <div className="preparing-spinner-wrap">
           <div className="preparing-spinner-ring" />
-          <span className="preparing-icon">🤖</span>
+          <span className="preparing-icon">
+            <Bot size={26} strokeWidth={1.5} />
+          </span>
         </div>
 
         <div>
@@ -59,7 +62,7 @@ export function PreparingBanner({
 
         {countdown !== null ? (
           <div className="preparing-countdown">
-            ⏱ 약{' '}
+            <Clock size={14} strokeWidth={2} />약{' '}
             {countdown.hours > 0
               ? `${countdown.hours}시간 ${countdown.minutes}분`
               : `${countdown.minutes}분`}{' '}
@@ -67,16 +70,18 @@ export function PreparingBanner({
           </div>
         ) : (
           <div className="preparing-done">
-            ✅ 생성 완료 예정 — 페이지를 새로고침해 보세요
+            <CheckCircle2 size={14} strokeWidth={2} />
+            생성 완료 예정 — 페이지를 새로고침해 보세요
           </div>
         )}
 
         <button
           type="button"
-          className="preparing-yesterday"
+          className="preparing-yesterday inline-flex items-center gap-1"
           onClick={() => router.push(`/?date=${yesterday}`)}
         >
-          어제 콘텐츠 보기 →
+          어제 콘텐츠 보기
+          <ArrowRight size={12} strokeWidth={2} />
         </button>
       </div>
 

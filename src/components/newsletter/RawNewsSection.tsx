@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
+import { ClipboardList, ChevronDown } from 'lucide-react'
 import type { NewsCard, Category } from '@/lib/types'
 import { useAppStore } from '@/store/app'
 
@@ -19,6 +21,7 @@ const CATEGORIES: Category[] = [
 export function RawNewsSection({ news }: { news: NewsCard[] }) {
   const { categoryFilter, setFilter } = useAppStore()
   const [open, setOpen] = useState(false)
+  const prefersReducedMotion = useReducedMotion()
 
   const filtered =
     categoryFilter === '전체'
@@ -26,7 +29,12 @@ export function RawNewsSection({ news }: { news: NewsCard[] }) {
       : news.filter((n) => n.category === categoryFilter)
 
   return (
-    <section>
+    <motion.section
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 24 }}
+      whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={{ duration: 0.45, ease: 'easeOut' }}
+    >
       {/* Header with toggle */}
       <button
         onClick={() => setOpen((p) => !p)}
@@ -36,8 +44,12 @@ export function RawNewsSection({ news }: { news: NewsCard[] }) {
           border: '1px solid var(--border)',
         }}
       >
-        <span className="font-semibold" style={{ color: 'var(--text)' }}>
-          📋 전체 뉴스 ({news.length}건)
+        <span
+          className="flex items-center gap-2 font-semibold"
+          style={{ color: 'var(--text)' }}
+        >
+          <ClipboardList size={16} strokeWidth={2} />
+          전체 뉴스 ({news.length}건)
         </span>
         <span
           className="transition-transform duration-200"
@@ -46,7 +58,7 @@ export function RawNewsSection({ news }: { news: NewsCard[] }) {
             color: 'var(--muted)',
           }}
         >
-          ▼
+          <ChevronDown size={16} strokeWidth={2} />
         </span>
       </button>
 
@@ -61,7 +73,7 @@ export function RawNewsSection({ news }: { news: NewsCard[] }) {
                 className="rounded-full px-3 py-1 text-xs font-medium transition-colors"
                 style={{
                   background:
-                    categoryFilter === cat ? 'var(--bmw)' : 'var(--glass)',
+                    categoryFilter === cat ? 'var(--brand)' : 'var(--glass)',
                   color: categoryFilter === cat ? '#fff' : 'var(--muted2)',
                   border: '1px solid var(--border)',
                 }}
@@ -107,6 +119,6 @@ export function RawNewsSection({ news }: { news: NewsCard[] }) {
           </div>
         </div>
       )}
-    </section>
+    </motion.section>
   )
 }

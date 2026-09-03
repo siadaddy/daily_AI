@@ -15,7 +15,7 @@ export function highlightCaption(text: string): string {
     )
     .replace(
       /\[전망\]/g,
-      '<span style="color:var(--accent2);font-weight:700">[전망]</span>'
+      '<span style="color:var(--accent-purple);font-weight:700">[전망]</span>'
     )
     .replace(/\n/g, '<br/>')
 }

@@ -1,5 +1,7 @@
 import { unstable_cache } from 'next/cache'
 import { createClient } from '@supabase/supabase-js'
+import { Newspaper, Bot, PenLine, ClipboardList, Inbox } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { FeaturedCard } from './FeaturedCard'
 import { NewsCard } from './NewsCard'
 import { BlogArticle } from './BlogArticle'
@@ -40,11 +42,11 @@ function getSupabase() {
 }
 
 function SectionTitle({
-  icon,
+  icon: Icon,
   title,
   sub,
 }: {
-  icon: string
+  icon: LucideIcon
   title: string
   sub?: string
 }) {
@@ -55,10 +57,10 @@ function SectionTitle({
         background:
           'linear-gradient(135deg, rgba(28,105,212,0.08) 0%, rgba(167,139,250,0.04) 100%)',
         border: '1px solid rgba(28,105,212,0.15)',
-        borderLeft: '3px solid var(--bmw)',
+        borderLeft: '3px solid var(--brand)',
       }}
     >
-      <span className="text-xl">{icon}</span>
+      <Icon size={20} strokeWidth={2} style={{ color: 'var(--brand-light)' }} />
       <span className="text-base font-bold" style={{ color: 'var(--text)' }}>
         {title}
       </span>
@@ -179,7 +181,7 @@ export async function NewsletterTab({ date }: { date?: string }) {
         className="flex min-h-64 flex-col items-center justify-center gap-3 rounded-2xl"
         style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
       >
-        <span className="text-4xl">📭</span>
+        <Inbox size={40} strokeWidth={1.5} style={{ color: 'var(--muted)' }} />
         <p style={{ color: 'var(--muted)' }}>해당 날짜의 콘텐츠가 없습니다</p>
         <p className="text-xs" style={{ color: 'var(--muted)' }}>
           시스템 오류 또는 미운영일입니다
@@ -222,7 +224,7 @@ export async function NewsletterTab({ date }: { date?: string }) {
       )}
       {/* 1. 카드뉴스 */}
       <section className="flex flex-col gap-6">
-        <SectionTitle icon="📰" title="카드뉴스" />
+        <SectionTitle icon={Newspaper} title="카드뉴스" />
         {featured && (
           <div className="flex flex-col gap-3">
             <FeaturedCard card={featured} />
@@ -248,7 +250,7 @@ export async function NewsletterTab({ date }: { date?: string }) {
         <>
           <hr style={{ borderColor: 'var(--border)', borderTopWidth: '1px' }} />
           <section className="flex flex-col gap-4">
-            <SectionTitle icon="🤖" title="AI Pick — 오늘의 TOP 3" />
+            <SectionTitle icon={Bot} title="AI Pick — 오늘의 TOP 3" />
             <AiPicksSection
               picks={trend.top3}
               insight={trend.talking_points?.one_line_insight}
@@ -263,7 +265,7 @@ export async function NewsletterTab({ date }: { date?: string }) {
         <>
           <hr style={{ borderColor: 'var(--border)', borderTopWidth: '1px' }} />
           <section className="flex flex-col gap-4">
-            <SectionTitle icon="✍️" title="AI 편집장의 리뷰" />
+            <SectionTitle icon={PenLine} title="AI 편집장의 리뷰" />
             <BlogArticle
               title={article?.title}
               content={article?.content}
@@ -280,7 +282,7 @@ export async function NewsletterTab({ date }: { date?: string }) {
           <hr style={{ borderColor: 'var(--border)', borderTopWidth: '1px' }} />
           <section className="flex flex-col gap-4">
             <SectionTitle
-              icon="📋"
+              icon={ClipboardList}
               title="수집 뉴스"
               sub={`${rawNews.length}건`}
             />

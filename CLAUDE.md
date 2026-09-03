@@ -115,12 +115,14 @@ Tailwind CSS v4 — uses `@import "tailwindcss"` (not the v3 `@tailwind` directi
 Design tokens live in `src/app/globals.css` as CSS custom properties:
 
 ```css
---bmw: #1c69d4 /* primary blue accent */ --accent2: #a78bfa
+--brand: #1c69d4 /* primary blue accent */ --accent-purple: #a78bfa
   /* purple secondary */ --bg: #080c14 /* dark background (default) */
   --card: #111827 --glass: rgba(255, 255, 255, 0.04);
 ```
 
-Dark mode is **default**. Light mode overrides via `[data-theme="light"]` selector (next-themes).
+Dark mode is **default**: the `:root` block in `globals.css` holds the dark values directly, and `[data-theme="light"]` overrides them for light mode. Theme state itself is a custom React Context (`src/components/layout/ThemeProvider.tsx`) — `next-themes` is not used/installed.
+
+`lucide-react` is the icon library (replaces emoji in structural UI elements — content-layer emoji like `Category` labels or `PortfolioCard` project glyphs are intentionally left alone). `framer-motion` drives interaction animations (tab underline, theme toggle, card reveals, KPI count-up); any new animation must respect `useReducedMotion()`.
 
 Prettier auto-sorts Tailwind classes via `prettier-plugin-tailwindcss`. Run format before committing.
 

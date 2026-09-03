@@ -60,7 +60,7 @@ export function ActivityLog() {
             <span style={{ color: 'var(--muted)', flexShrink: 0 }}>
               {dayjs(log.created_at).format('HH:mm:ss')}
             </span>
-            <span style={{ color: 'var(--bmw-lt)', flexShrink: 0 }}>
+            <span style={{ color: 'var(--brand-light)', flexShrink: 0 }}>
               [{log.agent_name}]
             </span>
             <span style={{ color: 'var(--text)' }}>{log.action}</span>

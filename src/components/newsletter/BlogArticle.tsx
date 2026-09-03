@@ -1,3 +1,6 @@
+'use client'
+
+import { motion, useReducedMotion } from 'framer-motion'
 import { mdToHtml, readingMinutes } from '@/lib/utils/caption'
 
 export function BlogArticle({
@@ -9,6 +12,8 @@ export function BlogArticle({
   content?: string | null
   date?: string
 }) {
+  const prefersReducedMotion = useReducedMotion()
+
   if (!content) return null
 
   const mins = readingMinutes(content)
@@ -22,7 +27,14 @@ export function BlogArticle({
     : null
 
   return (
-    <section className="blog-article transition-transform duration-300 hover:-translate-y-1">
+    <motion.section
+      className="blog-article"
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 28 }}
+      whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+      whileHover={prefersReducedMotion ? undefined : { scale: 1.005 }}
+    >
       {/* 상단 액센트 라인 */}
       <div className="blog-accent" />
 
@@ -70,6 +82,6 @@ export function BlogArticle({
         className="article-body blog-body"
         dangerouslySetInnerHTML={{ __html: mdToHtml(content) }}
       />
-    </section>
+    </motion.section>
   )
 }

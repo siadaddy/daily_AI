@@ -80,7 +80,7 @@ export function UserButton() {
         style={{
           background: 'var(--glass)',
           border: '1px solid var(--border)',
-          color: 'var(--bmw-lt)',
+          color: 'var(--brand-light)',
         }}
       >
         <span>👤</span>

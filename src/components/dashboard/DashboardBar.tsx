@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { ExchangeWidget } from './ExchangeWidget'
 import { DxyWidget } from './DxyWidget'
 import { KospiWidget } from './KospiWidget'
@@ -44,9 +45,18 @@ function WidgetRow() {
 }
 
 export function DashboardBar() {
+  // 터치 기기는 :hover로 마퀴를 멈출 수 없으므로, 탭할 때마다 정지/재생을 토글한다.
+  const [paused, setPaused] = useState(false)
+
   return (
     <div className="dash-bar">
-      <div className="dash-scroll">
+      <div
+        className={['dash-scroll', paused && 'dash-scroll--paused']
+          .filter(Boolean)
+          .join(' ')}
+        onTouchStart={() => setPaused((p) => !p)}
+        aria-label="실시간 시장 지표 (탭하여 정지/재생)"
+      >
         {/*
           하나의 트랙 안에 원본+복제본을 순서대로 배치.
           translateX(0 → -50%) 하면 정확히 원본 1벌 이동 후 루프.

@@ -16,6 +16,16 @@
         "hooks": [
           {
             "type": "command",
+            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const j=JSON.parse(d);const fp=j.tool_input?.file_path;if(fp&&/\\.(ts|tsx)$/.test(fp)&&!fp.includes('node_modules')){let out='';try{out=require('child_process').execSync('npx eslint '+JSON.stringify(fp),{stdio:'pipe',encoding:'utf8'})}catch(e){out=(e.stdout||'')+(e.stderr||'')}if(out.trim())console.log('⚠️  ESLint: '+fp.split(/[\\\\/]/).pop()+'\\n'+out.trim())}}catch(e){}})\"",
+            "timeout": 20000
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
             "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const j=JSON.parse(d);const fp=j.tool_input?.file_path;if(fp&&/(route\\.ts$|[\\\\/]actions[\\\\/]|[\\\\/]server\\.ts$)/.test(fp)){const fs=require('fs');const c=fs.existsSync(fp)?fs.readFileSync(fp,'utf8'):'';if(c.includes('createBrowserClient')){console.error('⚠️  [Server/Client Guard] '+fp.split(/[\\\\/]/).pop()+' 에서 createBrowserClient 감지!\\n   → lib/supabase/server.ts 의 createServerClient() 사용 필요');process.exit(2)}}}catch(e){}})\"",
             "timeout": 5000
           }

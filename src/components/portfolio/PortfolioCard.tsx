@@ -1,3 +1,16 @@
+'use client'
+
+import { motion, useReducedMotion } from 'framer-motion'
+import {
+  Bot,
+  ArrowUpRight,
+  CircleDot,
+  CheckCircle2,
+  PlayCircle,
+  Wrench,
+  type LucideIcon,
+} from 'lucide-react'
+
 type Category = 'personal' | 'work' | 'edu'
 
 interface PortfolioItem {
@@ -43,7 +56,7 @@ const PORTFOLIO_ITEMS: PortfolioItem[] = [
     aiUsage:
       '5-에이전트(수집·기획·작성·디자인·음악) 파이프라인 + 7일마다 스스로 프롬프트를 재작성하는 자기학습 메모리',
     detailHref: '/about/ai-usage',
-    detailLabel: 'AI 활용기 자세히 보기 →',
+    detailLabel: 'AI 활용기 자세히 보기',
   },
   {
     title: '뮤직 유니버스 3D',
@@ -172,14 +185,19 @@ const CATEGORIES: { key: Category; label: string }[] = [
   { key: 'edu', label: '🎓 교육' },
 ]
 
-const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
-  live: { label: 'LIVE', cls: 'badge-green' },
-  demo: { label: 'DEMO', cls: 'badge-blue' },
-  ended: { label: 'ENDED', cls: 'badge-purple' },
-  wip: { label: '작업중', cls: 'badge-orange' },
+const STATUS_LABEL: Record<
+  string,
+  { label: string; cls: string; icon: LucideIcon }
+> = {
+  live: { label: 'LIVE', cls: 'badge-green', icon: CircleDot },
+  demo: { label: 'DEMO', cls: 'badge-blue', icon: PlayCircle },
+  ended: { label: 'ENDED', cls: 'badge-purple', icon: CheckCircle2 },
+  wip: { label: '작업중', cls: 'badge-orange', icon: Wrench },
 }
 
 export function PortfolioSection() {
+  const prefersReducedMotion = useReducedMotion()
+
   return (
     <section className="flex flex-col gap-10">
       {CATEGORIES.map(({ key, label }) => {
@@ -193,7 +211,7 @@ export function PortfolioSection() {
                 background:
                   'linear-gradient(135deg, rgba(28,105,212,0.08) 0%, rgba(167,139,250,0.04) 100%)',
                 border: '1px solid rgba(28,105,212,0.15)',
-                borderLeft: '3px solid var(--bmw)',
+                borderLeft: '3px solid var(--brand)',
               }}
             >
               <span
@@ -214,10 +232,25 @@ export function PortfolioSection() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {items.map((item) => {
                 const st = item.status ? STATUS_LABEL[item.status] : null
+                const StatusIcon = st?.icon
                 return (
-                  <div
+                  <motion.div
                     key={item.title}
-                    className="glass-card group relative flex flex-col gap-3 p-5 transition-transform hover:-translate-y-1"
+                    className="portfolio-card-item glass-card group relative flex flex-col gap-3 p-5"
+                    initial={
+                      prefersReducedMotion ? false : { opacity: 0, y: 20 }
+                    }
+                    whileInView={
+                      prefersReducedMotion ? undefined : { opacity: 1, y: 0 }
+                    }
+                    viewport={{ once: true, margin: '-40px' }}
+                    transition={{ duration: 0.4, ease: 'easeOut' }}
+                    whileHover={
+                      prefersReducedMotion ? undefined : { scale: 1.015 }
+                    }
+                    whileTap={
+                      prefersReducedMotion ? undefined : { scale: 0.98 }
+                    }
                   >
                     <a
                       href={item.href}
@@ -226,8 +259,11 @@ export function PortfolioSection() {
                     />
                     <div className="flex items-start justify-between">
                       <span className="text-3xl">{item.emoji}</span>
-                      {st && (
-                        <span className={`badge ${st.cls}`}>{st.label}</span>
+                      {st && StatusIcon && (
+                        <span className={`badge ${st.cls}`}>
+                          <StatusIcon size={11} strokeWidth={2.5} />
+                          {st.label}
+                        </span>
                       )}
                     </div>
                     <div>
@@ -245,13 +281,18 @@ export function PortfolioSection() {
                       </p>
                       {item.aiUsage && (
                         <p
-                          className="mt-2 rounded-lg px-2.5 py-1.5 text-xs leading-relaxed"
+                          className="mt-2 flex items-start gap-1.5 rounded-lg px-2.5 py-1.5 text-xs leading-relaxed"
                           style={{
                             background: 'rgba(28,105,212,0.08)',
-                            color: 'var(--bmw-lt)',
+                            color: 'var(--brand-light)',
                           }}
                         >
-                          🤖 {item.aiUsage}
+                          <Bot
+                            size={14}
+                            strokeWidth={2}
+                            className="mt-0.5 shrink-0"
+                          />
+                          <span>{item.aiUsage}</span>
                         </p>
                       )}
                       {item.evidenceImg && (
@@ -277,13 +318,14 @@ export function PortfolioSection() {
                     {item.detailHref && (
                       <a
                         href={item.detailHref}
-                        className="relative z-10 self-start text-xs font-semibold hover:underline"
-                        style={{ color: 'var(--bmw-lt)' }}
+                        className="relative z-10 inline-flex w-fit items-center gap-1 self-start text-xs font-semibold hover:underline"
+                        style={{ color: 'var(--brand-light)' }}
                       >
-                        {item.detailLabel ?? '자세히 보기 →'}
+                        {item.detailLabel ?? '자세히 보기'}
+                        <ArrowUpRight size={12} strokeWidth={2.5} />
                       </a>
                     )}
-                  </div>
+                  </motion.div>
                 )
               })}
             </div>

@@ -28,7 +28,7 @@ function pm25Level(val: number) {
   return { label: '매우나쁨', color: 'var(--red)' }
 }
 
-export function WeatherWidget() {
+export function WeatherWidget({ compact = false }: { compact?: boolean }) {
   const [data, setData] = useState<{
     temp: number
     code: number
@@ -44,6 +44,14 @@ export function WeatherWidget() {
 
   const icon = data ? (WMO_ICONS[data.code] ?? '🌡') : null
   const pm = data ? pm25Level(data.pm25) : null
+
+  if (compact) {
+    return (
+      <span className="text-xs text-[var(--text)]">
+        {data ? `${data.temp}°C` : '--°C'}
+      </span>
+    )
+  }
 
   return (
     <div className="dash-widget">

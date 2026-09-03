@@ -2,6 +2,15 @@
 
 import { useState } from 'react'
 import useSWR from 'swr'
+import {
+  LineChart,
+  KeyRound,
+  BarChart3,
+  TrendingUp,
+  Globe,
+  Lightbulb,
+  type LucideIcon,
+} from 'lucide-react'
 import type { ReportPeriod, AnalyticsPayload } from '@/lib/types'
 import { ReportsPeriodSelector } from './ReportsPeriodSelector'
 import { StatsKpiRow } from './StatsKpiRow'
@@ -33,14 +42,20 @@ function ChartSkeleton({ height = 200 }: { height?: number }) {
 
 function SectionCard({
   title,
+  icon: Icon,
   children,
 }: {
   title: string
+  icon: LucideIcon
   children: React.ReactNode
 }) {
   return (
     <div className="glass-card rounded-2xl p-5">
-      <h3 className="mb-4 text-sm font-bold" style={{ color: 'var(--muted2)' }}>
+      <h3
+        className="mb-4 flex items-center gap-1.5 text-sm font-bold"
+        style={{ color: 'var(--muted2)' }}
+      >
+        <Icon size={16} strokeWidth={2} />
         {title}
       </h3>
       {children}
@@ -62,8 +77,12 @@ export function ReportsDashboard() {
     <div className="flex flex-col gap-5">
       {/* 헤더 */}
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-bold" style={{ color: 'var(--text)' }}>
-          📈 뉴스 분석 대시보드
+        <h2
+          className="flex items-center gap-2 text-base font-bold"
+          style={{ color: 'var(--text)' }}
+        >
+          <LineChart size={18} strokeWidth={2} />
+          뉴스 분석 대시보드
         </h2>
         <ReportsPeriodSelector value={period} onChange={setPeriod} />
       </div>
@@ -87,7 +106,7 @@ export function ReportsDashboard() {
 
       {/* 키워드 + 카테고리 */}
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-        <SectionCard title="🔑 키워드 분석 (상위 15개)">
+        <SectionCard title="키워드 분석 (상위 15개)" icon={KeyRound}>
           {isLoading ? (
             <ChartSkeleton height={320} />
           ) : data ? (
@@ -95,7 +114,7 @@ export function ReportsDashboard() {
           ) : null}
         </SectionCard>
 
-        <SectionCard title="📊 카테고리 분포">
+        <SectionCard title="카테고리 분포" icon={BarChart3}>
           {isLoading ? (
             <ChartSkeleton height={320} />
           ) : data ? (
@@ -105,7 +124,7 @@ export function ReportsDashboard() {
       </div>
 
       {/* 볼륨 추이 */}
-      <SectionCard title="📅 뉴스 발행 추이">
+      <SectionCard title="뉴스 발행 추이" icon={TrendingUp}>
         {isLoading ? (
           <ChartSkeleton height={200} />
         ) : data ? (
@@ -115,7 +134,7 @@ export function ReportsDashboard() {
 
       {/* 소스 분포 */}
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-        <SectionCard title="🌐 출처(소스) 분포">
+        <SectionCard title="출처(소스) 분포" icon={Globe}>
           {isLoading ? (
             <ChartSkeleton height={280} />
           ) : data ? (
@@ -124,14 +143,17 @@ export function ReportsDashboard() {
         </SectionCard>
 
         {/* 주요 인사이트 */}
-        <SectionCard title="💡 기간 요약">
+        <SectionCard title="기간 요약" icon={Lightbulb}>
           {isLoading ? (
             <ChartSkeleton height={280} />
           ) : data ? (
             <div className="flex flex-col gap-3">
               <p className="text-sm" style={{ color: 'var(--muted2)' }}>
                 {data.periodLabel} 동안 총{' '}
-                <span className="font-bold" style={{ color: 'var(--bmw-lt)' }}>
+                <span
+                  className="font-bold"
+                  style={{ color: 'var(--brand-light)' }}
+                >
                   {data.totalArticles.toLocaleString()}건
                 </span>
                 의 뉴스가 수집됐습니다.
@@ -152,8 +174,12 @@ export function ReportsDashboard() {
               )}
               {data.comparison && data.comparison.risingKeywords.length > 0 && (
                 <>
-                  <p className="text-xs" style={{ color: 'var(--muted)' }}>
-                    🔺 떠오르는 키워드
+                  <p
+                    className="flex items-center gap-1 text-xs"
+                    style={{ color: 'var(--muted)' }}
+                  >
+                    <TrendingUp size={12} strokeWidth={2.5} />
+                    떠오르는 키워드
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {data.comparison.risingKeywords.map((kw) => (

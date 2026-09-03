@@ -1,10 +1,24 @@
+'use client'
+
 import Image from 'next/image'
+import { motion, useReducedMotion } from 'framer-motion'
+import { FileText, Newspaper, ArrowUpRight } from 'lucide-react'
 import type { ContentCard } from '@/lib/types'
 import { highlightCaption } from '@/lib/utils/caption'
 
 export function NewsCard({ card, idx }: { card: ContentCard; idx: number }) {
+  const prefersReducedMotion = useReducedMotion()
+
   return (
-    <div className="news-card-item glass-card group flex flex-col overflow-hidden transition-all duration-200 hover:-translate-y-1">
+    <motion.div
+      className="news-card-item glass-card group flex flex-col overflow-hidden"
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 24 }}
+      whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={{ duration: 0.45, ease: 'easeOut' }}
+      whileHover={prefersReducedMotion ? undefined : { scale: 1.015 }}
+      whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
+    >
       {/* 상단: 이미지 전체 너비 */}
       <div className="relative aspect-video w-full overflow-hidden">
         {card.image_url ? (
@@ -18,13 +32,17 @@ export function NewsCard({ card, idx }: { card: ContentCard; idx: number }) {
           />
         ) : (
           <div
-            className="flex h-full w-full items-center justify-center text-5xl transition-transform duration-500 group-hover:scale-105"
+            className="flex h-full w-full items-center justify-center transition-transform duration-500 group-hover:scale-105"
             style={{
               background:
                 'linear-gradient(135deg, var(--surface) 0%, var(--card2) 100%)',
             }}
           >
-            📄
+            <FileText
+              size={44}
+              strokeWidth={1.5}
+              style={{ color: 'var(--muted2)' }}
+            />
           </div>
         )}
       </div>
@@ -61,10 +79,12 @@ export function NewsCard({ card, idx }: { card: ContentCard; idx: number }) {
             rel="noopener noreferrer"
             className="source-btn mt-auto"
           >
-            📰 {card.source_name || '원문 보기'} →
+            <Newspaper size={12} strokeWidth={2.5} />
+            {card.source_name || '원문 보기'}
+            <ArrowUpRight size={12} strokeWidth={2.5} />
           </a>
         )}
       </div>
-    </div>
+    </motion.div>
   )
 }

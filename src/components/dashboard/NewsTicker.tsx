@@ -10,6 +10,7 @@ function getToday() {
 
 export function NewsTicker() {
   const [headlines, setHeadlines] = useState<string[]>([])
+  const [paused, setPaused] = useState(false)
 
   useEffect(() => {
     const sb = createBrowserClient(
@@ -37,8 +38,12 @@ export function NewsTicker() {
     <div className="ticker-bar">
       <div className="ticker-track">
         <div
-          className="ticker-inner"
+          className={['ticker-inner', paused && 'ticker-inner--paused']
+            .filter(Boolean)
+            .join(' ')}
           style={{ '--count': items.length } as React.CSSProperties}
+          onTouchStart={() => setPaused((p) => !p)}
+          aria-label="실시간 뉴스 헤드라인 (탭하여 정지/재생)"
         >
           {items.map((h, i) => (
             <span key={i} className="ticker-item">

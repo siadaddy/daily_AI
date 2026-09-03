@@ -170,7 +170,7 @@ export function AuthModal({ onClose }: Props) {
             type="submit"
             disabled={isPending}
             className="mt-1 rounded-lg py-2 text-sm font-semibold transition-opacity disabled:opacity-50"
-            style={{ background: 'var(--accent2)', color: '#fff' }}
+            style={{ background: 'var(--accent-purple)', color: '#fff' }}
           >
             {isPending
               ? '처리 중...'

@@ -87,7 +87,7 @@ export default function AiUsagePage() {
           <Link
             href="/about"
             className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-80"
-            style={{ background: 'var(--bmw)', color: '#fff' }}
+            style={{ background: 'var(--brand)', color: '#fff' }}
           >
             서비스 소개 페이지 보기 →
           </Link>
@@ -142,7 +142,7 @@ export default function AiUsagePage() {
                 <Link
                   href="/?tab=portfolio"
                   className="underline"
-                  style={{ color: 'var(--bmw-lt)' }}
+                  style={{ color: 'var(--brand-light)' }}
                 >
                   포트폴리오에서 사례 확인
                 </Link>
@@ -199,7 +199,7 @@ export default function AiUsagePage() {
                       className="rounded-full px-2.5 py-1 text-[10px] font-medium"
                       style={{
                         background: 'rgba(28,105,212,0.12)',
-                        color: 'var(--bmw-lt)',
+                        color: 'var(--brand-light)',
                         border: '1px solid rgba(28,105,212,0.25)',
                       }}
                     >
@@ -236,7 +236,7 @@ export default function AiUsagePage() {
               >
                 <div
                   className="mb-1 text-3xl font-bold"
-                  style={{ color: 'var(--bmw-lt)' }}
+                  style={{ color: 'var(--brand-light)' }}
                 >
                   {stat.num}
                 </div>
@@ -255,7 +255,7 @@ export default function AiUsagePage() {
             <Link
               href="/?tab=portfolio"
               className="underline"
-              style={{ color: 'var(--bmw-lt)' }}
+              style={{ color: 'var(--brand-light)' }}
             >
               포트폴리오 카드
             </Link>
@@ -303,7 +303,7 @@ export default function AiUsagePage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline"
-                  style={{ color: 'var(--bmw-lt)' }}
+                  style={{ color: 'var(--brand-light)' }}
                 >
                   github.com/siadaddy/daily_AI
                 </a>{' '}
@@ -331,7 +331,7 @@ export default function AiUsagePage() {
             <Link
               href="/"
               className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-80"
-              style={{ background: 'var(--bmw)', color: '#fff' }}
+              style={{ background: 'var(--brand)', color: '#fff' }}
             >
               뉴스레터 보기 →
             </Link>

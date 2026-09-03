@@ -3,51 +3,15 @@
 /* ── Design Tokens ─────────────────────────────────── */
 :root {
   /* Brand */
-  --bmw: #1c69d4;
-  --bmw-lt: #4d90f0;
-  --accent2: #a78bfa;
+  --brand: #1c69d4;
+  --brand-light: #4d90f0;
+  --accent-purple: #a78bfa;
   --green: #10b981;
   --gold: #f59e0b;
   --red: #ef4444;
   --blue: #3b82f6;
 
-  /* Light mode (default) */
-  --bg: #f0f4f8;
-  --surface: #e8edf5;
-  --card: #ffffff;
-  --card2: #f8fafc;
-  --text: #0f172a;
-  --muted: #64748b;
-  --muted2: #475569;
-  --border: rgba(0, 0, 0, 0.08);
-  --glass: rgba(0, 0, 0, 0.03);
-  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.08);
-
-  /* Chart.js (light) */
-  --chart-grid: rgba(0, 0, 0, 0.08);
-  --chart-tick: #475569;
-  --chart-legend: #475569;
-
-  /* Chart series (light) — validated categorical palette, fixed slot order */
-  --viz-1: #2a78d6;
-  --viz-2: #1baf7a;
-  --viz-3: #eda100;
-  --viz-4: #008300;
-  --viz-5: #4a3aa7;
-  --viz-6: #e34948;
-  --viz-etc: #64748b;
-
-  /* Radii */
-  --r-sm: 10px;
-  --r-md: 18px;
-  --r-lg: 24px;
-
-  /* Shadows */
-  --shadow-glow: 0 0 20px rgba(28, 105, 212, 0.3);
-}
-
-/* Dark mode */
-[data-theme='dark'] {
+  /* Dark mode (default) */
   --bg: #080c14;
   --surface: #0f1520;
   --card: #111827;
@@ -72,14 +36,65 @@
   --viz-5: #9085e9;
   --viz-6: #e66767;
   --viz-etc: #94a3b8;
+
+  /* Radii */
+  --r-sm: 10px;
+  --r-md: 18px;
+  --r-lg: 24px;
+  --r-full: 999px;
+
+  /* Type scale */
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.875rem;
+  --fs-base: 1rem;
+  --fs-md: 1.125rem;
+  --fs-lg: 1.375rem;
+  --fs-xl: 1.75rem;
+  --fs-2xl: 2.25rem;
+
+  /* Spacing rhythm (커스텀 CSS 클래스 전용, Tailwind 기본 스케일 대체 아님) */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+
+  /* Elevation */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.12);
+  --shadow-lift: 0 16px 40px rgba(0, 0, 0, 0.3);
+  --shadow-glow-brand: 0 0 20px rgba(28, 105, 212, 0.3);
+  --shadow-glow-accent: 0 0 20px rgba(167, 139, 250, 0.25);
+}
+
+/* Light mode */
+[data-theme='light'] {
+  --bg: #f0f4f8;
+  --surface: #e8edf5;
+  --card: #ffffff;
+  --card2: #f8fafc;
+  --text: #0f172a;
+  --muted: #64748b;
+  --muted2: #475569;
+  --border: rgba(0, 0, 0, 0.08);
+  --glass: rgba(0, 0, 0, 0.03);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.08);
+
+  /* Chart.js (light) */
+  --chart-grid: rgba(0, 0, 0, 0.08);
+  --chart-tick: #475569;
+  --chart-legend: #475569;
+
+  /* Chart series (light) — validated categorical palette, fixed slot order */
+  --viz-1: #2a78d6;
+  --viz-2: #1baf7a;
+  --viz-3: #eda100;
+  --viz-4: #008300;
+  --viz-5: #4a3aa7;
+  --viz-6: #e34948;
+  --viz-etc: #64748b;
 }
 
 /* ── Base ──────────────────────────────────────────── */
-@theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
 html {
   scroll-behavior: smooth;
 }
@@ -159,7 +174,7 @@ body {
 
 /* ── Gradient Text ─────────────────────────────────── */
 .gradient-text {
-  background: linear-gradient(135deg, var(--bmw-lt), var(--accent2));
+  background: linear-gradient(135deg, var(--brand-light), var(--accent-purple));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -179,13 +194,13 @@ body {
 
 .badge-blue {
   background: rgba(28, 105, 212, 0.2);
-  color: var(--bmw-lt);
+  color: var(--brand-light);
   border: 1px solid rgba(28, 105, 212, 0.3);
 }
 
 .badge-purple {
   background: rgba(167, 139, 250, 0.15);
-  color: var(--accent2);
+  color: var(--accent-purple);
   border: 1px solid rgba(167, 139, 250, 0.3);
 }
 
@@ -203,9 +218,11 @@ body {
 
 /* ── Source Button ─────────────────────────────────── */
 .source-btn {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   margin-top: 12px;
-  font-size: 0.74rem;
+  font-size: var(--fs-xs);
   font-weight: 700;
   color: #60a5fa;
   text-decoration: none;
@@ -237,9 +254,7 @@ body {
 }
 .blog-article:hover {
   border-color: rgba(245, 158, 11, 0.45);
-  box-shadow:
-    0 12px 36px rgba(0, 0, 0, 0.3),
-    0 0 20px rgba(245, 158, 11, 0.12);
+  box-shadow: var(--shadow-lift), var(--shadow-glow-accent);
 }
 .blog-accent {
   height: 3px;
@@ -247,7 +262,7 @@ body {
     90deg,
     #f59e0b 0%,
     #f97316 50%,
-    var(--accent2) 100%
+    var(--accent-purple) 100%
   );
   transform-origin: top;
   transition: transform 0.3s ease;
@@ -274,7 +289,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -285,11 +300,8 @@ body {
   padding: 4px 12px;
   margin-bottom: 14px;
 }
-.blog-label-icon {
-  font-size: 0.85rem;
-}
 .blog-title {
-  font-size: clamp(1rem, 2.5vw, 1.35rem);
+  font-size: clamp(var(--fs-base), 2.5vw, var(--fs-lg));
   font-weight: 800;
   letter-spacing: -0.025em;
   line-height: 1.4;
@@ -307,12 +319,12 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
   color: var(--muted);
 }
 .blog-meta-dot {
   color: var(--border);
-  font-size: 0.8rem;
+  font-size: var(--fs-xs);
 }
 .blog-body {
   padding: 28px 32px 24px;
@@ -325,34 +337,34 @@ body {
 
 /* ── Article Body (마크다운 파싱 결과) ────────────────── */
 .article-body {
-  font-size: 0.91rem;
+  font-size: var(--fs-sm);
   line-height: 1.95;
   color: var(--muted2);
 }
 .article-body h1 {
-  font-size: 1.2rem;
+  font-size: var(--fs-md);
   font-weight: 800;
   letter-spacing: -0.02em;
   color: var(--text);
   margin: 28px 0 12px;
 }
 .article-body h2 {
-  font-size: 1.05rem;
+  font-size: var(--fs-base);
   font-weight: 700;
   letter-spacing: -0.01em;
-  color: var(--bmw-lt);
+  color: var(--brand-light);
   margin: 24px 0 10px;
   padding-left: 14px;
-  border-left: 3px solid var(--bmw);
+  border-left: 3px solid var(--brand);
 }
 .article-body h3 {
-  font-size: 0.95rem;
+  font-size: var(--fs-sm);
   font-weight: 700;
-  color: var(--accent2);
+  color: var(--accent-purple);
   margin: 18px 0 8px;
 }
 .article-body p {
-  font-size: 0.91rem;
+  font-size: var(--fs-sm);
   line-height: 1.95;
   margin-bottom: 14px;
   word-break: keep-all;
@@ -363,7 +375,7 @@ body {
   margin-bottom: 14px;
 }
 .article-body li {
-  font-size: 0.91rem;
+  font-size: var(--fs-sm);
   line-height: 1.9;
   margin-bottom: 6px;
 }
@@ -374,12 +386,12 @@ body {
 .article-body blockquote {
   margin: 16px 0;
   padding: 12px 16px;
-  border-left: 3px solid var(--accent2);
+  border-left: 3px solid var(--accent-purple);
   background: rgba(167, 139, 250, 0.06);
   border-radius: 0 8px 8px 0;
   font-style: italic;
   color: var(--muted2);
-  font-size: 0.88rem;
+  font-size: var(--fs-sm);
   line-height: 1.8;
 }
 .article-tags {
@@ -392,7 +404,7 @@ body {
 }
 .article-tag {
   display: inline-block;
-  font-size: 0.7rem;
+  font-size: var(--fs-xs);
   font-weight: 600;
   color: var(--muted);
   background: var(--glass);
@@ -406,7 +418,7 @@ body {
   cursor: default;
 }
 .article-tag:hover {
-  color: var(--bmw-lt);
+  color: var(--brand-light);
   background: rgba(28, 105, 212, 0.08);
   border-color: rgba(28, 105, 212, 0.25);
 }
@@ -414,43 +426,53 @@ body {
 /* ── News Card Hover ───────────────────────────────── */
 .news-card-item:hover {
   border-color: rgba(28, 105, 212, 0.4) !important;
-  box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.3),
-    0 0 24px rgba(28, 105, 212, 0.1) !important;
+  box-shadow: var(--shadow-lift), var(--shadow-glow-brand) !important;
 }
 
 /* ── AI Pick Item Hover ────────────────────────────── */
 .ai-pick-item:hover {
   border-color: rgba(28, 105, 212, 0.4) !important;
-  box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.3),
-    0 0 24px rgba(28, 105, 212, 0.1) !important;
+  box-shadow: var(--shadow-lift), var(--shadow-glow-brand) !important;
+}
+
+/* ── Portfolio Card Hover ──────────────────────────── */
+.portfolio-card-item:hover {
+  border-color: rgba(28, 105, 212, 0.4) !important;
+  box-shadow: var(--shadow-lift), var(--shadow-glow-brand) !important;
 }
 
 /* ── Reduced Motion (접근성) ───────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .news-card-item,
   .ai-pick-item,
+  .portfolio-card-item,
   .blog-article,
   .blog-accent {
     transition: none !important;
   }
   .news-card-item:hover,
   .ai-pick-item:hover,
+  .portfolio-card-item:hover,
   .blog-article:hover {
     transform: none !important;
+  }
+  /* 마퀴류 무한 스크롤 애니메이션 정지 */
+  .dash-track,
+  .ticker-inner,
+  .site-header::before {
+    animation: none !important;
   }
 }
 
 /* ── Card Caption ──────────────────────────────────── */
 .card-caption {
-  font-size: 0.875rem;
+  font-size: var(--fs-sm);
   line-height: 1.9;
   color: var(--muted2);
   word-break: break-word;
 }
 .nc-caption {
-  font-size: 0.83rem;
+  font-size: var(--fs-sm);
   line-height: 1.85;
   color: var(--muted2);
   word-break: break-word;
@@ -476,38 +498,19 @@ body {
 }
 
 /* ── Site Header ───────────────────────────────────── */
-@keyframes shimmer-line {
-  0% {
-    background-position: -200% center;
-  }
-  100% {
-    background-position: 200% center;
-  }
-}
-@keyframes logo-pulse {
-  0%,
-  100% {
-    box-shadow:
-      0 0 0 0 rgba(28, 105, 212, 0.5),
-      0 0 16px rgba(167, 139, 250, 0.3);
-  }
-  50% {
-    box-shadow:
-      0 0 0 6px rgba(28, 105, 212, 0),
-      0 0 28px rgba(167, 139, 250, 0.5);
-  }
-}
+/* 배경 장식 애니메이션은 최대 1개(오로라 블롭)만 유지한다.
+   타이틀 시머·로고 펄스는 정적 스타일로 대체(촌스러운 상시 루프 절제). */
 @keyframes aurora-shift {
   0% {
-    opacity: 0.6;
+    opacity: 0.5;
     transform: translateX(-10%) scale(1);
   }
   50% {
-    opacity: 1;
-    transform: translateX(5%) scale(1.08);
+    opacity: 0.85;
+    transform: translateX(5%) scale(1.06);
   }
   100% {
-    opacity: 0.6;
+    opacity: 0.5;
     transform: translateX(-10%) scale(1);
   }
 }
@@ -515,77 +518,48 @@ body {
 .site-header {
   position: relative;
   overflow: visible;
-  background: linear-gradient(180deg, #dce8f8 0%, #e8edf5 100%);
-  border-bottom: 1px solid rgba(28, 105, 212, 0.15);
+  background: linear-gradient(180deg, #0b1120 0%, #080c14 100%);
+  border-bottom: 1px solid rgba(28, 105, 212, 0.2);
   z-index: 100;
 }
-[data-theme='dark'] .site-header {
-  background: linear-gradient(180deg, #0b1120 0%, #080c14 100%);
-  border-bottom-color: rgba(28, 105, 212, 0.2);
+[data-theme='light'] .site-header {
+  background: linear-gradient(180deg, #dce8f8 0%, #e8edf5 100%);
+  border-bottom-color: rgba(28, 105, 212, 0.15);
 }
-[data-theme='dark'] .header-title {
-  background: linear-gradient(
-    120deg,
-    #60a5fa 0%,
-    var(--accent2) 50%,
-    #f0abfc 100%
-  );
-  background-size: 200% 100%;
+[data-theme='light'] .header-title {
+  background: linear-gradient(120deg, #1c69d4 0%, #7c3aed 50%, #9333ea 100%);
   -webkit-background-clip: text;
   background-clip: text;
-  animation: shimmer-line 6s linear infinite;
 }
-[data-theme='dark'] .header-subtitle {
-  color: rgba(148, 163, 184, 0.7);
+[data-theme='light'] .header-subtitle {
+  color: rgba(30, 41, 59, 0.55);
 }
-[data-theme='dark'] .header-live-widgets {
-  border-color: rgba(28, 105, 212, 0.25);
-  background: rgba(255, 255, 255, 0.04);
+[data-theme='light'] .header-live-widgets {
+  border-color: rgba(28, 105, 212, 0.2);
+  background: rgba(255, 255, 255, 0.6);
 }
 
-/* Aurora glow blobs behind content */
-.site-header::before,
-.site-header::after {
+/* Aurora glow blob — 유일하게 유지하는 배경 장식 애니메이션 */
+.site-header::before {
   content: '';
   position: absolute;
   border-radius: 50%;
   pointer-events: none;
-  animation: aurora-shift 8s ease-in-out infinite;
-}
-.site-header::before {
+  animation: aurora-shift 10s ease-in-out infinite;
   width: 400px;
   height: 200px;
   top: -80px;
   left: -60px;
   background: radial-gradient(
     ellipse,
+    rgba(28, 105, 212, 0.22) 0%,
+    transparent 70%
+  );
+}
+[data-theme='light'] .site-header::before {
+  background: radial-gradient(
+    ellipse,
     rgba(28, 105, 212, 0.12) 0%,
-    transparent 70%
-  );
-}
-.site-header::after {
-  width: 320px;
-  height: 180px;
-  top: -60px;
-  right: 80px;
-  background: radial-gradient(
-    ellipse,
-    rgba(167, 139, 250, 0.1) 0%,
-    transparent 70%
-  );
-  animation-delay: -4s;
-}
-[data-theme='dark'] .site-header::before {
-  background: radial-gradient(
-    ellipse,
-    rgba(28, 105, 212, 0.25) 0%,
-    transparent 70%
-  );
-}
-[data-theme='dark'] .site-header::after {
-  background: radial-gradient(
-    ellipse,
-    rgba(167, 139, 250, 0.2) 0%,
     transparent 70%
   );
 }
@@ -595,13 +569,11 @@ body {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    var(--bmw) 20%,
-    var(--accent2) 50%,
-    var(--bmw) 80%,
+    var(--brand) 20%,
+    var(--accent-purple) 50%,
+    var(--brand) 80%,
     transparent 100%
   );
-  background-size: 200% 100%;
-  animation: shimmer-line 4s linear infinite;
 }
 
 .header-main {
@@ -613,6 +585,8 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
+  flex: 1 1 auto;
   cursor: pointer;
   text-decoration: none;
   opacity: 1;
@@ -621,9 +595,12 @@ body {
 .header-logo:hover {
   opacity: 0.82;
 }
+.header-logo-text {
+  min-width: 0;
+}
 
 .header-logo-icon {
-  font-size: 1.8rem;
+  color: var(--brand-light);
   line-height: 1;
   width: 44px;
   height: 44px;
@@ -637,7 +614,7 @@ body {
     rgba(167, 139, 250, 0.2)
   );
   border: 1px solid rgba(28, 105, 212, 0.35);
-  animation: logo-pulse 3s ease-in-out infinite;
+  box-shadow: var(--shadow-glow-brand);
   flex-shrink: 0;
 }
 
@@ -645,42 +622,45 @@ body {
   font-size: 1.05rem;
   font-weight: 800;
   letter-spacing: -0.03em;
-  background: linear-gradient(120deg, #1c69d4 0%, #7c3aed 50%, #9333ea 100%);
-  background-size: 200% 100%;
+  background: linear-gradient(
+    120deg,
+    #60a5fa 0%,
+    var(--accent-purple) 50%,
+    #f0abfc 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: shimmer-line 6s linear infinite;
   line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .header-subtitle {
   font-size: 0.65rem;
-  color: rgba(30, 41, 59, 0.55);
+  color: rgba(148, 163, 184, 0.7);
   margin-top: 2px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* 헤더 우측 시계·날씨 고정 위젯 */
+/* 헤더 우측 시계·날씨 고정 위젯 (표시 여부는 Header.tsx의 hidden/md:flex가 담당) */
 .header-live-widgets {
-  display: none;
   align-items: center;
   gap: 0;
   padding: 5px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(28, 105, 212, 0.2);
-  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(28, 105, 212, 0.25);
+  background: rgba(255, 255, 255, 0.04);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
     0 4px 20px rgba(0, 0, 0, 0.3);
-}
-@media (min-width: 768px) {
-  .header-live-widgets {
-    display: flex;
-  }
 }
 .header-live-widgets .dash-widget {
   padding: 2px 10px;
@@ -701,16 +681,35 @@ body {
   flex-shrink: 0;
 }
 
+/* 모바일 압축 시계·날씨 한 줄 표시 */
+.header-live-widgets-compact {
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: var(--r-full);
+  border: 1px solid rgba(28, 105, 212, 0.25);
+  background: rgba(255, 255, 255, 0.04);
+  font-variant-numeric: tabular-nums;
+}
+[data-theme='light'] .header-live-widgets-compact {
+  border-color: rgba(28, 105, 212, 0.2);
+  background: rgba(255, 255, 255, 0.6);
+}
+.header-compact-divider {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
 .header-stats {
   display: none;
   align-items: center;
   gap: 6px;
   font-size: 0.68rem;
-  color: rgba(109, 40, 217, 0.85);
+  color: rgba(167, 139, 250, 0.85);
   padding: 4px 12px;
   border-radius: 99px;
-  border: 1px solid rgba(109, 40, 217, 0.2);
-  background: rgba(109, 40, 217, 0.06);
+  border: 1px solid rgba(167, 139, 250, 0.25);
+  background: rgba(167, 139, 250, 0.07);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   white-space: nowrap;
@@ -724,7 +723,6 @@ body {
 }
 @media (max-width: 390px) {
   .header-logo-icon {
-    font-size: 1.4rem;
     width: 36px;
     height: 36px;
   }
@@ -747,29 +745,60 @@ body {
     background 0.2s,
     transform 0.3s,
     box-shadow 0.2s;
-  background: rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
 .header-theme-btn:hover {
-  background: rgba(28, 105, 212, 0.12);
-  border-color: rgba(28, 105, 212, 0.3);
+  background: rgba(28, 105, 212, 0.18);
+  border-color: rgba(28, 105, 212, 0.4);
   box-shadow: 0 0 12px rgba(28, 105, 212, 0.3);
   transform: rotate(20deg);
 }
-[data-theme='dark'] .header-theme-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.1);
+[data-theme='light'] .header-theme-btn {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.1);
 }
-[data-theme='dark'] .header-theme-btn:hover {
-  background: rgba(28, 105, 212, 0.18);
-  border-color: rgba(28, 105, 212, 0.4);
+[data-theme='light'] .header-theme-btn:hover {
+  background: rgba(28, 105, 212, 0.12);
+  border-color: rgba(28, 105, 212, 0.3);
 }
-[data-theme='dark'] .header-stats {
-  color: rgba(167, 139, 250, 0.85);
-  border-color: rgba(167, 139, 250, 0.25);
-  background: rgba(167, 139, 250, 0.07);
+[data-theme='light'] .header-stats {
+  color: rgba(109, 40, 217, 0.85);
+  border-color: rgba(109, 40, 217, 0.2);
+  background: rgba(109, 40, 217, 0.06);
+}
+
+/* ── Tab Navigation ────────────────────────────────── */
+.tn-list-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+.tn-list {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+.tn-list::-webkit-scrollbar {
+  display: none;
+}
+.tn-list > button {
+  scroll-snap-align: start;
+}
+/* 우측 스크롤 힌트 페이드 마스크 */
+.tn-fade {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 32px;
+  height: 100%;
+  background: linear-gradient(to right, transparent, var(--surface));
+  pointer-events: none;
 }
 
 /* ── News Ticker ───────────────────────────────────── */
@@ -789,13 +818,13 @@ body {
   padding: 0 12px;
   font-size: 0.68rem;
   font-weight: 800;
-  color: var(--bmw-lt);
+  color: var(--brand-light);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   border-right: 1px solid var(--border);
   height: 100%;
 }
-@media (max-width: 639px) {
+@media (max-width: 640px) {
   .ticker-label {
     padding: 0 8px;
     gap: 0;
@@ -809,7 +838,7 @@ body {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--bmw-lt);
+  background: var(--brand-light);
   animation: blink 1.2s ease-in-out infinite;
   flex-shrink: 0;
 }
@@ -841,7 +870,8 @@ body {
   white-space: nowrap;
   animation: ticker-scroll 40s linear infinite;
 }
-.ticker-inner:hover {
+.ticker-inner:hover,
+.ticker-inner--paused {
   animation-play-state: paused;
 }
 .ticker-item {
@@ -965,7 +995,7 @@ body {
   --header-h: 60px;
   --tabnav-h: 44px;
 }
-@media (max-width: 639px) {
+@media (max-width: 640px) {
   :root {
     --header-h: 56px;
     --tabnav-h: 44px;
@@ -1128,7 +1158,7 @@ body {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: var(--bmw-lt);
+  background: var(--brand-light);
 }
 
 /* 오늘 칩 */
@@ -1137,16 +1167,16 @@ body {
   background: rgba(28, 105, 212, 0.06);
 }
 .dn-chip.today .dn-chip-dow {
-  color: var(--bmw-lt);
+  color: var(--brand-light);
   opacity: 0.8;
 }
 .dn-chip.today .dn-chip-day {
-  color: var(--bmw-lt);
+  color: var(--brand-light);
 }
 
 /* 선택 상태 */
 .dn-chip.active {
-  background: linear-gradient(145deg, var(--bmw), #1455b0);
+  background: linear-gradient(145deg, var(--brand), #1455b0);
   border-color: transparent;
   box-shadow:
     0 4px 16px rgba(28, 105, 212, 0.45),
@@ -1224,21 +1254,24 @@ body {
   inset: 0;
   border-radius: 50%;
   border: 2px solid transparent;
-  border-top-color: var(--bmw);
-  border-right-color: var(--accent2);
+  border-top-color: var(--brand);
+  border-right-color: var(--accent-purple);
   animation: spin-slow 2s linear infinite;
 }
 .preparing-icon {
-  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-light);
 }
 .preparing-title {
-  font-size: 1.2rem;
+  font-size: var(--fs-md);
   font-weight: 800;
   color: var(--text);
   margin-bottom: 4px;
 }
 .preparing-sub {
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   color: var(--muted2);
 }
 .preparing-countdown {
@@ -1249,9 +1282,9 @@ body {
   padding: 6px 20px;
   background: rgba(28, 105, 212, 0.12);
   border: 1px solid rgba(28, 105, 212, 0.25);
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   font-weight: 600;
-  color: var(--bmw-lt);
+  color: var(--brand-light);
 }
 .preparing-done {
   display: flex;
@@ -1261,12 +1294,12 @@ body {
   padding: 6px 20px;
   background: rgba(16, 185, 129, 0.1);
   border: 1px solid rgba(16, 185, 129, 0.25);
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   font-weight: 600;
   color: var(--green);
 }
 .preparing-yesterday {
-  font-size: 0.82rem;
+  font-size: var(--fs-sm);
   color: var(--muted);
   text-decoration: underline;
   background: none;
@@ -1274,7 +1307,7 @@ body {
   cursor: pointer;
 }
 .preparing-raw-label {
-  font-size: 0.7rem;
+  font-size: var(--fs-xs);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -1296,7 +1329,7 @@ body {
   border: 1px solid var(--border);
 }
 .preparing-raw-link {
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   font-weight: 500;
   color: var(--text);
   text-decoration: none;
@@ -1306,6 +1339,6 @@ body {
 }
 .preparing-raw-cat {
   margin-left: 8px;
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
   color: var(--muted);
 }

@@ -13,10 +13,10 @@ type Theme = 'dark' | 'light'
 const ThemeContext = createContext<{
   theme: Theme
   setTheme: (t: Theme) => void
-}>({ theme: 'light', setTheme: () => {} })
+}>({ theme: 'dark', setTheme: () => {} })
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('light')
+  const [theme, setThemeState] = useState<Theme>('dark')
 
   // 초기 테마 복원 — 하이드레이션 이후 첫 프레임에 적용
   useEffect(() => {

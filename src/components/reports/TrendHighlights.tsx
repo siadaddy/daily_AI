@@ -1,3 +1,7 @@
+'use client'
+
+import { motion, useReducedMotion } from 'framer-motion'
+import { Flame } from 'lucide-react'
 import type { PeriodType, Top3Item } from '@/lib/types'
 
 interface TrendRow {
@@ -12,6 +16,8 @@ export function TrendHighlights({
   trends: TrendRow[]
   periodType: PeriodType
 }) {
+  const prefersReducedMotion = useReducedMotion()
+
   if (trends.length === 0) return null
 
   // 주간: 일별 TOP3 전체, 월간: 각 날짜의 1위만 최근 10건
@@ -27,15 +33,19 @@ export function TrendHighlights({
           .slice(-10)
 
   return (
-    <div
-      className="rounded-2xl p-5"
-      style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
+    <motion.div
+      className="glass-card rounded-2xl p-5"
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 24 }}
+      whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={{ duration: 0.45, ease: 'easeOut' }}
     >
       <h3
-        className="mb-4 text-sm font-semibold"
+        className="mb-4 flex items-center gap-1.5 text-sm font-semibold"
         style={{ color: 'var(--text)' }}
       >
-        🔥 기간 TOP 뉴스
+        <Flame size={16} strokeWidth={2} />
+        기간 TOP 뉴스
       </h3>
       <div className="flex flex-col gap-4">
         {groups.map((g) => (
@@ -54,7 +64,7 @@ export function TrendHighlights({
                 >
                   <span
                     className="mt-0.5 shrink-0 text-xs font-bold"
-                    style={{ color: 'var(--bmw-lt)' }}
+                    style={{ color: 'var(--brand-light)' }}
                   >
                     #{item.rank}
                   </span>
@@ -73,6 +83,6 @@ export function TrendHighlights({
           </div>
         ))}
       </div>
-    </div>
+    </motion.div>
   )
 }

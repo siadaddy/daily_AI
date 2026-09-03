@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { Orbit, Maximize2, Minimize2 } from 'lucide-react'
 
 export function MusicUniverse() {
   const [loaded, setLoaded] = useState(false)
@@ -24,16 +25,25 @@ export function MusicUniverse() {
   return (
     <div
       ref={containerRef}
-      className="relative overflow-hidden rounded-2xl"
+      className="relative overflow-hidden"
       style={{
         height: 600,
         background: '#000008',
         border: '1px solid var(--border)',
+        borderRadius: 'var(--r-lg)',
+        boxShadow: 'var(--shadow-card)',
       }}
     >
       {!loaded && (
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4">
-          <div className="animate-pulse text-6xl">🌌</div>
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 transition-opacity duration-500">
+          <Orbit
+            size={56}
+            strokeWidth={1.5}
+            style={{
+              color: 'var(--brand-light)',
+              animation: 'spin-slow 3s linear infinite',
+            }}
+          />
           <p className="gradient-text text-lg font-bold">
             뮤직 유니버스 로딩 중...
           </p>
@@ -49,7 +59,7 @@ export function MusicUniverse() {
         style={{
           border: 'none',
           opacity: loaded ? 1 : 0,
-          transition: 'opacity 0.5s',
+          transition: 'opacity 0.5s ease',
         }}
         onLoad={() => setLoaded(true)}
         title="뮤직 유니버스 3D"
@@ -59,40 +69,23 @@ export function MusicUniverse() {
       {loaded && (
         <button
           onClick={toggleFullscreen}
-          className="absolute right-4 bottom-4 z-20 flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium backdrop-blur-sm transition-all hover:scale-105"
+          className="absolute right-4 bottom-4 z-20 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium backdrop-blur-sm transition-all hover:scale-105"
           style={{
             background: 'rgba(255,255,255,0.1)',
             border: '1px solid rgba(255,255,255,0.15)',
+            borderRadius: 'var(--r-sm)',
             color: '#fff',
           }}
           title={isFullscreen ? '전체화면 종료' : '전체화면'}
         >
           {isFullscreen ? (
             <>
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
-              </svg>
+              <Minimize2 size={14} strokeWidth={2} />
               축소
             </>
           ) : (
             <>
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
-              </svg>
+              <Maximize2 size={14} strokeWidth={2} />
               전체화면
             </>
           )}
