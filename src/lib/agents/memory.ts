@@ -50,20 +50,28 @@ function normalizeDiary(value: unknown): DiaryEntry[] {
 
 export const fetchAgentMemories = unstable_cache(
   async (): Promise<AgentMemory[]> => {
-    const { data } = await createPublicClient()
-      .from('agent_memories')
-      .select(
-        'agent_name, persona, growth_score, diary, persona_updated_at, updated_at'
-      )
-      .order('growth_score', { ascending: false })
+    let data: Record<string, unknown>[] | null = null
+    try {
+      const res = await createPublicClient()
+        .from('agent_memories')
+        .select(
+          'agent_name, persona, growth_score, diary, persona_updated_at, updated_at'
+        )
+        .order('growth_score', { ascending: false })
+      if (res.error) throw new Error(res.error.message)
+      data = res.data
+    } catch (e) {
+      console.error('[agents/memory] agent_memories 조회 실패:', e)
+      return []
+    }
 
     return (data ?? []).map((row) => ({
-      agent_name: row.agent_name,
-      persona: row.persona ?? null,
-      growth_score: row.growth_score ?? null,
+      agent_name: String(row.agent_name),
+      persona: (row.persona as string) ?? null,
+      growth_score: (row.growth_score as number) ?? null,
       diary: normalizeDiary(row.diary),
-      persona_updated_at: row.persona_updated_at ?? null,
-      updated_at: row.updated_at ?? null,
+      persona_updated_at: (row.persona_updated_at as string) ?? null,
+      updated_at: (row.updated_at as string) ?? null,
     }))
   },
   ['agent-memories'],

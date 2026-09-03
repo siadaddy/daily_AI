@@ -15,20 +15,28 @@ export async function GET() {
   const base = getSiteUrl()
   const supabase = createPublicClient()
 
-  const [articlesResult, reportKeys, keywords] = await Promise.all([
-    supabase
-      .from('articles')
-      .select('date, title')
-      .order('date', { ascending: false })
-      .limit(RECENT_LIMIT),
+  async function fetchRecentArticles(): Promise<
+    { date: string; title: string }[]
+  > {
+    try {
+      const { data, error } = await supabase
+        .from('articles')
+        .select('date, title')
+        .order('date', { ascending: false })
+        .limit(RECENT_LIMIT)
+      if (error) throw new Error(error.message)
+      return data ?? []
+    } catch (e) {
+      console.error('[llms.txt] articles 조회 실패:', e)
+      return []
+    }
+  }
+
+  const [articles, reportKeys, keywords] = await Promise.all([
+    fetchRecentArticles(),
     fetchAllReportKeys(),
     getTopKeywords(60),
   ])
-
-  const articles = (articlesResult.data ?? []) as {
-    date: string
-    title: string
-  }[]
 
   const recentNews = articles
     .map((a) => `- [${a.date} — ${a.title}](${base}/news/${a.date})`)

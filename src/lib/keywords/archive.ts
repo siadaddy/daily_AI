@@ -42,38 +42,43 @@ interface CardRow {
  */
 export const getTopKeywords = unstable_cache(
   async (limit = TOP_KEYWORD_COUNT): Promise<KeywordStat[]> => {
-    const supabase = createPublicClient()
+    try {
+      const supabase = createPublicClient()
 
-    const [cards, trends, articles] = await Promise.all([
-      fetchAllPages<CardRow>((from, to) =>
+      const [cards, trends, articles] = await Promise.all([
+        fetchAllPages<CardRow>((from, to) =>
+          supabase
+            .from('news_cards')
+            .select('title, summary, category, date')
+            .order('date', { ascending: false })
+            .range(from, to)
+        ),
+        supabase.from('news_trends').select('top3'),
         supabase
-          .from('news_cards')
-          .select('title, summary, category, date')
+          .from('articles')
+          .select('content')
           .order('date', { ascending: false })
-          .range(from, to)
-      ),
-      supabase.from('news_trends').select('top3'),
-      supabase
-        .from('articles')
-        .select('content')
-        .order('date', { ascending: false })
-        .limit(180),
-    ])
+          .limit(180),
+      ])
 
-    const visible = cards.filter((c) => !isExcludedNews(c))
+      const visible = cards.filter((c) => !isExcludedNews(c))
 
-    const trendTitles = ((trends.data ?? []) as { top3: Top3Item[] | null }[])
-      .flatMap((t) => t.top3 ?? [])
-      .map((i) => i.title)
+      const trendTitles = ((trends.data ?? []) as { top3: Top3Item[] | null }[])
+        .flatMap((t) => t.top3 ?? [])
+        .map((i) => i.title)
 
-    return extractKeywords({
-      titles: visible.map((c) => c.title ?? ''),
-      trendTitles,
-      articleContents: ((articles.data ?? []) as { content: string }[]).map(
-        (a) => a.content
-      ),
-      topN: limit,
-    })
+      return extractKeywords({
+        titles: visible.map((c) => c.title ?? ''),
+        trendTitles,
+        articleContents: ((articles.data ?? []) as { content: string }[]).map(
+          (a) => a.content
+        ),
+        topN: limit,
+      })
+    } catch (e) {
+      console.error('[keywords/archive] 상위 키워드 집계 실패:', e)
+      return []
+    }
   },
   ['top-keywords'],
   { revalidate: 3600 }
@@ -84,17 +89,22 @@ export const getNewsByKeyword = unstable_cache(
   async (keyword: string): Promise<KeywordNewsItem[]> => {
     if (!isSafeKeyword(keyword)) return []
 
-    const supabase = createPublicClient()
-    const rows = await fetchAllPages<KeywordNewsItem>((from, to) =>
-      supabase
-        .from('news_cards')
-        .select('date, title, summary, link, source, category')
-        .or(`title.ilike.%${keyword}%,summary.ilike.%${keyword}%`)
-        .order('date', { ascending: false })
-        .range(from, to)
-    )
+    try {
+      const supabase = createPublicClient()
+      const rows = await fetchAllPages<KeywordNewsItem>((from, to) =>
+        supabase
+          .from('news_cards')
+          .select('date, title, summary, link, source, category')
+          .or(`title.ilike.%${keyword}%,summary.ilike.%${keyword}%`)
+          .order('date', { ascending: false })
+          .range(from, to)
+      )
 
-    return rows.filter((r) => !isExcludedNews(r))
+      return rows.filter((r) => !isExcludedNews(r))
+    } catch (e) {
+      console.error('[keywords/archive] 키워드 뉴스 조회 실패:', e)
+      return []
+    }
   },
   ['news-by-keyword'],
   { revalidate: 3600 }

@@ -26,16 +26,22 @@ function pubDate(date: string): string {
 export async function GET() {
   const base = getSiteUrl()
 
-  const { data } = await createPublicClient()
-    .from('articles')
-    .select('date, title, content')
-    .order('date', { ascending: false })
-    .limit(ITEM_LIMIT)
-
-  const articles = data ?? []
+  let articles: { date: string; title: string; content: string }[] = []
+  try {
+    const { data, error } = await createPublicClient()
+      .from('articles')
+      .select('date, title, content')
+      .order('date', { ascending: false })
+      .limit(ITEM_LIMIT)
+    if (error) throw new Error(error.message)
+    articles = data ?? []
+  } catch (e) {
+    // 조회에 실패해도 빈 피드를 반환한다 — 리더가 500을 받는 것보다 낫다
+    console.error('[feed.xml] articles 조회 실패:', e)
+  }
 
   const items = articles
-    .map((a: { date: string; title: string; content: string }) => {
+    .map((a) => {
       // 오늘 자도 `/`가 아닌 날짜 퍼머링크를 쓴다.
       // guid는 영구 불변이어야 하는데 `/`는 매일 다른 글을 가리키기 때문.
       const link = `${base}/news/${a.date}`
