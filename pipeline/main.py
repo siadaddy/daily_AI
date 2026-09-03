@@ -16,12 +16,12 @@ GitHub Actions 06:00 KST (= 21:00 UTC 전날) 자동 실행
 import sys, os, json, time, requests
 sys.path.insert(0, os.path.dirname(__file__))
 
-from datetime import date, datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 
 load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
 
-from agents import planner, writer, designer, music_curator, weekly_trend
+from agents import planner, writer, designer, music_curator
 from agents.supabase_logger import update_agent_status, log_action
 
 PIPELINE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -132,10 +132,6 @@ def _insert_to_supabase(today: str, written: dict, images: list):
             log_action("이작가", "articles 저장", f"{today} / {article_title[:30]}")
     except Exception as e:
         print(f"  ⚠️  Supabase 저장 실패 (무시): {e}")
-
-
-def _should_run_weekly_trend() -> bool:
-    return date.today().weekday() == 0  # 월요일
 
 
 def _should_run_music() -> bool:
@@ -266,24 +262,8 @@ def main():
         print("  ⏭  음악 수집 스킵 (마지막 수집 90일 미경과)")
         music_curator.reflect()
 
-    # ── 주간 트렌드 브리핑 (월요일만) ───────────────────────
-    if _should_run_weekly_trend():
-        print("\n[6/6] 주간 트렌드 브리핑...")
-        update_agent_status("AI주간트렌드", "online", "주간 분석 중")
-        log_action("AI주간트렌드", "주간 분석 시작", f"{today}")
-        try:
-            result = weekly_trend.run()
-            if result:
-                log_action("AI주간트렌드", "주간 분석 완료",
-                           result.get("week_summary", "")[:60])
-            update_agent_status("AI주간트렌드", "idle", "주간 분석 완료")
-        except Exception as e:
-            print(f"  ⚠️  주간 트렌드 실패 (무시): {e}")
-            log_action("AI주간트렌드", "주간 분석 실패", str(e)[:100])
-            update_agent_status("AI주간트렌드", "idle", "분석 실패")
-            notify("⚠️ 주간 트렌드 생성 실패", f"오류: {e}", priority="low")
-    else:
-        print("\n[6/6] 주간 트렌드 스킵 (월요일 아님)")
+    # 주간/월간 리포트는 웹앱 크론(/api/reports/generate)이 담당한다.
+    # 여기 있던 Gemini 주간 브리핑은 같은 테이블에 중복 생성하던 것이라 제거했다.
 
 
 if __name__ == "__main__":

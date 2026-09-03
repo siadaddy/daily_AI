@@ -72,6 +72,13 @@ export interface NewsTrend {
 
 export type PeriodType = 'weekly' | 'monthly'
 
+/** 리포트의 분야별 심층 섹션 — weekly_reports.raw_data에 저장된다 */
+export interface ReportSection {
+  category: string
+  top_issue: string
+  insight: string
+}
+
 // weekly_reports 테이블 — period_type으로 주간/월간 리포트를 함께 저장
 export interface PeriodReport {
   id: number
@@ -79,9 +86,12 @@ export interface PeriodReport {
   week_start: string
   week_end: string
   summary: string
+  /** LLM이 아니라 코드가 집계한 값 — buildCategoryStats() 참고 */
   categories: CategoryStat[]
   insights: string
   next_focus: string[]
+  /** 전용 컬럼이 없는 부가 데이터. 현재는 sections를 담는다. */
+  raw_data: { sections?: ReportSection[] } | null
   created_at: string
 }
 

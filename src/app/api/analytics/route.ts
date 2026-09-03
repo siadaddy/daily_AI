@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { extractKeywords } from '@/lib/utils/keywords'
 import { isExcludedNews } from '@/lib/utils/exclude'
+import { buildCategoryStats, deltaPct } from '@/lib/utils/category-stats'
 import { fetchAllPages } from '@/lib/reports/generate'
 import dayjs from 'dayjs'
 import type {
@@ -26,11 +27,6 @@ function getCacheTtl(period: Period): number {
 
 function getPeriodLabel(period: Period): string {
   return period === 'day' ? '오늘' : period === 'week' ? '이번 주' : '이번 달'
-}
-
-function deltaPct(current: number, prev: number): number {
-  if (prev === 0) return current > 0 ? 100 : 0
-  return Math.round(((current - prev) / prev) * 1000) / 10
 }
 
 interface CardRow {
@@ -124,25 +120,10 @@ export async function GET(req: NextRequest) {
       .slice(0, 8)
 
     // Category stats (직전 기간 대비 trend 포함)
-    const catMap: Record<string, number> = {}
-    for (const c of newsCards) {
-      const cat = c.category ?? '기타'
-      catMap[cat] = (catMap[cat] ?? 0) + 1
-    }
-    const prevCatMap: Record<string, number> = {}
-    for (const c of prevCards) {
-      const cat = c.category ?? '기타'
-      prevCatMap[cat] = (prevCatMap[cat] ?? 0) + 1
-    }
-    const categoryStats: CategoryStat[] = Object.entries(catMap)
-      .sort((a, b) => b[1] - a[1])
-      .map(([name, count]) => {
-        const prev = prevCatMap[name] ?? 0
-        const pct = deltaPct(count, prev)
-        const trend: CategoryStat['trend'] =
-          pct > 10 ? 'up' : pct < -10 ? 'down' : 'flat'
-        return { name, count, trend, deltaPct: pct }
-      })
+    const categoryStats: CategoryStat[] = buildCategoryStats(
+      newsCards,
+      prevCards
+    )
 
     // Source stats
     const srcMap: Record<string, number> = {}

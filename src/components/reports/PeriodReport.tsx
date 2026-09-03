@@ -7,6 +7,7 @@ import {
   Lightbulb,
   Target,
   BarChart3,
+  Layers,
 } from 'lucide-react'
 import type {
   PeriodReport as PeriodReportData,
@@ -46,6 +47,7 @@ export function PeriodReport({
 }) {
   const labels = LABELS[periodType]
   const BadgeIcon = labels.badgeIcon
+  const sections = report?.raw_data?.sections ?? []
   const prefersReducedMotion = useReducedMotion()
 
   const reveal = {
@@ -92,8 +94,11 @@ export function PeriodReport({
             style={{ color: 'var(--text)' }}
           >
             <BarChart3 size={16} strokeWidth={2} />
-            카테고리별 빈도
+            TOP 뉴스 분야 분포
           </h3>
+          <p className="mb-3 text-xs" style={{ color: 'var(--muted)' }}>
+            AI가 매일 TOP 3로 고른 뉴스의 분야별 건수 · 직전 기간 대비 증감
+          </p>
           <CategoryChart stats={report.categories} />
           <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
             {report.categories.map((cat) => (
@@ -104,7 +109,59 @@ export function PeriodReport({
               >
                 <TrendMark trend={cat.trend} />
                 {cat.name} {cat.count}건
+                {cat.deltaPct !== undefined && cat.deltaPct !== 0 && (
+                  <span style={{ color: 'var(--muted)' }}>
+                    ({cat.deltaPct > 0 ? '+' : ''}
+                    {cat.deltaPct}%)
+                  </span>
+                )}
               </span>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* 분야별 심층 — raw_data.sections */}
+      {sections.length > 0 && (
+        <motion.div className="glass-card rounded-2xl p-5" {...reveal}>
+          <h3
+            className="mb-4 flex items-center gap-1.5 text-sm font-semibold"
+            style={{ color: 'var(--text)' }}
+          >
+            <Layers size={16} strokeWidth={2} />
+            분야별 심층
+          </h3>
+          <div className="flex flex-col gap-4">
+            {sections.map((section, i) => (
+              <div
+                key={`${section.category}-${i}`}
+                className="flex flex-col gap-1.5 rounded-xl px-4 py-3"
+                style={{
+                  background: 'var(--glass)',
+                  borderLeft: '3px solid var(--brand)',
+                }}
+              >
+                <div className="flex flex-wrap items-baseline gap-2">
+                  <span
+                    className="text-xs font-bold"
+                    style={{ color: 'var(--brand-light)' }}
+                  >
+                    {section.category}
+                  </span>
+                  <span
+                    className="text-sm font-semibold"
+                    style={{ color: 'var(--text)' }}
+                  >
+                    {section.top_issue}
+                  </span>
+                </div>
+                <p
+                  className="text-xs leading-relaxed"
+                  style={{ color: 'var(--muted2)' }}
+                >
+                  {section.insight}
+                </p>
+              </div>
             ))}
           </div>
         </motion.div>

@@ -1,8 +1,15 @@
 import OpenAI from 'openai'
+import dayjs from 'dayjs'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { extractKeywords } from '@/lib/utils/keywords'
 import { isExcludedNews } from '@/lib/utils/exclude'
-import type { CategoryStat, PeriodType, Top3Item } from '@/lib/types'
+import { buildCategoryStats } from '@/lib/utils/category-stats'
+import type {
+  CategoryStat,
+  PeriodType,
+  ReportSection,
+  Top3Item,
+} from '@/lib/types'
 
 interface NewsCardRow {
   title: string
@@ -22,11 +29,15 @@ interface WeeklyReportRow {
   insights: string
 }
 
+/**
+ * LLM에게 요구하는 출력.
+ * categories(건수·추세)는 의도적으로 제외한다 — 세는 일은 코드가 한다.
+ */
 interface BriefingJson {
   summary: string
-  categories: CategoryStat[]
   insights: string
   next_focus: string[]
+  sections?: ReportSection[]
 }
 
 export type GenerateResult =
@@ -81,15 +92,24 @@ ${cardLines || '(데이터 없음)'}
 === 일별 TOP3 트렌드 ===
 ${formatTrendLines(trends) || '(데이터 없음)'}
 
+위 데이터에 실제로 등장한 기업명·수치·사건만 사용하세요. 창작 금지.
+건수 집계는 시스템이 따로 계산하므로 숫자를 세려고 하지 마세요.
+
 아래 JSON 형식으로만 응답하세요. 코드블록 없이 순수 JSON만 출력하세요:
 {
   "summary": "이번 주를 관통하는 3-4문장 핵심 요약 (한국어)",
-  "categories": [
-    {"name": "카테고리명", "count": 숫자, "trend": "up|down|flat"}
+  "sections": [
+    {
+      "category": "분야명 (위 기사 목록의 대괄호 안 분야명을 그대로 복사)",
+      "top_issue": "그 분야의 이번 주 핵심 이슈 한 줄 (20자 내외)",
+      "insight": "2문장. ①실제 등장한 기업명·수치로 무슨 일이 있었는지 ②독자에게 주는 실질적 의미"
+    }
   ],
   "insights": "편집장 시각의 심층 인사이트 2-3문장 (한국어)",
   "next_focus": ["다음 주 주목할 포인트 1", "포인트 2", "포인트 3"]
-}`
+}
+
+sections는 기사가 많은 상위 4개 분야만 포함하세요.`
 }
 
 function buildMonthlyPrompt(params: {
@@ -137,15 +157,24 @@ ${weeklySection}
 === 일별 TOP3 트렌드 ===
 ${formatTrendLines(trends) || '(데이터 없음)'}
 
+위 데이터에 실제로 등장한 기업명·수치·사건만 사용하세요. 창작 금지.
+건수 집계는 시스템이 따로 계산하므로 숫자를 세려고 하지 마세요.
+
 아래 JSON 형식으로만 응답하세요. 코드블록 없이 순수 JSON만 출력하세요:
 {
   "summary": "이번 달을 관통하는 4-5문장 핵심 요약 (한국어)",
-  "categories": [
-    {"name": "카테고리명", "count": 숫자, "trend": "up|down|flat"}
+  "sections": [
+    {
+      "category": "분야명 (위 '분야별 기사 수'의 분야명을 그대로 복사)",
+      "top_issue": "그 분야의 이번 달 핵심 이슈 한 줄 (20자 내외)",
+      "insight": "2문장. ①실제 등장한 기업명·수치로 무슨 일이 있었는지 ②독자에게 주는 실질적 의미"
+    }
   ],
   "insights": "편집장 시각의 월간 심층 인사이트 3-4문장 (한국어)",
   "next_focus": ["다음 달 주목할 포인트 1", "포인트 2", "포인트 3"]
-}`
+}
+
+sections는 기사가 많은 상위 4개 분야만 포함하세요.`
 }
 
 function extractJson(text: string): string {
@@ -159,6 +188,30 @@ function extractJson(text: string): string {
   }
   return text.trim()
 }
+
+/** 일별 TOP3를 카테고리 집계용 행으로 편다 */
+function topPicks(trends: NewsTrendRow[]): { category: string | null }[] {
+  return trends
+    .flatMap((t) => t.top3 ?? [])
+    .filter((i) => !isExcludedNews({ title: i.title, category: i.category }))
+    .map((i) => ({ category: i.category ?? null }))
+}
+
+/** [start, end] 바로 앞의 같은 길이 기간 — 카테고리 추세 비교용 */
+export function previousRange(
+  start: string,
+  end: string
+): { start: string; end: string } {
+  const days = dayjs(end).diff(dayjs(start), 'day') + 1
+  const prevEnd = dayjs(start).subtract(1, 'day')
+  return {
+    start: prevEnd.subtract(days - 1, 'day').format('YYYY-MM-DD'),
+    end: prevEnd.format('YYYY-MM-DD'),
+  }
+}
+
+/** 프롬프트에 실어보낼 기사 제목 최대 개수 (집계는 전량으로 별도 수행) */
+const PROMPT_CARD_LIMIT = 200
 
 export async function generateReport(params: {
   periodType: PeriodType
@@ -194,25 +247,33 @@ export async function generateReport(params: {
 
     let prompt: string
     if (periodType === 'weekly') {
-      const { data: rawCards, error: cardsErr } = await supabase
-        .from('news_cards')
-        .select('title, category, date')
-        .gte('date', start)
-        .lte('date', end)
-        .order('date', { ascending: true })
-        .limit(200)
-
-      if (cardsErr) {
-        console.error('[reports/generate] news_cards query error:', cardsErr)
+      let weekCards: NewsCardRow[]
+      try {
+        weekCards = await fetchAllPages<NewsCardRow>((from, to) =>
+          supabase
+            .from('news_cards')
+            .select('title, category, date')
+            .gte('date', start)
+            .lte('date', end)
+            .order('date', { ascending: true })
+            .range(from, to)
+        )
+      } catch (err) {
+        console.error('[reports/generate] news_cards pagination error:', err)
         return {
           ok: false,
           error: 'db_error',
-          detail: cardsErr.message,
+          detail: String(err),
           status: 500,
         }
       }
-      const cards = (rawCards ?? []).filter((c) => !isExcludedNews(c))
-      prompt = buildWeeklyPrompt(start, end, cards, trends)
+      // 프롬프트에는 표본만 실어 토큰을 아낀다 (집계에는 쓰지 않는다)
+      prompt = buildWeeklyPrompt(
+        start,
+        end,
+        weekCards.filter((c) => !isExcludedNews(c)).slice(0, PROMPT_CARD_LIMIT),
+        trends
+      )
     } else {
       // 월간: 원문 제목 대신 전체 집계 + 주간 리포트를 입력으로 사용
       let cards: NewsCardRow[]
@@ -332,15 +393,35 @@ export async function generateReport(params: {
       return { ok: false, error: 'parse_error', status: 500 }
     }
 
+    // 카테고리 건수·추세는 LLM 출력이 아니라 실데이터에서 집계한다.
+    //
+    // 집계 대상은 수집 원문(news_cards)이 아니라 일별 TOP3다.
+    // 수집은 "카테고리당 하루 5건" 고정 쿼터라 원문 건수가 항상 균일해
+    // 분포·추세로서 아무 정보가 없다. 반면 TOP3는 AI가 매일 고른
+    // 편집 판단이라 분야별로 실제 변동한다.
+    const prev = previousRange(start, end)
+
+    const { data: rawPrevTrends } = await supabase
+      .from('news_trends')
+      .select('top3, date')
+      .gte('date', prev.start)
+      .lte('date', prev.end)
+
+    const categories: CategoryStat[] = buildCategoryStats(
+      topPicks(trends),
+      topPicks(rawPrevTrends ?? [])
+    )
+
     const { error: upsertErr } = await supabase.from('weekly_reports').upsert(
       {
         period_type: periodType,
         week_start: start,
         week_end: end,
         summary: parsed.summary,
-        categories: parsed.categories,
+        categories,
         insights: parsed.insights,
         next_focus: parsed.next_focus,
+        raw_data: { sections: parsed.sections ?? [] },
       },
       { onConflict: 'period_type,week_start' }
     )
