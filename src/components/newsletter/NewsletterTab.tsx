@@ -11,6 +11,7 @@ import type {
   NewsCard as NewsCardType,
   NewsTrend,
 } from '@/lib/types'
+import { isExcludedNews } from '@/lib/utils/exclude'
 import { getSiteUrl } from '@/lib/site-url'
 import nextDynamic from 'next/dynamic'
 
@@ -127,12 +128,12 @@ const fetchTodayRawNews = unstable_cache(
         .select('*')
         .eq('date', date)
         .order('id', { ascending: true })
-      return data ?? []
+      return (data ?? []).filter((n) => !isExcludedNews(n))
     } catch {
       return []
     }
   },
-  ['news_cards'],
+  ['news_cards', 'v2'],
   { revalidate: 300 }
 )
 

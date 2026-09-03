@@ -52,7 +52,7 @@ related:
 
 ## weekly_trend.py
 매주 월요일 실행. [[card_news]] + [[news_cards]] 지난 7일 데이터로 분야별 이슈 빈도를 집계하고
-Gemini로 인사이트를 생성해 [[news_trends]]에 저장. "BMW 딜러십 근무 + 삼천리 그룹 관심"이라는
+Gemini로 인사이트를 생성해 [[news_trends]]에 저장. "BMW 딜러십 근무"라는
 구체적 페르소나로 "그래서 나한테 뭔 의미야?"에 답하는 톤을 요구하는 시스템 프롬프트.
 
 ## 관련 문서

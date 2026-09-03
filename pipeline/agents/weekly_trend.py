@@ -16,9 +16,8 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
 if SUPABASE_URL and not SUPABASE_URL.startswith("http"):
     SUPABASE_URL = "https://" + SUPABASE_URL
 
-SYSTEM = """당신은 BMW 딜러십에 근무하며 삼천리 그룹에 관심 있는 30대 직장인을 위한 경제·기술 뉴스 큐레이터입니다.
+SYSTEM = """당신은 BMW 딜러십에 근무하는 30대 직장인을 위한 경제·기술 뉴스 큐레이터입니다.
 이번 주 뉴스를 날카롭게 분석해 "그래서 나한테 뭔 의미야?"에 바로 답하는 인사이트를 씁니다.
-삼천리 그룹(에너지·가스·도시가스 계열) 관련 뉴스가 있으면 자동차·에너지 산업 연결 관점으로 언급.
 
 글쓰기 원칙:
 - 구체적 기업명·수치·날짜가 없는 문장은 쓰지 않는다

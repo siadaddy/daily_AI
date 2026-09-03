@@ -12,7 +12,7 @@ const PIPELINE_STEPS = [
     emoji: '🌐',
     step: 'Step 1',
     title: '뉴스 수집',
-    desc: '네이버 뉴스 API로 AI, 기술, 경제, 자동차, BMW 등 9개 카테고리 뉴스 자동 수집',
+    desc: '네이버 뉴스 API로 AI, 기술, 경제, 자동차, BMW 등 8개 카테고리 뉴스 자동 수집',
     color: 'var(--bmw)',
   },
   {
@@ -141,7 +141,7 @@ const FEATURES = [
   {
     emoji: '🏷️',
     title: '카테고리 필터',
-    desc: 'AI · 기술 · 경제 · 자동차 · BMW 등 9개 분야 필터링',
+    desc: 'AI · 기술 · 경제 · 자동차 · BMW 등 8개 분야 필터링',
   },
   {
     emoji: '🌙',

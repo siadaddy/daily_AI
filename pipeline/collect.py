@@ -33,6 +33,9 @@ MAX_PER_CATEGORY = 5
 MAX_RETRIES      = 3
 RETRY_DELAY      = 10
 
+# 수집 단계에서 제외할 키워드 (제목·요약에 포함되면 버림)
+EXCLUDE_KEYWORDS = ("삼천리",)
+
 CATEGORIES = {
     "🔥 오늘의 하이라이트": ["속보", "단독", "오늘 주요뉴스"],
     "🤖 AI / 인공지능":    ["AI 인공지능", "ChatGPT", "생성형 AI", "LLM"],
@@ -42,7 +45,6 @@ CATEGORIES = {
     "🏙️ 사회":           ["사회 이슈", "정치 뉴스", "복지 정책"],
     "🚗 자동차":          ["전기차 자동차", "현대차 기아", "자율주행"],
     "🚘 BMW":            ["BMW 뉴스", "BMW 신차"],
-    "🏢 삼천리 그룹":    ["삼천리 그룹", "삼천리 에너지", "삼천리 뉴스"],
 }
 
 
@@ -140,11 +142,15 @@ def fetch_all():
                 link = item.get("originallink") or item.get("link", "")
                 if link in seen_links:
                     continue
+                title   = clean_html(item.get("title", ""))
+                summary = clean_html(item.get("description", ""))[:200]
+                if any(bad in f"{title} {summary}" for bad in EXCLUDE_KEYWORDS):
+                    continue
                 seen_links.add(link)
                 articles.append({
-                    "title":   clean_html(item.get("title", "")),
+                    "title":   title,
                     "link":    link,
-                    "summary": clean_html(item.get("description", ""))[:200],
+                    "summary": summary,
                     "source":  extract_source(link),
                 })
                 if len(articles) >= MAX_PER_CATEGORY:

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { extractKeywords } from '@/lib/utils/keywords'
+import { isExcludedNews } from '@/lib/utils/exclude'
 import { fetchAllPages } from '@/lib/reports/generate'
 import dayjs from 'dayjs'
 import type {
@@ -55,7 +56,7 @@ export async function GET(req: NextRequest) {
   try {
     const supabase = await createClient()
 
-    const [newsCards, prevCards, articlesResult, trendsResult] =
+    const [allNewsCards, allPrevCards, articlesResult, trendsResult] =
       await Promise.all([
         fetchAllPages<CardRow>((from, to) =>
           supabase
@@ -77,6 +78,10 @@ export async function GET(req: NextRequest) {
         supabase.from('articles').select('content, date').gte('date', since),
         supabase.from('news_trends').select('top3, date').gte('date', since),
       ])
+
+    // 제외 대상(삼천리) 뉴스는 집계에서 뺀다 — DB에는 과거 데이터가 남아 있다
+    const newsCards = allNewsCards.filter((c) => !isExcludedNews(c))
+    const prevCards = allPrevCards.filter((c) => !isExcludedNews(c))
 
     const articles = articlesResult.data ?? []
     const trends = trendsResult.data ?? []

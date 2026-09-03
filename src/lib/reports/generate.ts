@@ -1,6 +1,7 @@
 import OpenAI from 'openai'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { extractKeywords } from '@/lib/utils/keywords'
+import { isExcludedNews } from '@/lib/utils/exclude'
 import type { CategoryStat, PeriodType, Top3Item } from '@/lib/types'
 
 interface NewsCardRow {
@@ -210,7 +211,8 @@ export async function generateReport(params: {
           status: 500,
         }
       }
-      prompt = buildWeeklyPrompt(start, end, rawCards ?? [], trends)
+      const cards = (rawCards ?? []).filter((c) => !isExcludedNews(c))
+      prompt = buildWeeklyPrompt(start, end, cards, trends)
     } else {
       // 월간: 원문 제목 대신 전체 집계 + 주간 리포트를 입력으로 사용
       let cards: NewsCardRow[]
@@ -233,6 +235,7 @@ export async function generateReport(params: {
           status: 500,
         }
       }
+      cards = cards.filter((c) => !isExcludedNews(c))
 
       const { data: rawWeekly, error: weeklyErr } = await supabase
         .from('weekly_reports')

@@ -22,8 +22,7 @@ GitHub Actions `pipeline-daily.yml`이 매일 06:00 KST(전날 21:00 UTC)에 실
 
 ### collect.py (427줄)
 네이버 뉴스 API로 카테고리별(`CATEGORIES` 딕셔너리 — 🔥 오늘의 하이라이트, 🤖 AI/인공지능,
-💻 기술/IT, 💰 경제/금융, 🚨 사건/사고, 🏙️ 사회, 🚗 자동차, 🚘 BMW, 🏢 삼천리 그룹, 카테고리당
-최대 5건)로 뉴스를 수집하고 Groq(`GROQ_KEYS` 여러 개 순환 사용)로 요약해 [[news_cards]]에
+💻 기술/IT, 💰 경제/금융, 🚨 사건/사고, 🏙️ 사회, 🚗 자동차, 🚘 BMW — 카테고리당 최대 5건)로 뉴스를 수집하고 Groq(`GROQ_KEYS` 여러 개 순환 사용)로 요약해 [[news_cards]]에
 INSERT한다. 동시에 `pipeline/output/{날짜}.md`와 `{날짜}_data.json`으로도 저장 — 이 파일이
 `main.py`의 입력이 된다.
 
