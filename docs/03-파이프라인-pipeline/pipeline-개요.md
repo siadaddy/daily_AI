@@ -5,7 +5,7 @@ source_paths:
   - pipeline/main.py
   - pipeline/check_gemini_keys.py
 tags: [pipeline, python]
-last_reviewed: 2026-07-15
+last_reviewed: 2026-09-04
 status: 확인됨
 related:
   - "[[pipeline-agents]]"
@@ -27,8 +27,9 @@ INSERT한다. 동시에 `pipeline/output/{날짜}.md`와 `{날짜}_data.json`으
 `main.py`의 입력이 된다.
 
 ### main.py (290줄)
-`collect.py`의 출력 파일을 읽어 [[pipeline-agents|planner → writer → designer → music_curator →
-weekly_trend]] 순서로 실행하고, 각 단계 결과를 [[card_news]]/[[articles]]에 저장한다.
+`collect.py`의 출력 파일을 읽어 [[pipeline-agents|planner → writer → designer → music_curator]]
+순서로 실행하고, 각 단계 결과를 [[card_news]]/[[articles]]에 저장한다.
+주간·월간 리포트는 파이프라인이 아니라 웹앱 크론([[reports-generate]])이 담당한다.
 실패 시 `retry()` 헬퍼로 최대 3회, 10초 간격 재시도. 완료/실패는 ntfy.sh로 푸시 알림
 (`NTFY_TOPIC`).
 

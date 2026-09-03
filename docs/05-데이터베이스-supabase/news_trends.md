@@ -2,9 +2,9 @@
 title: "news_trends 테이블"
 source_paths:
   - src/lib/types/index.ts
-  - pipeline/agents/weekly_trend.py
+  - pipeline/collect.py
 tags: [table, supabase]
-last_reviewed: 2026-07-15
+last_reviewed: 2026-09-04
 status: 확인됨
 related:
   - "[[pipeline-agents]]"
@@ -15,9 +15,9 @@ related:
 # news_trends 테이블
 
 ## 내용
-일별 TOP3 트렌드 분석. 이름과 달리 파일명은 `weekly_trend.py`이지만 **매일 실행되어 하루치
-TOP3를 기록**하는 것으로 보인다(주간 집계는 이 데이터를 모아 [[weekly_reports]]가 별도로 생성) —
-정확한 실행 주기는 `pipeline-daily.yml` 워크플로 파일로 재확인 필요.
+일별 TOP3 트렌드 분석과 대화 소재. `collect.py`가 수집 직후 Groq로 생성해 **매일 1행**
+upsert한다(`on_conflict=date`). 주간·월간 집계는 이 데이터를 모아 [[weekly_reports]]가
+별도로 생성한다.
 
 ## 컬럼 (`src/lib/types/index.ts`의 `NewsTrend` 기준)
 
@@ -31,12 +31,16 @@ TOP3를 기록**하는 것으로 보인다(주간 집계는 이 데이터를 모
 | `created_at` | string | |
 
 ## 쓰는 곳
-- [[pipeline-agents|pipeline/agents/weekly_trend.py]] — `card_news` + `news_cards` 지난 7일 데이터
-  분석 후 Gemini로 인사이트 생성.
+- [[pipeline-개요|pipeline/collect.py]] — 그날 수집한 기사로 Groq가 TOP3·분야별 요약·대화 소재를
+  생성해 `date` 기준 upsert.
 
 ## 읽는 곳
+- [[newsletter]] 탭 — `AiPicksSection`(TOP3 + `one_line_insight`)과
+  `TalkingPointsSection`(`talking_points.talking_points[]`의 3건).
 - [[reports]] 탭 `TrendHighlights`.
-- [[reports-generate]] — 리포트 생성 프롬프트에 일별 TOP3를 포함.
+- [[reports-generate]] — 리포트 프롬프트에 일별 TOP3를 포함하고, **`top3`의 분야 분포를
+  리포트 `categories` 집계 대상으로 사용**한다. 수집은 분야당 하루 5건 고정 쿼터라
+  `news_cards` 원문 건수로는 분포·추세 정보를 얻을 수 없기 때문.
 - [[analytics]] — 트렌드 제목도 키워드 추출 입력에 포함.
 
 ## 관련 문서

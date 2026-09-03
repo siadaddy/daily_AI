@@ -5,7 +5,7 @@ source_paths:
   - pipeline/utils/gemini_client.py
   - pipeline/utils/quality_tracker.py
 tags: [pipeline, utils]
-last_reviewed: 2026-07-15
+last_reviewed: 2026-09-04
 status: 확인됨
 related:
   - "[[pipeline-agents]]"
@@ -18,7 +18,7 @@ related:
 AI 직원 공통 메모리 시스템. 로컬 캐시 파일(`pipeline/agent_memory.json`)이 1차 저장소이고,
 GitHub Actions처럼 로컬 파일이 없는 환경에서는 실행 시작 시 [[agent_memories]] 테이블에서
 자동 복원한다(`_load_from_supabase`). `remember()`로 경험 누적, `get_hints()`로 최근 학습
-힌트를 프롬프트에 삽입 — [[pipeline-agents]]의 planner/designer/music_curator/weekly_trend가
+힌트를 프롬프트에 삽입 — [[pipeline-agents]]의 planner/designer/music_curator가
 모두 이 두 함수를 사용.
 
 ## gemini_client.py

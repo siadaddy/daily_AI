@@ -6,9 +6,8 @@ source_paths:
   - pipeline/agents/designer.py
   - pipeline/agents/music_curator.py
   - pipeline/agents/supabase_logger.py
-  - pipeline/agents/weekly_trend.py
 tags: [pipeline, agents]
-last_reviewed: 2026-07-15
+last_reviewed: 2026-09-04
 status: 확인됨
 related:
   - "[[pipeline-개요]]"
@@ -17,7 +16,7 @@ related:
 
 # pipeline/agents 모듈
 
-6개 파일이 각각 독립된 책임과 쓰는 테이블을 가진다 — 아래 `##`가 각 파일에 대응하므로
+5개 파일이 각각 독립된 책임과 쓰는 테이블을 가진다 — 아래 `##`가 각 파일에 대응하므로
 `grep`으로 특정 파일의 문서만 찾을 수 있다.
 
 ## planner.py
@@ -50,11 +49,19 @@ related:
 (예: `박기획`)을 테이블 upsert 키(`planner`)로 매핑한다. [[office]] 탭의 실시간 모니터링이
 이 테이블을 구독하므로, 새 에이전트를 추가하면 이 매핑도 함께 갱신해야 한다.
 
-## weekly_trend.py
-매주 월요일 실행. [[card_news]] + [[news_cards]] 지난 7일 데이터로 분야별 이슈 빈도를 집계하고
-Gemini로 인사이트를 생성해 [[news_trends]]에 저장. "BMW 딜러십 근무"라는
-구체적 페르소나로 "그래서 나한테 뭔 의미야?"에 답하는 톤을 요구하는 시스템 프롬프트.
+## 제거된 에이전트: weekly_trend.py (2026-09-04)
+매주 월요일 Gemini로 주간 브리핑을 만들어 [[weekly_reports]]에 저장하려 했으나,
+테이블에 없는 컬럼(`week_summary`, `sections`, `top_headlines` 등)을 POST해
+**저장이 매주 실패하고 있었다**. 같은 테이블을 웹앱 크론([[reports-generate]])이
+이미 주간·월간 모두 채우고 있어 중복이기도 해서 제거했다.
+
+다만 이 에이전트가 웹앱보다 나았던 점 두 가지는 웹앱 쪽으로 흡수했다.
+- 분야별 심층 섹션(`sections`) → `weekly_reports.raw_data.sections`
+- 건수를 LLM에게 세게 하지 않고 **코드로 집계** → `src/lib/utils/category-stats.ts`
+
+`agent_memories`의 `AI주간트렌드` 행은 과거 기록으로 남아 있으며 `/agents` 페이지에서
+계속 조회된다(신규 기록은 더 이상 쌓이지 않는다).
 
 ## 관련 문서
 - [[pipeline-개요]] · [[pipeline-utils]]
-- [[card_news]] · [[news_trends]] · [[agents-logs]]
+- [[card_news]] · [[news_trends]] · [[agents-logs]] · [[weekly_reports]]

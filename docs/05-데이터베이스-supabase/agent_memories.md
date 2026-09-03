@@ -4,7 +4,7 @@ source_paths:
   - pipeline/utils/agent_memory.py
   - ai-crew/utils/agent_memory.py
 tags: [table, supabase]
-last_reviewed: 2026-07-15
+last_reviewed: 2026-09-04
 status: 초안
 related:
   - "[[pipeline-utils]]"
@@ -33,6 +33,13 @@ related:
 ## 쓰는 곳 / 읽는 곳
 - [[pipeline-utils]] — `remember()`(쓰기), `get_hints()`(읽기).
 - [[ai-crew-개요]] — 음악 큐레이터가 기존 큐레이션 이력 조회에 사용.
+- **웹앱 `/agents`, `/agents/[name]`** — `src/lib/agents/memory.ts`가 `persona`,
+  `growth_score`, `diary`를 읽어 에이전트별 성장 기록 페이지로 렌더한다.
+  2026-09-04 이전에는 웹앱에서 읽는 곳이 전혀 없었다.
+
+`diary`는 `{ date, lesson, trigger }` 배열이며 에이전트당 최근 60건까지만 유지된다
+(`add_diary()`가 앞에 넣고 잘라낸다). `AI주간트렌드` 행은 해당 에이전트가 제거된 뒤에도
+과거 기록으로 남아 계속 조회된다 — [[pipeline-agents]] 참고.
 
 ## 관련 문서
 - [[pipeline-utils]]

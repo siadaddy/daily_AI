@@ -4,7 +4,7 @@ source_paths:
   - src/lib/types/index.ts
   - pipeline/agents/supabase_logger.py
 tags: [table, supabase, realtime]
-last_reviewed: 2026-07-15
+last_reviewed: 2026-09-04
 status: 확인됨
 related:
   - "[[pipeline-agents]]"
@@ -24,7 +24,7 @@ related:
 | 컬럼 | 타입 | 설명 |
 |---|---|---|
 | `id` | number | PK |
-| `name` | string | 예: `수집봇`, `박기획`, `이작가`, `최디자`, `AI주간트렌드`, `한뮤직` |
+| `name` | string | 예: `수집봇`, `박기획`, `이작가`, `최디자`, `한뮤직` (`AI주간트렌드`는 2026-09-04 제거) |
 | `role` | string | |
 | `status` | `'online' \| 'idle' \| 'offline'` | |
 | `last_active` | string | |
