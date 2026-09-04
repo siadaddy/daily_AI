@@ -1,24 +1,17 @@
 import { ImageResponse } from 'next/og'
 import { fetchCardNews } from '@/components/newsletter/NewsletterTab'
 import { isValidDate } from '@/lib/dates'
+import {
+  pickLayout,
+  cutAtSentence,
+  CARD_W,
+  CARD_H,
+} from '@/lib/naver/card-layout'
 
 export const revalidate = 300
 
-/** 네이버 카드뉴스 관행에 맞춘 4:5 세로 판형 */
-const W = 1080
-const H = 1350
-
-/**
- * 캡션 분량은 헤드라인이 몇 줄을 먹느냐에 달렸다.
- * 텍스트 영역은 1350 - 96(제자 띠) - 620(도판) - 여백 ≈ 542px.
- * 헤드라인 58px×1.25 = 줄당 72px, 캡션 30px×1.6 = 줄당 48px, 하단 출처 ≈ 92px.
- * 헤드라인이 한 줄 늘 때마다 캡션에서 대략 한 줄 반을 빼야 넘치지 않는다.
- */
-function captionBudget(headline: string): number {
-  const perLine = 16 // 58px 세리프 기준 한 줄에 들어가는 한글 글자 수(대략)
-  const headlineLines = Math.max(1, Math.ceil(headline.length / perLine))
-  return Math.max(90, 200 - (headlineLines - 1) * 55)
-}
+const W = CARD_W
+const H = CARD_H
 
 /** 사이트의 [사실]/[분석]/[전망] 강조색 (이미지라 리터럴 값만 쓴다) */
 const MARK_COLORS: Record<string, string> = {
@@ -84,11 +77,8 @@ export async function GET(
 
   const [y, m, d] = date.split('-')
   const num = String(i + 1).padStart(2, '0')
-  const budget = captionBudget(card.headline)
-  const caption =
-    card.caption.length > budget
-      ? card.caption.slice(0, budget).trimEnd() + '…'
-      : card.caption
+  const layout = pickLayout(card.headline, card.caption)
+  const caption = cutAtSentence(card.caption, layout.maxChars)
   const segments = captionSegments(caption)
   const source = card.source_name || '원문 보기'
 
@@ -137,7 +127,7 @@ export async function GET(
         style={{
           display: 'flex',
           width: `${W}px`,
-          height: '620px',
+          height: `${layout.photo}px`,
           overflow: 'hidden',
           backgroundColor: '#17171a',
         }}
@@ -192,7 +182,7 @@ export async function GET(
           style={{
             display: 'flex',
             flexWrap: 'wrap',
-            fontSize: '30px',
+            fontSize: `${layout.font}px`,
             lineHeight: 1.6,
             color: '#b3aea5',
           }}
