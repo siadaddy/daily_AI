@@ -2,6 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { Tags } from 'lucide-react'
 import { SiteShell } from '@/components/layout/SiteShell'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { getTopKeywords } from '@/lib/keywords/archive'
 import { keywordHref } from '@/lib/dates'
 import { getSiteUrl } from '@/lib/site-url'
@@ -38,22 +39,14 @@ export default async function KeywordIndexPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="flex flex-col gap-6">
-        <header className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <Tags
-              size={20}
-              strokeWidth={2}
-              style={{ color: 'var(--brand-light)' }}
-            />
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>
-              키워드 아카이브
-            </h1>
-          </div>
-          <p className="text-sm" style={{ color: 'var(--muted)' }}>
-            AI가 수집한 전체 뉴스에서 추출한 주요 키워드 {keywords.length}개
-          </p>
-        </header>
+      <div className="flex flex-col gap-8">
+        <PageHeader
+          icon={Tags}
+          kicker="Index"
+          title="키워드 아카이브"
+          meta={`${keywords.length}개`}
+          description="AI가 수집한 전체 뉴스에서 추출한 주요 키워드입니다. 글자 크기가 클수록 자주 등장한 키워드입니다."
+        />
 
         <div className="flex flex-wrap gap-2">
           {keywords.map((k) => {
@@ -63,17 +56,12 @@ export default async function KeywordIndexPage() {
               <Link
                 key={k.word}
                 href={keywordHref(k.word)}
-                className="rounded-full px-3 py-1.5 transition-colors"
-                style={{
-                  background: 'var(--glass)',
-                  border: '1px solid var(--border)',
-                  color: 'var(--text)',
-                  fontSize: `${scale}rem`,
-                }}
+                className="rounded-sm border border-[var(--border)] px-2.5 py-1 transition-colors hover:border-[var(--rule-strong)]"
+                style={{ color: 'var(--text)', fontSize: `${scale}rem` }}
               >
                 {k.word}
                 <span
-                  className="ml-1.5 text-xs"
+                  className="ml-1.5 font-[family-name:var(--font-mono)] text-xs tabular-nums"
                   style={{ color: 'var(--muted)' }}
                 >
                   {k.count}

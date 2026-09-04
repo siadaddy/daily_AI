@@ -3,6 +3,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { Tag, ExternalLink } from 'lucide-react'
 import { SiteShell } from '@/components/layout/SiteShell'
+import { PageHeader } from '@/components/layout/PageHeader'
 import {
   getTopKeywords,
   getNewsByKeyword,
@@ -126,43 +127,34 @@ export default async function KeywordPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className="flex flex-col gap-6">
-        <header className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <Tag
-              size={20}
-              strokeWidth={2}
-              style={{ color: 'var(--brand-light)' }}
-            />
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>
-              {keyword}
-            </h1>
-          </div>
-          <p className="text-sm" style={{ color: 'var(--muted)' }}>
-            {news.length > 0
-              ? `${news[news.length - 1].date} ~ ${news[0].date} · 총 ${news.length}건`
-              : '수집된 뉴스가 없습니다'}
-          </p>
-        </header>
+      <div className="flex flex-col gap-8">
+        <PageHeader
+          icon={Tag}
+          kicker="Keyword"
+          title={keyword}
+          meta={news.length > 0 ? `${news.length}건` : undefined}
+          description={
+            news.length > 0
+              ? `${news[news.length - 1].date} — ${news[0].date} 사이에 수집된 관련 뉴스입니다.`
+              : '수집된 뉴스가 없습니다.'
+          }
+        />
 
         {groups.map((group) => (
           <section key={group.month} className="flex flex-col gap-3">
-            <h2
-              className="text-sm font-semibold tracking-wide"
-              style={{ color: 'var(--muted2)' }}
-            >
+            <h2 className="kicker border-b border-[var(--rule)] pb-2">
               {group.month.replace('-', '년 ')}월
             </h2>
-            <ul className="flex flex-col gap-2">
+            <ul className="flex flex-col">
               {group.items.map((item, i) => (
                 <li
                   key={`${item.date}-${i}`}
-                  className="glass-card flex flex-col gap-1.5 rounded-xl p-4"
+                  className="news-card-item flex flex-col gap-2 border-b border-[var(--rule)] px-1 py-3 transition-colors"
                 >
                   <div className="flex flex-wrap items-center gap-2 text-xs">
                     <Link
                       href={newsHref(item.date)}
-                      className="font-semibold"
+                      className="font-[family-name:var(--font-mono)] tabular-nums"
                       style={{ color: 'var(--brand-light)' }}
                     >
                       {item.date}
@@ -178,10 +170,7 @@ export default async function KeywordPage({
                       </span>
                     )}
                   </div>
-                  <h3
-                    className="text-sm font-semibold"
-                    style={{ color: 'var(--text)' }}
-                  >
+                  <h3 className="ed-display text-[0.9375rem] leading-snug">
                     {item.link ? (
                       <a
                         href={item.link}
@@ -192,6 +181,7 @@ export default async function KeywordPage({
                         {item.title}
                         <ExternalLink
                           size={12}
+                          aria-hidden="true"
                           className="mt-1 shrink-0"
                           style={{ color: 'var(--muted)' }}
                         />

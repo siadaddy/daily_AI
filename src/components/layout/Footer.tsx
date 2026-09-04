@@ -9,41 +9,44 @@ const LINKS: { href: string; label: string; external?: boolean }[] = [
   { href: '/feed.xml', label: 'RSS', external: true },
 ]
 
+/**
+ * 지면 하단 판권란. 가운데 정렬 대신 좌측 정렬 + 굵은 괘선으로
+ * 본문과 같은 편집 격자 위에 앉힌다.
+ */
 export function Footer() {
   return (
-    <footer
-      className="mt-auto border-t py-6 text-center text-xs"
-      style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}
-    >
-      <p className="inline-flex items-center justify-center gap-1.5">
-        <Bot size={14} strokeWidth={2} aria-hidden="true" />
-        시아아빠의 AI 데일리 · Claude Code와 함께 제작 · AI Agent로 콘텐츠 자동
-        생성
-      </p>
-      <p className="mt-1">
-        Powered by{' '}
-        <span style={{ color: 'var(--brand-light)' }}>
-          Next.js · Supabase · GitHub Actions
-        </span>
-      </p>
-      <nav
-        className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-2"
-        aria-label="사이트 링크"
-      >
-        {LINKS.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className="transition-colors hover:underline"
-            style={{ color: 'var(--brand-light)' }}
-            {...(link.external
-              ? { prefetch: false, target: '_blank', rel: 'noopener' }
-              : {})}
+    <footer className="mt-auto border-t border-[var(--rule)]">
+      <div className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-8">
+        <nav
+          className="flex flex-wrap items-center gap-x-5 gap-y-2"
+          aria-label="사이트 링크"
+        >
+          {LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="kicker transition-colors hover:text-[var(--text)]"
+              {...(link.external
+                ? { prefetch: false, target: '_blank', rel: 'noopener' }
+                : {})}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="flex flex-col gap-1.5 border-t border-[var(--rule)] pt-5">
+          <p
+            className="flex items-center gap-2 text-xs"
+            style={{ color: 'var(--muted2)' }}
           >
-            {link.label}
-          </Link>
-        ))}
-      </nav>
+            <Bot size={13} strokeWidth={2} aria-hidden="true" />
+            시아아빠의 AI 데일리 · Claude Code와 함께 제작 · AI Agent로 콘텐츠
+            자동 생성
+          </p>
+          <p className="kicker">Next.js · Supabase · GitHub&nbsp;Actions</p>
+        </div>
+      </div>
     </footer>
   )
 }

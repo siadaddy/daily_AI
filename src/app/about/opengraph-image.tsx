@@ -35,7 +35,7 @@ export default async function Image() {
         height: '630px',
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: '#F5F8FF',
+        backgroundColor: '#f2efe9',
         fontFamily: '"NotoSansKR", sans-serif',
         position: 'relative',
         overflow: 'hidden',
@@ -82,7 +82,7 @@ export default async function Image() {
             <span
               style={{
                 fontSize: '22px',
-                color: '#ffffff',
+                color: '#fbf9f5',
                 fontWeight: 700,
                 letterSpacing: '0.04em',
               }}
@@ -97,7 +97,7 @@ export default async function Image() {
             display: 'flex',
             fontSize: '56px',
             fontWeight: 700,
-            color: '#0f172a',
+            color: '#17161a',
             letterSpacing: '-0.03em',
             lineHeight: '1.2',
             marginBottom: '28px',
@@ -110,7 +110,7 @@ export default async function Image() {
           style={{
             display: 'flex',
             fontSize: '28px',
-            color: '#64748b',
+            color: '#6b675f',
             lineHeight: '1.6',
             marginBottom: '44px',
           }}
@@ -127,9 +127,9 @@ export default async function Image() {
                 backgroundColor: purple
                   ? 'rgba(124,58,237,0.08)'
                   : 'rgba(28,105,212,0.08)',
-                color: purple ? '#7c3aed' : '#1c69d4',
+                color: purple ? '#b8412c' : '#1a56b8',
                 border: `1.5px solid ${purple ? 'rgba(124,58,237,0.22)' : 'rgba(28,105,212,0.22)'}`,
-                borderRadius: '10px',
+                borderRadius: '3px',
                 padding: '10px 24px',
                 fontSize: '24px',
                 fontWeight: 700,
@@ -148,7 +148,7 @@ export default async function Image() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          backgroundColor: '#0f172a',
+          backgroundColor: '#17161a',
           height: '70px',
           padding: '0px 80px 0px 72px',
         }}
@@ -157,7 +157,7 @@ export default async function Image() {
           style={{
             fontSize: '22px',
             fontWeight: 700,
-            color: '#ffffff',
+            color: '#fbf9f5',
             letterSpacing: '0.18em',
           }}
         >
@@ -166,7 +166,7 @@ export default async function Image() {
         <span
           style={{
             fontSize: '20px',
-            color: '#64748b',
+            color: '#6b675f',
             letterSpacing: '0.06em',
           }}
         >

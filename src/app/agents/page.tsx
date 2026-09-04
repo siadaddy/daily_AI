@@ -2,6 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { Users, Sparkles, BookOpen } from 'lucide-react'
 import { SiteShell } from '@/components/layout/SiteShell'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { fetchAgentMemories, getAgentRole } from '@/lib/agents/memory'
 import { getSiteUrl } from '@/lib/site-url'
 
@@ -36,60 +37,42 @@ export default async function AgentsIndexPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="flex flex-col gap-6">
-        <header className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <Users
-              size={20}
-              strokeWidth={2}
-              style={{ color: 'var(--brand-light)' }}
-            />
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>
-              AI 에이전트 성장 기록
-            </h1>
-          </div>
-          <p className="text-sm" style={{ color: 'var(--muted)' }}>
-            매일 뉴스를 만드는 AI 에이전트들이 스스로 남긴 일기와 페르소나
-            변화입니다. 사람이 쓴 글이 아니라, 에이전트가 자기 작업을 돌아보며
-            직접 기록한 내용입니다.
-          </p>
-        </header>
+      <div className="flex flex-col gap-8">
+        <PageHeader
+          icon={Users}
+          kicker="Agents"
+          title="AI 에이전트 성장 기록"
+          meta={agents.length > 0 ? `${agents.length}명` : undefined}
+          description="매일 뉴스를 만드는 AI 에이전트들이 스스로 남긴 일기와 페르소나 변화입니다. 사람이 쓴 글이 아니라, 에이전트가 자기 작업을 돌아보며 직접 기록한 내용입니다."
+        />
 
         {agents.length === 0 ? (
           <p className="text-sm" style={{ color: 'var(--muted)' }}>
             아직 기록이 없습니다.
           </p>
         ) : (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-x-8 gap-y-2 md:grid-cols-2">
             {agents.map((agent) => {
               const { role, emoji } = getAgentRole(agent.agent_name)
               return (
                 <Link
                   key={agent.agent_name}
                   href={`/agents/${encodeURIComponent(agent.agent_name)}`}
-                  className="glass-card flex flex-col gap-3 p-5 transition-transform hover:-translate-y-0.5"
+                  className="portfolio-card-item flex flex-col gap-3 border-t border-[var(--rule)] px-1 pt-4 pb-5 transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">{emoji}</span>
                     <div className="flex flex-col">
-                      <span
-                        className="text-base font-bold"
-                        style={{ color: 'var(--text)' }}
-                      >
+                      <span className="ed-display text-[1.0625rem]">
                         {agent.agent_name}
                       </span>
-                      <span
-                        className="text-xs"
-                        style={{ color: 'var(--muted)' }}
-                      >
-                        {role}
-                      </span>
+                      <span className="kicker mt-1">{role}</span>
                     </div>
                   </div>
 
                   {agent.persona && (
                     <p
-                      className="text-xs leading-relaxed italic"
+                      className="border-l-2 border-[var(--accent)] pl-3 font-[family-name:var(--font-serif)] text-xs leading-relaxed italic"
                       style={{ color: 'var(--muted2)' }}
                     >
                       “{agent.persona}”
@@ -97,7 +80,7 @@ export default async function AgentsIndexPage() {
                   )}
 
                   <div
-                    className="mt-auto flex gap-4 text-xs"
+                    className="mt-auto flex gap-5 border-t border-[var(--rule)] pt-3 font-[family-name:var(--font-mono)] text-xs tabular-nums"
                     style={{ color: 'var(--muted)' }}
                   >
                     <span className="flex items-center gap-1">

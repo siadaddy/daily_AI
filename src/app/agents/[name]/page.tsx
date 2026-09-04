@@ -107,54 +107,41 @@ export default async function AgentDetailPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="flex flex-col gap-6">
-        <Link
-          href="/agents"
-          className="flex w-fit items-center gap-1.5 text-xs"
-          style={{ color: 'var(--muted)' }}
-        >
-          <ArrowLeft size={13} strokeWidth={2} />
+      <div className="flex flex-col gap-8">
+        <Link href="/agents" className="kicker flex w-fit items-center gap-1.5">
+          <ArrowLeft size={12} strokeWidth={2} aria-hidden="true" />
           에이전트 목록
         </Link>
 
-        <header className="glass-card flex flex-col gap-4 p-6">
+        <header className="flex flex-col gap-4 border-t-2 border-[var(--text)] pt-4">
           <div className="flex items-center gap-4">
             <span className="text-4xl">{emoji}</span>
-            <div className="flex flex-col">
-              <h1
-                className="text-2xl font-bold"
-                style={{ color: 'var(--text)' }}
-              >
+            <div className="flex flex-col gap-1">
+              <span className="kicker kicker-accent">{role}</span>
+              <h1 className="ed-display text-[clamp(1.75rem,4vw,2.5rem)]">
                 {name}
               </h1>
-              <span className="text-sm" style={{ color: 'var(--muted)' }}>
-                {role}
-              </span>
             </div>
           </div>
 
           {agent.persona && (
             <blockquote
-              className="rounded-xl px-4 py-3 text-sm leading-relaxed italic"
-              style={{
-                background: 'var(--glass)',
-                borderLeft: '3px solid var(--accent-purple)',
-                color: 'var(--muted2)',
-              }}
+              className="border-l-2 border-[var(--accent)] py-1 pl-4 font-[family-name:var(--font-serif)] leading-relaxed italic"
+              style={{ color: 'var(--text)' }}
             >
               “{agent.persona}”
               {agent.persona_updated_at && (
-                <span
-                  className="mt-2 block text-[11px] not-italic"
-                  style={{ color: 'var(--muted)' }}
-                >
+                <span className="kicker mt-2 block not-italic">
                   페르소나 갱신 {agent.persona_updated_at}
                 </span>
               )}
             </blockquote>
           )}
 
-          <div className="flex gap-5 text-xs" style={{ color: 'var(--muted)' }}>
+          <div
+            className="flex gap-5 border-t border-[var(--rule)] pt-3 font-[family-name:var(--font-mono)] text-xs tabular-nums"
+            style={{ color: 'var(--muted)' }}
+          >
             <span className="flex items-center gap-1.5">
               <Sparkles size={13} strokeWidth={2} />
               성장 점수 {agent.growth_score ?? 0}
@@ -167,29 +154,20 @@ export default async function AgentDetailPage({
         </header>
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-base font-bold" style={{ color: 'var(--text)' }}>
+          <h2 className="ed-section-title border-t border-[var(--rule)] pt-4 text-[1.125rem]">
             성장 일기
           </h2>
-          <ol className="flex flex-col gap-2">
+          <ol className="flex flex-col">
             {agent.diary.map((entry, i) => (
               <li
                 key={`${entry.date}-${i}`}
-                className="glass-card flex flex-col gap-1.5 rounded-xl p-4"
+                className="flex flex-col gap-2 border-b border-[var(--rule)] px-1 py-4"
               >
-                <div
-                  className="flex items-center gap-2 text-[11px]"
-                  style={{ color: 'var(--muted)' }}
-                >
-                  <CalendarDays size={12} strokeWidth={2} />
+                <div className="kicker flex items-center gap-2">
+                  <CalendarDays size={12} strokeWidth={2} aria-hidden="true" />
                   <time dateTime={entry.date}>{entry.date}</time>
                   {entry.trigger && (
-                    <span
-                      className="rounded-full px-2 py-0.5"
-                      style={{
-                        background: 'var(--glass)',
-                        border: '1px solid var(--border)',
-                      }}
-                    >
+                    <span className="rounded-sm border border-[var(--border)] px-2 py-0.5">
                       {entry.trigger}
                     </span>
                   )}
