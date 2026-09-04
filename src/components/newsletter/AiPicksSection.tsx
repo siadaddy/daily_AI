@@ -23,7 +23,7 @@ export function AiPicksSection({
   return (
     <div className="flex flex-col gap-6">
       {insight && (
-        <p className="ed-lede flex items-start gap-3 border-l-2 border-[var(--accent)] pl-4 font-[family-name:var(--font-serif)] italic">
+        <p className="ed-lede flex items-start gap-3 border-l-2 border-[var(--accent)] pl-4 font-[family-name:var(--font-serif)]">
           <Lightbulb
             size={16}
             strokeWidth={2}

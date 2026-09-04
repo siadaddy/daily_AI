@@ -126,12 +126,12 @@ export default async function AgentDetailPage({
 
           {agent.persona && (
             <blockquote
-              className="border-l-2 border-[var(--accent)] py-1 pl-4 font-[family-name:var(--font-serif)] leading-relaxed italic"
+              className="border-l-2 border-[var(--accent)] py-1 pl-4 font-[family-name:var(--font-serif)] leading-relaxed"
               style={{ color: 'var(--text)' }}
             >
               “{agent.persona}”
               {agent.persona_updated_at && (
-                <span className="kicker mt-2 block not-italic">
+                <span className="kicker mt-2 block">
                   페르소나 갱신 {agent.persona_updated_at}
                 </span>
               )}

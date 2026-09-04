@@ -72,7 +72,7 @@ export default async function AgentsIndexPage() {
 
                   {agent.persona && (
                     <p
-                      className="border-l-2 border-[var(--accent)] pl-3 font-[family-name:var(--font-serif)] text-xs leading-relaxed italic"
+                      className="border-l-2 border-[var(--accent)] pl-3 font-[family-name:var(--font-serif)] text-xs leading-relaxed"
                       style={{ color: 'var(--muted2)' }}
                     >
                       “{agent.persona}”
