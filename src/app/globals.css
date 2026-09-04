@@ -1522,3 +1522,24 @@ h4 {
   opacity: 1;
   font-weight: 600;
 }
+
+/* ── 네이버 옮겨쓰기 미리보기 ──────────────────────────
+   카드 이미지는 1024×1024 정사각형이라 폭 제한이 없으면 미리보기가
+   이미지로 도배된다. 실제 네이버 본문 단(약 693px)보다 조금 좁게 잡아
+   글 전체를 훑을 수 있게 한다. 붙여넣은 뒤의 크기는 스마트에디터가 정한다. */
+.naver-preview img {
+  display: block;
+  width: 100%;
+  max-width: 380px;
+  height: auto;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+}
+.naver-preview h2 {
+  margin-top: 32px;
+}
+.naver-preview hr {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: 28px 0;
+}

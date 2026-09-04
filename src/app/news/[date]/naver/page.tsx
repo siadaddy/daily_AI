@@ -112,8 +112,7 @@ export default async function NaverExportPage({
           <h2 className="ed-section-head ed-section-title">붙여넣을 내용</h2>
           <div
             id="naver-preview"
-            className="article-body"
-            style={{ maxWidth: '100%' }}
+            className="article-body naver-preview"
             dangerouslySetInnerHTML={{ __html: post.html }}
           />
         </section>
