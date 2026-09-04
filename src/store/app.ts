@@ -1,26 +1,17 @@
 import { create } from 'zustand'
-import type { TabId, Category } from '@/lib/types'
+import type { Category } from '@/lib/types'
 
+/**
+ * 딥링크가 필요한 상태(활성 탭·선택 날짜)는 URL이 진실의 원천이므로
+ * 여기에 두지 않는다 — TabNav는 pathname/`?tab=`을, DateNav는 경로를 읽는다.
+ * 이 스토어에는 URL에 남길 필요가 없는 순수 UI 상태만 둔다.
+ */
 interface AppStore {
-  activeTab: TabId
   categoryFilter: Category
-  selectedDate: string
-  setTab: (tab: TabId) => void
   setFilter: (cat: Category) => void
-  setDate: (date: string) => void
-}
-
-function todayKST(): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(
-    new Date()
-  )
 }
 
 export const useAppStore = create<AppStore>((set) => ({
-  activeTab: 'newsletter',
   categoryFilter: '전체' as Category,
-  selectedDate: todayKST(),
-  setTab: (tab) => set({ activeTab: tab }),
   setFilter: (cat) => set({ categoryFilter: cat }),
-  setDate: (date) => set({ selectedDate: date }),
 }))

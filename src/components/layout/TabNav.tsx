@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import {
   Newspaper,
@@ -13,9 +13,9 @@ import {
   Moon,
   type LucideIcon,
 } from 'lucide-react'
-import { useAppStore } from '@/store/app'
 import { useTheme } from '@/components/layout/ThemeProvider'
 import type { TabId } from '@/lib/types'
+import { tabHref, resolveTab } from '@/lib/tabs'
 
 const TABS: { id: TabId; label: string; icon: LucideIcon }[] = [
   { id: 'newsletter', label: 'AI 뉴스레터', icon: Newspaper },
@@ -26,20 +26,12 @@ const TABS: { id: TabId; label: string; icon: LucideIcon }[] = [
 ]
 
 export function TabNav() {
-  const router = useRouter()
+  const pathname = usePathname()
   const searchParams = useSearchParams()
-  const { activeTab, setTab } = useAppStore()
   const { theme, setTheme } = useTheme()
   const prefersReducedMotion = useReducedMotion()
 
-  const currentTab = (searchParams.get('tab') as TabId) || activeTab
-
-  function handleTab(id: TabId) {
-    setTab(id)
-    const params = new URLSearchParams(searchParams.toString())
-    params.set('tab', id)
-    router.push(`?${params.toString()}`, { scroll: false })
-  }
+  const currentTab = resolveTab(pathname, searchParams.get('tab'))
 
   return (
     <nav
@@ -54,9 +46,10 @@ export function TabNav() {
               const isActive = currentTab === tab.id
               const Icon = tab.icon
               return (
-                <button
+                <Link
                   key={tab.id}
-                  onClick={() => handleTab(tab.id)}
+                  href={tabHref(tab.id)}
+                  scroll={false}
                   className="relative flex shrink-0 items-center gap-1.5 px-4 py-3 text-sm font-medium transition-colors"
                   style={{
                     color: isActive ? 'var(--brand-light)' : 'var(--muted)',
@@ -76,7 +69,7 @@ export function TabNav() {
                       }
                     />
                   )}
-                </button>
+                </Link>
               )
             })}
           </div>

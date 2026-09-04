@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Bot, Clock, CheckCircle2, ArrowRight } from 'lucide-react'
 import type { NewsCard } from '@/lib/types'
+import { newsHref } from '@/lib/dates'
 
 function getTimeUntil0640KST(): { hours: number; minutes: number } | null {
   const parts = new Intl.DateTimeFormat('en-US', {
@@ -34,7 +35,6 @@ export function PreparingBanner({
   date: string
   rawNews: NewsCard[]
 }) {
-  const router = useRouter()
   const [countdown, setCountdown] = useState(getTimeUntil0640KST)
   const yesterday = getYesterday(date)
 
@@ -75,14 +75,13 @@ export function PreparingBanner({
           </div>
         )}
 
-        <button
-          type="button"
+        <Link
+          href={newsHref(yesterday)}
           className="preparing-yesterday inline-flex items-center gap-1"
-          onClick={() => router.push(`/?date=${yesterday}`)}
         >
           어제 콘텐츠 보기
           <ArrowRight size={12} strokeWidth={2} />
-        </button>
+        </Link>
       </div>
 
       {rawNews.length > 0 && (
