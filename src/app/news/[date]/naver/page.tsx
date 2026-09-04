@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { ArrowLeft } from 'lucide-react'
+import Image from 'next/image'
+import { ArrowLeft, Download } from 'lucide-react'
 import { SiteShell } from '@/components/layout/SiteShell'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { CopyForNaver } from '@/components/naver/CopyForNaver'
@@ -106,6 +107,45 @@ export default async function NaverExportPage({
             </li>
           ))}
         </ol>
+
+        {/* 카드 이미지 — 스마트에디터가 CSS를 버리므로, 카드 레이아웃은
+            HTML이 아니라 이미지로 넘긴다 (네이버 카드뉴스의 실제 관행) */}
+        {cards.length > 0 && (
+          <section className="flex flex-col gap-4">
+            <h2 className="ed-section-head ed-section-title">카드 이미지</h2>
+            <p className="ed-lede text-[0.9375rem]">
+              지면의 카드 구조를 그대로 담은 1080×1350 이미지입니다. 에디터가
+              CSS를 버리기 때문에 카드 모양은 HTML로 못 넘깁니다 — 이미지로
+              올리면 사이트에서 보던 그대로 나옵니다. 끌어다 놓거나 내려받아
+              첨부하세요.
+            </p>
+            <ol className="grid list-none grid-cols-2 gap-x-6 gap-y-8 p-0 sm:grid-cols-3">
+              {cards.map((c, i) => {
+                const src = `/api/naver-card/${date}/${i}`
+                return (
+                  <li key={i} className="flex flex-col gap-2">
+                    <Image
+                      src={src}
+                      alt={`${c.headline} 카드 이미지`}
+                      width={1080}
+                      height={1350}
+                      sizes="(max-width: 640px) 45vw, 30vw"
+                      className="h-auto w-full border border-[var(--border)]"
+                    />
+                    <a
+                      href={src}
+                      download={`${date}_card_${String(i + 1).padStart(2, '0')}.png`}
+                      className="kicker inline-flex items-center gap-1.5 hover:text-[var(--text)]"
+                    >
+                      <Download size={11} strokeWidth={2} aria-hidden="true" />
+                      CARD {String(i + 1).padStart(2, '0')}
+                    </a>
+                  </li>
+                )
+              })}
+            </ol>
+          </section>
+        )}
 
         {/* 미리보기 — 복사 폴백에서 이 노드를 그대로 선택한다 */}
         <section className="flex flex-col gap-4">
