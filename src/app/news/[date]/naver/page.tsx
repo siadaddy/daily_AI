@@ -6,6 +6,7 @@ import { ArrowLeft, Download } from 'lucide-react'
 import { SiteShell } from '@/components/layout/SiteShell'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { CopyForNaver } from '@/components/naver/CopyForNaver'
+import { ShareCards } from '@/components/naver/ShareCards'
 import {
   fetchCardNews,
   fetchTodayArticle,
@@ -88,25 +89,54 @@ export default async function NaverExportPage({
           previewId="naver-preview"
         />
 
-        <ol className="flex list-none flex-col gap-2 border-t border-[var(--rule)] p-0 pt-4">
-          {[
-            '위 “본문 복사”를 누른다',
-            '네이버 블로그 → 글쓰기(스마트에디터 ONE)를 연다',
-            '제목을 붙여넣고, 본문 영역에 ⌘V / Ctrl+V',
-            '이미지가 안 넘어왔다면 아래 미리보기에서 이미지만 따로 끌어다 놓는다',
-            '발행 전 한 번 훑어본다 — 자동 생성물이라 사실관계는 사람이 확인하는 게 맞다',
-          ].map((step, i) => (
-            <li key={i} className="flex items-baseline gap-3 text-sm">
-              <span
-                className="shrink-0 font-[family-name:var(--font-mono)] text-xs tabular-nums"
-                style={{ color: 'var(--rule-strong)' }}
-              >
-                {String(i + 1).padStart(2, '0')}
-              </span>
-              <span style={{ color: 'var(--muted2)' }}>{step}</span>
-            </li>
-          ))}
-        </ol>
+        <section className="flex flex-col gap-5 border-t border-[var(--rule)] pt-5">
+          <div className="flex flex-col gap-2">
+            <h2 className="kicker kicker-accent">모바일에서</h2>
+            <ol className="flex list-none flex-col gap-2 p-0">
+              {[
+                '아래 “카드 이미지 N장 공유”를 누른다 — 공유 시트가 열린다',
+                '네이버 블로그 앱을 고르거나, 사진에 일괄 저장한다',
+                '“제목 복사” → 네이버 글쓰기에 붙여넣기',
+                '“본문 복사” → 본문에 붙여넣기 (이미지는 위에서 첨부한 것을 쓴다)',
+              ].map((step, i) => (
+                <li key={i} className="flex items-baseline gap-3 text-sm">
+                  <span
+                    className="shrink-0 font-[family-name:var(--font-mono)] text-xs tabular-nums"
+                    style={{ color: 'var(--rule-strong)' }}
+                  >
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span style={{ color: 'var(--muted2)' }}>{step}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <h2 className="kicker">데스크톱에서</h2>
+            <ol className="flex list-none flex-col gap-2 p-0">
+              {[
+                '“본문 복사” → 스마트에디터 본문에 ⌘V / Ctrl+V',
+                '카드 이미지는 아래에서 내려받아 첨부하거나 끌어다 놓는다',
+              ].map((step, i) => (
+                <li key={i} className="flex items-baseline gap-3 text-sm">
+                  <span
+                    className="shrink-0 font-[family-name:var(--font-mono)] text-xs tabular-nums"
+                    style={{ color: 'var(--rule-strong)' }}
+                  >
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span style={{ color: 'var(--muted2)' }}>{step}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <p className="kicker">
+            발행 전 한 번 훑어보세요 — 자동 생성물이라 사실관계는 사람이
+            확인하는 게 맞습니다.
+          </p>
+        </section>
 
         {/* 카드 이미지 — 스마트에디터가 CSS를 버리므로, 카드 레이아웃은
             HTML이 아니라 이미지로 넘긴다 (네이버 카드뉴스의 실제 관행) */}
@@ -116,9 +146,9 @@ export default async function NaverExportPage({
             <p className="ed-lede text-[0.9375rem]">
               지면의 카드 구조를 그대로 담은 1080×1350 이미지입니다. 에디터가
               CSS를 버리기 때문에 카드 모양은 HTML로 못 넘깁니다 — 이미지로
-              올리면 사이트에서 보던 그대로 나옵니다. 끌어다 놓거나 내려받아
-              첨부하세요.
+              올리면 사이트에서 보던 그대로 나옵니다. 캡처할 필요 없습니다.
             </p>
+            <ShareCards date={date} count={cards.length} />
             <ol className="grid list-none grid-cols-2 gap-x-6 gap-y-8 p-0 sm:grid-cols-3">
               {cards.map((c, i) => {
                 const src = `/api/naver-card/${date}/${i}`
