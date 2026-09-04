@@ -101,7 +101,7 @@ function IssueLine({
   )
 }
 
-const fetchCardNews = unstable_cache(
+export const fetchCardNews = unstable_cache(
   async (date: string): Promise<ContentCard[]> => {
     try {
       const { data } = await getSupabase()
@@ -154,7 +154,7 @@ const fetchTodayRawNews = unstable_cache(
   { revalidate: 300 }
 )
 
-const fetchTodayTrend = unstable_cache(
+export const fetchTodayTrend = unstable_cache(
   async (date: string): Promise<NewsTrend | null> => {
     try {
       const { data } = await getSupabase()
