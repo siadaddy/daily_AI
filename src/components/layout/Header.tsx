@@ -6,29 +6,29 @@ import { ClockWidget } from '@/components/dashboard/ClockWidget'
 import { WeatherWidget } from '@/components/dashboard/WeatherWidget'
 import { UserButton } from '@/components/layout/UserButton'
 
+/**
+ * 마스트헤드. 신문 제호처럼 굵은 괘선 아래 제호를 앉힌다.
+ * 이전의 오로라 블롭·그라디언트 제목·유리 패널은 전부 걷어냈다 —
+ * 매일 보는 화면에서 상시 애니메이션은 정보가 아니라 소음이다.
+ */
 export function Header() {
   return (
     <header className="site-header">
-      {/* 상단 그라디언트 라인 (정적) */}
+      {/* 제호 위 굵은 괘선 — 유일하게 남긴 장식 */}
       <div className="header-accent-line" />
 
       <div className="header-main">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-          {/* Logo — home link */}
-          <Link
-            href="/"
-            className="header-logo group"
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          >
-            <div className="header-logo-icon transition-transform group-hover:scale-110">
-              <Bot size={22} strokeWidth={2} />
-            </div>
-            <div className="header-logo-text">
-              <h1 className="header-title">시아아빠의 AI 데일리</h1>
-              <p className="header-subtitle">
-                Claude Code와 함께한 뉴스 &amp; 포트폴리오 놀이터
-              </p>
-            </div>
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
+          <Link href="/" className="header-logo group">
+            <span className="header-logo-icon">
+              <Bot size={20} strokeWidth={2} aria-hidden="true" />
+            </span>
+            <span className="header-logo-text">
+              <span className="header-title block">시아아빠의 AI 데일리</span>
+              <span className="header-subtitle block">
+                Daily&nbsp;AI&nbsp;Briefing · Seoul
+              </span>
+            </span>
           </Link>
 
           {/* 우측: 로그인 + 시계·날씨 */}
@@ -43,7 +43,9 @@ export function Header() {
             {/* 모바일: 압축 한 줄 표시 */}
             <div className="header-live-widgets-compact flex md:hidden">
               <ClockWidget compact />
-              <span className="header-compact-divider">·</span>
+              <span className="header-compact-divider" aria-hidden="true">
+                ·
+              </span>
               <WeatherWidget compact />
             </div>
           </div>

@@ -1,21 +1,14 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
-import { Lightbulb, Trophy, Medal, Award } from 'lucide-react'
+import { Lightbulb } from 'lucide-react'
 import type { Top3Item } from '@/lib/types'
 
-function getRankColor(rank: number): string {
-  if (rank === 1) return '#f59e0b'
-  if (rank === 2) return '#9ca3af'
-  return '#b45309'
-}
-
-function getRankIcon(rank: number) {
-  if (rank === 1) return Trophy
-  if (rank === 2) return Medal
-  return Award
-}
-
+/**
+ * 편집자 선정 TOP 3.
+ * 금·은·동 메달 색은 지면에 어울리지 않아 걷어내고,
+ * 순위는 큰 모노 숫자와 세로 괘선으로만 표시한다.
+ */
 export function AiPicksSection({
   picks,
   insight,
@@ -28,90 +21,56 @@ export function AiPicksSection({
   if (!picks || picks.length === 0) return null
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-6">
       {insight && (
-        <p
-          className="flex items-start gap-2 rounded-xl px-4 py-2 text-sm italic"
-          style={{
-            background: 'var(--glass)',
-            border: '1px solid var(--border)',
-            color: 'var(--muted2)',
-          }}
-        >
+        <p className="ed-lede flex items-start gap-3 border-l-2 border-[var(--accent)] pl-4 font-[family-name:var(--font-serif)] italic">
           <Lightbulb
-            size={15}
+            size={16}
             strokeWidth={2}
-            className="mt-0.5 shrink-0"
-            style={{ color: 'var(--gold)' }}
+            aria-hidden="true"
+            className="mt-1 shrink-0"
+            style={{ color: 'var(--accent)' }}
           />
-          <span>{insight}</span>
+          <span style={{ color: 'var(--text)' }}>{insight}</span>
         </p>
       )}
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-        {picks.map((item) => {
-          const RankIcon = getRankIcon(item.rank)
-          return (
-            <motion.div
-              key={item.rank}
-              className="glass-card ai-pick-item flex min-h-[160px] flex-col gap-2 p-4"
-              initial={prefersReducedMotion ? false : { opacity: 0, y: 24 }}
-              whileInView={
-                prefersReducedMotion ? undefined : { opacity: 1, y: 0 }
-              }
-              viewport={{ once: true, margin: '-40px' }}
-              transition={{
-                duration: 0.45,
-                ease: 'easeOut',
-                delay: prefersReducedMotion ? 0 : (item.rank - 1) * 0.08,
-              }}
-              whileHover={prefersReducedMotion ? undefined : { scale: 1.015 }}
-              whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
+      <ol className="grid list-none grid-cols-1 gap-x-8 gap-y-6 p-0 md:grid-cols-3">
+        {picks.map((item, i) => (
+          <motion.li
+            key={item.rank}
+            className="ai-pick-item flex min-w-0 flex-col gap-2 border-t border-[var(--rule)] pt-3 transition-colors md:border-t-0 md:border-l md:pt-0 md:pl-5 md:first:border-l-0 md:first:pl-0"
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+            whileInView={
+              prefersReducedMotion ? undefined : { opacity: 1, y: 0 }
+            }
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{
+              duration: 0.45,
+              ease: 'easeOut',
+              delay: prefersReducedMotion ? 0 : i * 0.07,
+            }}
+          >
+            <div className="flex items-baseline gap-3">
+              <span className="ed-index" aria-hidden="true">
+                {String(item.rank).padStart(2, '0')}
+              </span>
+              <span className="kicker min-w-0 truncate">{item.category}</span>
+            </div>
+
+            <h3 className="ed-display text-[0.9375rem] leading-snug">
+              {item.title}
+            </h3>
+
+            <p
+              className="mt-auto text-[0.8125rem] leading-relaxed"
+              style={{ color: 'var(--muted2)' }}
             >
-              {/* Rank badge */}
-              <div className="flex items-center justify-between">
-                <span
-                  className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold"
-                  style={{
-                    background: `${getRankColor(item.rank)}22`,
-                    color: getRankColor(item.rank),
-                    border: `1px solid ${getRankColor(item.rank)}55`,
-                  }}
-                >
-                  <RankIcon size={12} strokeWidth={2.5} />
-                  {item.rank}위
-                </span>
-                <span
-                  className="rounded-full px-2 py-0.5 text-[11px]"
-                  style={{
-                    background: 'var(--surface)',
-                    color: 'var(--muted)',
-                    border: '1px solid var(--border)',
-                  }}
-                >
-                  {item.category}
-                </span>
-              </div>
-
-              {/* Title */}
-              <p
-                className="text-sm leading-snug font-semibold"
-                style={{ color: 'var(--text)' }}
-              >
-                {item.title}
-              </p>
-
-              {/* Why */}
-              <p
-                className="mt-auto text-xs leading-relaxed"
-                style={{ color: 'var(--muted2)' }}
-              >
-                {item.why}
-              </p>
-            </motion.div>
-          )
-        })}
-      </div>
+              {item.why}
+            </p>
+          </motion.li>
+        ))}
+      </ol>
     </div>
   )
 }

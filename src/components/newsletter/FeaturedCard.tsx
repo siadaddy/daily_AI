@@ -2,89 +2,42 @@
 
 import Image from 'next/image'
 import { motion, useReducedMotion } from 'framer-motion'
-import { Newspaper, Sparkles, ArrowUpRight } from 'lucide-react'
+import { Newspaper, ArrowUpRight } from 'lucide-react'
 import type { ContentCard } from '@/lib/types'
 import { highlightCaption } from '@/lib/utils/caption'
 
+/**
+ * 리드 기사. 카드가 아니라 지면 최상단 기사로 다룬다.
+ * · 7:5 비대칭 그리드 — 균등 2분할은 위계를 만들지 못한다
+ * · 제목이 이미지보다 먼저 읽히도록 모바일에서 텍스트를 위로 올린다
+ * · 테두리·그림자 대신 위아래 괘선으로만 영역을 잡는다
+ */
 export function FeaturedCard({ card }: { card: ContentCard }) {
   const prefersReducedMotion = useReducedMotion()
 
   return (
-    <motion.div
-      className="glass-card grid min-h-64 grid-cols-1 overflow-hidden sm:min-h-80 md:min-h-[400px] md:grid-cols-2"
-      style={{
-        border: '1px solid rgba(28,105,212,.25)',
-        boxShadow: 'var(--shadow-glow-brand)',
-      }}
-      initial={prefersReducedMotion ? false : { opacity: 0, y: 28 }}
+    <motion.article
+      className="grid grid-cols-1 gap-x-10 gap-y-6 border-t-2 border-b border-t-[var(--text)] border-b-[var(--rule)] pt-6 pb-8 md:grid-cols-12"
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
       whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      whileHover={prefersReducedMotion ? undefined : { scale: 1.01 }}
-      whileTap={prefersReducedMotion ? undefined : { scale: 0.99 }}
     >
-      {/* 좌: 이미지 영역 */}
-      <div className="relative min-h-56 overflow-hidden md:min-h-full">
-        {card.image_url ? (
-          <Image
-            src={card.image_url}
-            alt={card.headline}
-            fill
-            className="object-cover transition-transform duration-500 hover:scale-105"
-            sizes="(max-width: 768px) 100vw, 50vw"
-            unoptimized
-          />
-        ) : (
-          <div
-            className="flex h-full min-h-56 w-full flex-col items-center justify-center gap-2"
-            style={{
-              background:
-                'linear-gradient(135deg, var(--surface) 0%, var(--card2) 100%)',
-            }}
-          >
-            <Newspaper
-              size={56}
-              strokeWidth={1.5}
-              style={{ color: 'var(--muted2)' }}
-            />
-          </div>
-        )}
-        {/* 이미지 위 뱃지 */}
-        <div className="absolute top-4 left-4 z-10">
-          <span className="badge badge-blue inline-flex items-center gap-1 text-[0.65rem] font-black tracking-widest">
-            <Sparkles size={11} strokeWidth={2.5} />
-            AUTO · CARD 01
-          </span>
-        </div>
-        {/* 하단 그라디언트 (모바일에서 텍스트 가독성) */}
-        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/60 to-transparent md:hidden" />
-      </div>
-
-      {/* 우: 텍스트 영역 */}
-      <div className="flex flex-col justify-start p-6 md:p-10">
-        {/* 라벨 */}
-        <p
-          className="mb-3 text-[0.67rem] font-black tracking-[0.14em] uppercase"
-          style={{ color: 'var(--brand-light)' }}
-        >
-          FEATURED · 오늘의 카드뉴스
+      {/* 좌: 기사 — 지면에서 제목이 먼저다 */}
+      <div className="order-2 flex flex-col md:order-1 md:col-span-7">
+        <p className="kicker kicker-accent mb-3">
+          Lead&nbsp;Story · 오늘의 카드뉴스
         </p>
 
-        {/* 제목 */}
-        <h2
-          className="mb-5 text-xl leading-snug font-bold tracking-tight md:text-2xl"
-          style={{ color: 'var(--text)' }}
-        >
+        <h3 className="ed-display mb-4 text-[clamp(1.5rem,3.4vw,2.25rem)]">
           {card.headline}
-        </h2>
+        </h3>
 
-        {/* 본문 */}
         <div
-          className="card-caption"
+          className="card-caption ed-lede"
           dangerouslySetInnerHTML={{ __html: highlightCaption(card.caption) }}
         />
 
-        {/* 원문 보기 버튼 */}
         {card.source_url && (
           <a
             href={card.source_url}
@@ -92,12 +45,38 @@ export function FeaturedCard({ card }: { card: ContentCard }) {
             rel="noopener noreferrer"
             className="source-btn mt-auto"
           >
-            <Newspaper size={12} strokeWidth={2.5} />
+            <Newspaper size={12} strokeWidth={2} aria-hidden="true" />
             {card.source_name || '원문 보기'}
-            <ArrowUpRight size={12} strokeWidth={2.5} />
+            <ArrowUpRight size={12} strokeWidth={2} aria-hidden="true" />
           </a>
         )}
       </div>
-    </motion.div>
+
+      {/* 우: 사진 — 캡션 없는 순수 도판 */}
+      <figure className="order-1 m-0 md:order-2 md:col-span-5">
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-[var(--card2)] md:aspect-[3/4]">
+          {card.image_url ? (
+            <Image
+              src={card.image_url}
+              alt={card.headline}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 42vw"
+              priority
+              unoptimized
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center">
+              <Newspaper
+                size={40}
+                strokeWidth={1.25}
+                aria-hidden="true"
+                style={{ color: 'var(--muted)' }}
+              />
+            </div>
+          )}
+        </div>
+      </figure>
+    </motion.article>
   )
 }

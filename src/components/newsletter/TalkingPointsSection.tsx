@@ -10,34 +10,34 @@ export interface TalkingPoint {
   business_impact: string
 }
 
+/**
+ * 대화 소재 3단. 지면의 하단 칼럼처럼 세로 괘선으로 나눈다.
+ * 질문은 세리프로 올려 눈에 먼저 걸리게 하고,
+ * 비즈니스 함의는 배경 박스 대신 들여쓴 각주로 처리한다.
+ */
 export function TalkingPointsSection({ points }: { points: TalkingPoint[] }) {
   const prefersReducedMotion = useReducedMotion()
 
   if (!points || points.length === 0) return null
 
   return (
-    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+    <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-3">
       {points.map((point, i) => (
         <motion.article
           key={`${point.topic}-${i}`}
-          className="glass-card flex flex-col gap-3 p-4"
-          initial={prefersReducedMotion ? false : { opacity: 0, y: 24 }}
+          className="flex min-w-0 flex-col gap-3 border-t border-[var(--rule)] pt-3 md:border-t-0 md:border-l md:pt-0 md:pl-5 md:first:border-l-0 md:first:pl-0"
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
           whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-40px' }}
           transition={{
             duration: 0.35,
-            delay: prefersReducedMotion ? 0 : i * 0.08,
+            delay: prefersReducedMotion ? 0 : i * 0.07,
           }}
         >
-          <h3
-            className="text-sm font-bold"
-            style={{ color: 'var(--brand-light)' }}
-          >
-            {point.topic}
-          </h3>
+          <h3 className="kicker kicker-brand">{point.topic}</h3>
 
           <p
-            className="text-xs leading-relaxed"
+            className="text-[0.8125rem] leading-relaxed"
             style={{ color: 'var(--muted2)' }}
           >
             {point.context}
@@ -47,29 +47,25 @@ export function TalkingPointsSection({ points }: { points: TalkingPoint[] }) {
             <MessageCircleQuestion
               size={14}
               strokeWidth={2}
-              className="mt-0.5 shrink-0"
-              style={{ color: 'var(--accent-purple)' }}
+              aria-hidden="true"
+              className="mt-1 shrink-0"
+              style={{ color: 'var(--accent)' }}
             />
-            <p
-              className="text-xs leading-relaxed font-medium"
-              style={{ color: 'var(--text)' }}
-            >
+            <p className="ed-display min-w-0 text-[0.9375rem] leading-snug">
               {point.question}
             </p>
           </div>
 
-          <div
-            className="mt-auto flex items-start gap-2 rounded-lg px-3 py-2"
-            style={{ background: 'var(--glass)' }}
-          >
+          <div className="mt-auto flex items-start gap-2 border-t border-[var(--rule)] pt-3">
             <Briefcase
-              size={13}
+              size={12}
               strokeWidth={2}
-              className="mt-0.5 shrink-0"
-              style={{ color: 'var(--gold)' }}
+              aria-hidden="true"
+              className="mt-1 shrink-0"
+              style={{ color: 'var(--muted)' }}
             />
             <p
-              className="text-xs leading-relaxed"
+              className="min-w-0 text-xs leading-relaxed"
               style={{ color: 'var(--muted)' }}
             >
               {point.business_impact}

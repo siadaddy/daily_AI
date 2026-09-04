@@ -1,8 +1,14 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
+import { CalendarDays, Clock } from 'lucide-react'
 import { mdToHtml, readingMinutes } from '@/lib/utils/caption'
 
+/**
+ * 편집장 리뷰 — 지면의 오피니언 면.
+ * 손으로 그린 SVG 아이콘을 lucide로 교체하고, 확대 호버를 걷어냈다.
+ * 본문은 68ch로 묶어 한글 장문의 행 길이를 읽기 좋게 유지한다.
+ */
 export function BlogArticle({
   title,
   content,
@@ -29,55 +35,33 @@ export function BlogArticle({
   return (
     <motion.section
       className="blog-article"
-      initial={prefersReducedMotion ? false : { opacity: 0, y: 28 }}
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
       whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      whileHover={prefersReducedMotion ? undefined : { scale: 1.005 }}
     >
-      {/* 상단 액센트 라인 */}
-      <div className="blog-accent" />
-
-      {/* 헤더 */}
       <div className="blog-header">
-        {title && <h2 className="blog-title">{title}</h2>}
+        <p className="blog-label">Opinion · AI 편집장</p>
+
+        {title && <h3 className="blog-title">{title}</h3>}
 
         <div className="blog-meta">
           {displayDate && (
             <span className="blog-meta-item">
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <rect x="3" y="4" width="18" height="18" rx="2" />
-                <path d="M16 2v4M8 2v4M3 10h18" />
-              </svg>
-              {displayDate}
+              <CalendarDays size={12} strokeWidth={2} aria-hidden="true" />
+              <time dateTime={date}>{displayDate}</time>
             </span>
           )}
-          <span className="blog-meta-dot">·</span>
+          <span className="blog-meta-dot" aria-hidden="true">
+            ·
+          </span>
           <span className="blog-meta-item">
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 6v6l4 2" />
-            </svg>
-            약 {mins}분 읽기
+            <Clock size={12} strokeWidth={2} aria-hidden="true" />약 {mins}분
+            읽기
           </span>
         </div>
       </div>
 
-      {/* 본문 */}
       <div
         className="article-body blog-body"
         dangerouslySetInnerHTML={{ __html: mdToHtml(content) }}

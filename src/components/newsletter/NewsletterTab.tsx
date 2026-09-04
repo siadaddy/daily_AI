@@ -43,41 +43,60 @@ function getSupabase() {
   )
 }
 
+/**
+ * 지면 섹션 머리 — 굵은 괘선 위에 모노 키커, 그 아래 세리프 제목.
+ * 아이콘은 타입에 종속된 보조 표시라 muted + 14px로 낮춰 둔다.
+ */
 function SectionTitle({
   icon: Icon,
+  kicker,
   title,
   sub,
 }: {
   icon: LucideIcon
+  kicker: string
   title: string
   sub?: string
 }) {
   return (
-    <div
-      className="flex items-center gap-3 rounded-xl px-4 py-3"
-      style={{
-        background:
-          'linear-gradient(135deg, rgba(28,105,212,0.08) 0%, rgba(167,139,250,0.04) 100%)',
-        border: '1px solid rgba(28,105,212,0.15)',
-        borderLeft: '3px solid var(--brand)',
-      }}
-    >
-      <Icon size={20} strokeWidth={2} style={{ color: 'var(--brand-light)' }} />
-      <span className="text-base font-bold" style={{ color: 'var(--text)' }}>
-        {title}
+    <header className="ed-section-head">
+      <Icon
+        size={14}
+        strokeWidth={2}
+        aria-hidden="true"
+        className="translate-y-px"
+        style={{ color: 'var(--muted)' }}
+      />
+      <span className="kicker">{kicker}</span>
+      <h2 className="ed-section-title w-full">{title}</h2>
+      {sub && <span className="ed-section-count">{sub}</span>}
+    </header>
+  )
+}
+
+/**
+ * 발행 정보 제자(題字). 날짜·발행 시각·수록 건수를 모노 한 줄로 고정해
+ * 매일 같은 자리에서 같은 폭으로 읽히게 한다.
+ */
+function IssueLine({
+  date,
+  cardCount,
+  rawCount,
+}: {
+  date: string
+  cardCount: number
+  rawCount: number
+}) {
+  const [y, m, d] = date.split('-')
+  return (
+    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-[var(--rule)] pb-3">
+      <time dateTime={date} className="kicker kicker-accent">
+        {y}.{m}.{d}
+      </time>
+      <span className="kicker">발행 06:00 KST</span>
+      <span className="kicker ml-auto">
+        카드 {cardCount} · 수집 {rawCount}
       </span>
-      {sub && (
-        <span
-          className="ml-auto rounded-full px-2.5 py-0.5 text-xs font-semibold"
-          style={{
-            background: 'var(--glass)',
-            border: '1px solid var(--border)',
-            color: 'var(--muted2)',
-          }}
-        >
-          {sub}
-        </span>
-      )}
     </div>
   )
 }
@@ -173,15 +192,15 @@ export async function NewsletterTab({ date }: { date?: string }) {
   // 과거 날짜인데 데이터 없음 → 빈 상태
   if (!isToday && cards.length === 0) {
     return (
-      <div
-        className="flex min-h-64 flex-col items-center justify-center gap-3 rounded-2xl"
-        style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
-      >
-        <Inbox size={40} strokeWidth={1.5} style={{ color: 'var(--muted)' }} />
-        <p style={{ color: 'var(--muted)' }}>해당 날짜의 콘텐츠가 없습니다</p>
-        <p className="text-xs" style={{ color: 'var(--muted)' }}>
-          시스템 오류 또는 미운영일입니다
-        </p>
+      <div className="flex min-h-64 flex-col items-center justify-center gap-3 border-t-2 border-[var(--rule-strong)] px-6 py-16 text-center">
+        <Inbox
+          size={32}
+          strokeWidth={1.5}
+          aria-hidden="true"
+          style={{ color: 'var(--muted)' }}
+        />
+        <p className="ed-display text-2xl">해당 날짜의 지면이 없습니다</p>
+        <p className="kicker">시스템 오류 또는 미운영일</p>
       </div>
     )
   }
@@ -212,22 +231,30 @@ export async function NewsletterTab({ date }: { date?: string }) {
     : null
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-14">
       {jsonLd && (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       )}
-      <FactSummary
-        date={targetDate}
-        cardCount={cards.length}
-        rawNews={rawNews}
-      />
 
-      {/* 1. 카드뉴스 */}
-      <section className="flex flex-col gap-6">
-        <SectionTitle icon={Newspaper} title="카드뉴스" />
+      <div className="flex flex-col gap-4">
+        <IssueLine
+          date={targetDate}
+          cardCount={cards.length}
+          rawCount={rawNews.length}
+        />
+        <FactSummary
+          date={targetDate}
+          cardCount={cards.length}
+          rawNews={rawNews}
+        />
+      </div>
+
+      {/* 1. 카드뉴스 — 리드 기사 1건 + 번호 매긴 후속 기사 */}
+      <section className="flex flex-col gap-7">
+        <SectionTitle icon={Newspaper} kicker="Card News" title="카드뉴스" />
         {featured && (
           <div className="flex flex-col gap-3">
             <FeaturedCard card={featured} />
@@ -235,7 +262,7 @@ export async function NewsletterTab({ date }: { date?: string }) {
           </div>
         )}
         {grid.length > 0 && (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-x-10 gap-y-8 sm:grid-cols-2">
             {grid.map((card, i) => (
               <div key={i} className="flex flex-col gap-3">
                 <NewsCard card={card} idx={i + 1} />
@@ -250,64 +277,62 @@ export async function NewsletterTab({ date }: { date?: string }) {
 
       {/* 2. AI Pick TOP3 */}
       {trend?.top3 && trend.top3.length > 0 && (
-        <>
-          <hr style={{ borderColor: 'var(--border)', borderTopWidth: '1px' }} />
-          <section className="flex flex-col gap-4">
-            <SectionTitle icon={Bot} title="AI Pick — 오늘의 TOP 3" />
-            <AiPicksSection
-              picks={trend.top3}
-              insight={trend.talking_points?.one_line_insight}
-            />
-            <ContentInteraction contentKey={`ai_picks:${targetDate}`} />
-          </section>
-        </>
+        <section className="flex flex-col gap-5">
+          <SectionTitle
+            icon={Bot}
+            kicker="Editor's Pick"
+            title="오늘의 TOP 3"
+          />
+          <AiPicksSection
+            picks={trend.top3}
+            insight={trend.talking_points?.one_line_insight}
+          />
+          <ContentInteraction contentKey={`ai_picks:${targetDate}`} />
+        </section>
       )}
 
       {/* 3. 오늘의 대화 소재 */}
       {talkingPoints.length > 0 && (
-        <>
-          <hr style={{ borderColor: 'var(--border)', borderTopWidth: '1px' }} />
-          <section className="flex flex-col gap-4">
-            <SectionTitle
-              icon={MessagesSquare}
-              title="오늘의 대화 소재"
-              sub={`${talkingPoints.length}건`}
-            />
-            <TalkingPointsSection points={talkingPoints} />
-            <ContentInteraction contentKey={`talking_points:${targetDate}`} />
-          </section>
-        </>
+        <section className="flex flex-col gap-5">
+          <SectionTitle
+            icon={MessagesSquare}
+            kicker="Talking Points"
+            title="오늘의 대화 소재"
+            sub={`${talkingPoints.length}건`}
+          />
+          <TalkingPointsSection points={talkingPoints} />
+          <ContentInteraction contentKey={`talking_points:${targetDate}`} />
+        </section>
       )}
 
       {/* 4. AI 편집장의 리뷰 */}
       {article && (
-        <>
-          <hr style={{ borderColor: 'var(--border)', borderTopWidth: '1px' }} />
-          <section className="flex flex-col gap-4">
-            <SectionTitle icon={PenLine} title="AI 편집장의 리뷰" />
-            <BlogArticle
-              title={article?.title}
-              content={article?.content}
-              date={targetDate}
-            />
-            <ContentInteraction contentKey={`article:${targetDate}`} />
-          </section>
-        </>
+        <section className="flex flex-col gap-5">
+          <SectionTitle
+            icon={PenLine}
+            kicker="Editorial"
+            title="AI 편집장의 리뷰"
+          />
+          <BlogArticle
+            title={article?.title}
+            content={article?.content}
+            date={targetDate}
+          />
+          <ContentInteraction contentKey={`article:${targetDate}`} />
+        </section>
       )}
 
       {/* 5. 수집 뉴스 */}
       {rawNews.length > 0 && (
-        <>
-          <hr style={{ borderColor: 'var(--border)', borderTopWidth: '1px' }} />
-          <section className="flex flex-col gap-4">
-            <SectionTitle
-              icon={ClipboardList}
-              title="수집 뉴스"
-              sub={`${rawNews.length}건`}
-            />
-            <RawNewsSection news={rawNews} />
-          </section>
-        </>
+        <section className="flex flex-col gap-5">
+          <SectionTitle
+            icon={ClipboardList}
+            kicker="Wire"
+            title="수집 뉴스"
+            sub={`${rawNews.length}건`}
+          />
+          <RawNewsSection news={rawNews} />
+        </section>
       )}
     </div>
   )

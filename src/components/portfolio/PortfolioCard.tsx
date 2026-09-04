@@ -205,52 +205,28 @@ export function PortfolioSection() {
         return (
           <div key={key}>
             {/* 카테고리 헤더 */}
-            <div
-              className="mb-5 flex items-center gap-3 rounded-xl px-4 py-3"
-              style={{
-                background:
-                  'linear-gradient(135deg, rgba(28,105,212,0.08) 0%, rgba(167,139,250,0.04) 100%)',
-                border: '1px solid rgba(28,105,212,0.15)',
-                borderLeft: '3px solid var(--brand)',
-              }}
-            >
-              <span
-                className="text-base font-bold"
-                style={{ color: 'var(--text)' }}
-              >
-                {label}
-              </span>
-              <span
-                className="ml-auto text-xs"
-                style={{ color: 'var(--muted2)' }}
-              >
-                {items.length}개
-              </span>
-            </div>
+            <header className="ed-section-head mb-6">
+              <h2 className="ed-section-title w-full">{label}</h2>
+              <span className="ed-section-count">{items.length}개</span>
+            </header>
 
             {/* 카드 그리드 */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-x-8 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
               {items.map((item) => {
                 const st = item.status ? STATUS_LABEL[item.status] : null
                 const StatusIcon = st?.icon
                 return (
                   <motion.div
                     key={item.title}
-                    className="portfolio-card-item glass-card group relative flex flex-col gap-3 p-5"
+                    className="portfolio-card-item group relative flex flex-col gap-3 border-t border-[var(--rule)] px-1 pt-4 pb-5 transition-colors"
                     initial={
-                      prefersReducedMotion ? false : { opacity: 0, y: 20 }
+                      prefersReducedMotion ? false : { opacity: 0, y: 16 }
                     }
                     whileInView={
                       prefersReducedMotion ? undefined : { opacity: 1, y: 0 }
                     }
                     viewport={{ once: true, margin: '-40px' }}
                     transition={{ duration: 0.4, ease: 'easeOut' }}
-                    whileHover={
-                      prefersReducedMotion ? undefined : { scale: 1.015 }
-                    }
-                    whileTap={
-                      prefersReducedMotion ? undefined : { scale: 0.98 }
-                    }
                   >
                     <a
                       href={item.href}
@@ -261,16 +237,17 @@ export function PortfolioSection() {
                       <span className="text-3xl">{item.emoji}</span>
                       {st && StatusIcon && (
                         <span className={`badge ${st.cls}`}>
-                          <StatusIcon size={11} strokeWidth={2.5} />
+                          <StatusIcon
+                            size={11}
+                            strokeWidth={2}
+                            aria-hidden="true"
+                          />
                           {st.label}
                         </span>
                       )}
                     </div>
                     <div>
-                      <h3
-                        className="mb-1 font-bold"
-                        style={{ color: 'var(--text)' }}
-                      >
+                      <h3 className="ed-display mb-2 text-[1.0625rem] leading-snug">
                         {item.title}
                       </h3>
                       <p
@@ -281,15 +258,13 @@ export function PortfolioSection() {
                       </p>
                       {item.aiUsage && (
                         <p
-                          className="mt-2 flex items-start gap-1.5 rounded-lg px-2.5 py-1.5 text-xs leading-relaxed"
-                          style={{
-                            background: 'rgba(28,105,212,0.08)',
-                            color: 'var(--brand-light)',
-                          }}
+                          className="mt-3 flex items-start gap-2 border-l-2 border-[var(--accent)] py-0.5 pl-3 text-xs leading-relaxed"
+                          style={{ color: 'var(--muted2)' }}
                         >
                           <Bot
-                            size={14}
+                            size={13}
                             strokeWidth={2}
+                            aria-hidden="true"
                             className="mt-0.5 shrink-0"
                           />
                           <span>{item.aiUsage}</span>
@@ -300,7 +275,10 @@ export function PortfolioSection() {
                         <img
                           src={item.evidenceImg}
                           alt={`${item.title} 전/후 증거 (민감정보 블러 처리)`}
-                          className="mt-2 rounded-lg"
+                          width={640}
+                          height={360}
+                          loading="lazy"
+                          className="mt-3 h-auto w-full rounded-sm"
                           style={{ border: '1px solid var(--border)' }}
                         />
                       )}
@@ -318,11 +296,14 @@ export function PortfolioSection() {
                     {item.detailHref && (
                       <a
                         href={item.detailHref}
-                        className="relative z-10 inline-flex w-fit items-center gap-1 self-start text-xs font-semibold hover:underline"
-                        style={{ color: 'var(--brand-light)' }}
+                        className="source-btn relative z-10 self-start"
                       >
                         {item.detailLabel ?? '자세히 보기'}
-                        <ArrowUpRight size={12} strokeWidth={2.5} />
+                        <ArrowUpRight
+                          size={12}
+                          strokeWidth={2}
+                          aria-hidden="true"
+                        />
                       </a>
                     )}
                   </motion.div>

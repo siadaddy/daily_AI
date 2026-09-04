@@ -26,6 +26,9 @@ export function SiteShell({
 }) {
   return (
     <>
+      <a href="#main" className="skip-link">
+        본문 바로가기
+      </a>
       {/* 완전 고정 상단바: 헤더 + 탭 + 대시바 + 날짜 */}
       <div className="top-bar-fixed">
         <Header />
@@ -41,7 +44,10 @@ export function SiteShell({
         )}
       </div>
 
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 pt-4 pb-6">
+      <main
+        id="main"
+        className="mx-auto w-full max-w-6xl flex-1 px-4 pt-8 pb-16"
+      >
         {children}
       </main>
       <Footer />
@@ -51,13 +57,15 @@ export function SiteShell({
 
 export function LoadingSkeleton() {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-8" aria-live="polite" aria-busy="true">
+      <span className="sr-only">지면을 불러오는 중…</span>
       {[1, 2, 3].map((i) => (
-        <div
-          key={i}
-          className="h-32 animate-pulse rounded-2xl"
-          style={{ background: 'var(--card)' }}
-        />
+        <div key={i} className="border-t border-[var(--rule)] pt-4">
+          <div
+            className="h-28 animate-pulse rounded-sm"
+            style={{ background: 'var(--glass)' }}
+          />
+        </div>
       ))}
     </div>
   )

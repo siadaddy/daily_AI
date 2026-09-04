@@ -1,17 +1,16 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Noto_Sans_KR } from 'next/font/google'
+import { JetBrains_Mono, Noto_Sans_KR, Noto_Serif_KR } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { ThemeProvider } from '@/components/layout/ThemeProvider'
 import { getSiteUrl } from '@/lib/site-url'
 import './globals.css'
 
-const inter = Inter({
-  variable: '--font-inter',
-  subsets: ['latin'],
-  display: 'swap',
-})
-
+/**
+ * Editorial Dark 타이포 3종.
+ * 헤드라인은 세리프(신문 제목), 본문은 산세리프(한글 장문 가독성),
+ * 키커·날짜·수치는 모노 — 셋의 역할이 겹치지 않는다.
+ */
 const notoSansKR = Noto_Sans_KR({
   variable: '--font-noto-kr',
   subsets: ['latin'],
@@ -19,10 +18,29 @@ const notoSansKR = Noto_Sans_KR({
   display: 'swap',
 })
 
+const notoSerifKR = Noto_Serif_KR({
+  variable: '--font-serif-kr',
+  subsets: ['latin'],
+  weight: ['400', '600', '700'],
+  display: 'swap',
+})
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: '--font-jetbrains',
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  display: 'swap',
+})
+
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
+  // 브라우저 UI(주소창)가 페이지 바탕과 이어지도록 — 테마별 잉크 값
+  themeColor: [
+    { media: '(prefers-color-scheme: dark)', color: '#0b0b0c' },
+    { media: '(prefers-color-scheme: light)', color: '#f2efe9' },
+  ],
 }
 
 export const metadata: Metadata = {
@@ -98,7 +116,7 @@ export default function RootLayout({
   return (
     <html
       lang="ko"
-      className={`${inter.variable} ${notoSansKR.variable}`}
+      className={`${notoSansKR.variable} ${notoSerifKR.variable} ${jetbrainsMono.variable}`}
       suppressHydrationWarning
     >
       <body className="flex min-h-screen flex-col antialiased">

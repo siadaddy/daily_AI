@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { motion, useReducedMotion } from 'framer-motion'
 import {
   Calendar,
@@ -17,33 +17,39 @@ const VIEWS: { id: ReportsView; label: string; icon: LucideIcon }[] = [
   { id: 'dashboard', label: '분석 대시보드', icon: LineChart },
 ]
 
+/**
+ * 리포트 하위 내비.
+ * 알약 버튼 → 밑줄 탭. router.push 버튼도 Link로 바꿔
+ * 새 탭 열기(⌘+클릭)와 가운데 클릭이 동작하게 했다.
+ */
 export function ReportsSubNav({ view }: { view: ReportsView }) {
-  const router = useRouter()
   const prefersReducedMotion = useReducedMotion()
 
   return (
-    <div
-      className="flex w-fit gap-1 rounded-full p-1"
-      style={{ background: 'var(--glass)', border: '1px solid var(--border)' }}
+    <nav
+      className="flex w-full gap-0 border-b border-[var(--rule)]"
+      aria-label="리포트 보기 전환"
     >
       {VIEWS.map((v) => {
         const isActive = view === v.id
         const Icon = v.icon
         return (
-          <button
+          <Link
             key={v.id}
-            onClick={() => router.push(`/?tab=reports&view=${v.id}`)}
-            className="relative flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold whitespace-nowrap transition-colors"
-            style={{ color: isActive ? '#fff' : 'var(--muted2)' }}
+            href={`/?tab=reports&view=${v.id}`}
+            scroll={false}
+            aria-current={isActive ? 'page' : undefined}
+            className="relative flex items-center gap-1.5 px-4 py-2.5 font-[family-name:var(--font-mono)] text-xs tracking-[0.1em] whitespace-nowrap uppercase transition-colors first:pl-0"
+            style={{ color: isActive ? 'var(--text)' : 'var(--muted)' }}
           >
+            <Icon size={13} strokeWidth={2} aria-hidden="true" />
+            {v.label}
             {isActive && (
               <motion.span
-                layoutId="reports-subnav-pill"
-                className="absolute inset-0 rounded-full"
-                style={{
-                  background: 'var(--brand)',
-                  boxShadow: 'var(--shadow-glow-brand)',
-                }}
+                layoutId="reports-subnav-underline"
+                aria-hidden="true"
+                className="absolute right-0 -bottom-px left-0 h-0.5"
+                style={{ background: 'var(--text)' }}
                 transition={
                   prefersReducedMotion
                     ? { duration: 0 }
@@ -51,13 +57,9 @@ export function ReportsSubNav({ view }: { view: ReportsView }) {
                 }
               />
             )}
-            <span className="relative z-10 flex items-center gap-1.5">
-              <Icon size={14} strokeWidth={2} />
-              {v.label}
-            </span>
-          </button>
+          </Link>
         )
       })}
-    </div>
+    </nav>
   )
 }

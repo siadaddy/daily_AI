@@ -21,44 +21,34 @@ export function ReportArchiveList({
 
   return (
     <motion.div
-      className="glass-card rounded-2xl p-5"
+      className="border-t-2 border-[var(--text)] pt-4"
       initial={prefersReducedMotion ? false : { opacity: 0, y: 24 }}
       whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.45, ease: 'easeOut' }}
     >
-      <h3
-        className="mb-3 flex items-center gap-1.5 text-sm font-semibold"
-        style={{ color: 'var(--text)' }}
-      >
-        <Archive size={16} strokeWidth={2} />
+      <h3 className="ed-section-title mb-4 flex items-center gap-2 text-[1.125rem]">
+        <Archive size={14} strokeWidth={2} aria-hidden="true" />
         지난 리포트
       </h3>
-      <ul className="flex flex-col gap-1">
+      <ul className="flex flex-col">
         {reports.map((r) => {
           const isActive = r.week_start === selectedStart
           return (
             <li key={r.id}>
               <Link
                 href={reportHref(view, r.week_start)}
-                className="block rounded-xl px-3 py-2 transition-all duration-150"
-                style={
-                  isActive
-                    ? {
-                        background: 'var(--glass)',
-                        border: '1px solid var(--brand)',
-                        boxShadow: 'var(--shadow-glow-brand)',
-                      }
-                    : { border: '1px solid transparent' }
-                }
+                aria-current={isActive ? 'page' : undefined}
+                className="block border-l-2 py-2 pl-3 transition-colors"
+                style={{
+                  borderLeftColor: isActive ? 'var(--text)' : 'transparent',
+                }}
               >
                 <span
-                  className="block text-xs font-semibold"
-                  style={{
-                    color: isActive ? 'var(--brand-light)' : 'var(--text)',
-                  }}
+                  className="block font-[family-name:var(--font-mono)] text-xs tabular-nums"
+                  style={{ color: isActive ? 'var(--text)' : 'var(--muted2)' }}
                 >
-                  {r.week_start} ~ {r.week_end}
+                  {r.week_start} — {r.week_end}
                 </span>
                 <span
                   className="mt-0.5 block truncate text-xs"

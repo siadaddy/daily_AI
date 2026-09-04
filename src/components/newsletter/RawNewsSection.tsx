@@ -37,19 +37,15 @@ export function RawNewsSection({ news }: { news: NewsCard[] }) {
     >
       {/* Header with toggle */}
       <button
+        type="button"
         onClick={() => setOpen((p) => !p)}
-        className="mb-3 flex w-full items-center justify-between rounded-xl p-3 transition-colors hover:opacity-80"
-        style={{
-          background: 'var(--surface)',
-          border: '1px solid var(--border)',
-        }}
+        aria-expanded={open}
+        aria-controls="raw-news-panel"
+        className="mb-4 flex w-full items-center justify-between border-b border-[var(--rule)] py-3 transition-colors"
       >
-        <span
-          className="flex items-center gap-2 font-semibold"
-          style={{ color: 'var(--text)' }}
-        >
-          <ClipboardList size={16} strokeWidth={2} />
-          전체 뉴스 ({news.length}건)
+        <span className="kicker flex items-center gap-2">
+          <ClipboardList size={13} strokeWidth={2} aria-hidden="true" />
+          전체 뉴스 {news.length}건
         </span>
         <span
           className="transition-transform duration-200"
@@ -57,25 +53,32 @@ export function RawNewsSection({ news }: { news: NewsCard[] }) {
             transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
             color: 'var(--muted)',
           }}
+          aria-hidden="true"
         >
           <ChevronDown size={16} strokeWidth={2} />
         </span>
       </button>
 
       {open && (
-        <div className="animate-fade-in">
+        <div id="raw-news-panel" className="animate-fade-in">
           {/* Category filter */}
           <div className="mb-4 flex flex-wrap gap-2">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat}
+                type="button"
                 onClick={() => setFilter(cat)}
-                className="rounded-full px-3 py-1 text-xs font-medium transition-colors"
+                aria-pressed={categoryFilter === cat}
+                className="rounded-sm px-2.5 py-1 font-[family-name:var(--font-mono)] text-xs transition-colors"
                 style={{
-                  background:
-                    categoryFilter === cat ? 'var(--brand)' : 'var(--glass)',
-                  color: categoryFilter === cat ? '#fff' : 'var(--muted2)',
-                  border: '1px solid var(--border)',
+                  background: 'transparent',
+                  color:
+                    categoryFilter === cat ? 'var(--text)' : 'var(--muted)',
+                  border: `1px solid ${
+                    categoryFilter === cat
+                      ? 'var(--rule-strong)'
+                      : 'var(--border)'
+                  }`,
                 }}
               >
                 {cat}
@@ -84,18 +87,14 @@ export function RawNewsSection({ news }: { news: NewsCard[] }) {
           </div>
 
           {/* News list */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col">
             {filtered.map((item) => (
               <a
                 key={item.id}
                 href={item.link ?? '#'}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-start gap-3 rounded-xl p-3 transition-colors hover:opacity-80"
-                style={{
-                  background: 'var(--glass)',
-                  border: '1px solid var(--border)',
-                }}
+                className="news-card-item flex items-start gap-3 border-b border-[var(--rule)] px-1 py-3 transition-colors"
               >
                 <span className="badge badge-purple mt-0.5 shrink-0">
                   {item.category}

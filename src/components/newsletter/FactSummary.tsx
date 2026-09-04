@@ -33,24 +33,27 @@ export function FactSummary({
 
   return (
     <section
-      className="grid grid-cols-2 gap-3 rounded-xl px-4 py-3 md:grid-cols-4"
-      style={{ background: 'var(--glass)', border: '1px solid var(--border)' }}
+      className="grid grid-cols-2 gap-x-6 gap-y-4 md:grid-cols-4"
       aria-label="이 날짜 콘텐츠 요약"
     >
-      {stats.map(({ icon: Icon, label, value }) => (
-        <div key={label} className="flex items-center gap-2">
+      {stats.map(({ icon: Icon, label, value }, i) => (
+        <div
+          key={label}
+          className={`flex min-w-0 items-start gap-2 ${
+            i > 0 ? 'md:border-l md:border-[var(--rule)] md:pl-6' : ''
+          }`}
+        >
           <Icon
-            size={15}
+            size={13}
             strokeWidth={2}
-            className="shrink-0"
+            aria-hidden="true"
+            className="mt-1 shrink-0"
             style={{ color: 'var(--muted)' }}
           />
-          <div className="flex flex-col">
-            <span className="text-[10px]" style={{ color: 'var(--muted)' }}>
-              {label}
-            </span>
+          <div className="flex min-w-0 flex-col gap-1">
+            <span className="kicker">{label}</span>
             <span
-              className="text-xs font-semibold"
+              className="truncate font-[family-name:var(--font-mono)] text-sm tabular-nums"
               style={{ color: 'var(--text)' }}
             >
               {value}

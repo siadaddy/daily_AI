@@ -51,18 +51,17 @@ export function TabNav({ activeTab }: { activeTab: TabId | null }) {
                   key={tab.id}
                   href={tabHref(tab.id)}
                   scroll={false}
-                  className="relative flex shrink-0 items-center gap-1.5 px-4 py-3 text-sm font-medium transition-colors"
-                  style={{
-                    color: isActive ? 'var(--brand-light)' : 'var(--muted)',
-                  }}
+                  aria-current={isActive ? 'page' : undefined}
+                  className="tn-tab"
                 >
-                  <Icon size={16} strokeWidth={2} />
+                  <Icon size={14} strokeWidth={2} aria-hidden="true" />
                   <span>{tab.label}</span>
                   {isActive && (
-                    <motion.div
+                    <motion.span
                       layoutId="tab-underline"
-                      className="absolute right-0 bottom-0 left-0 h-0.5 rounded-full"
-                      style={{ background: 'var(--brand)' }}
+                      aria-hidden="true"
+                      className="absolute right-0 bottom-0 left-0 h-0.5"
+                      style={{ background: 'var(--text)' }}
                       transition={
                         prefersReducedMotion
                           ? { duration: 0 }

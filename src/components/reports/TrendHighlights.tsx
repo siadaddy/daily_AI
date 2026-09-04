@@ -34,28 +34,20 @@ export function TrendHighlights({
 
   return (
     <motion.div
-      className="glass-card rounded-2xl p-5"
+      className="border-t-2 border-[var(--text)] pt-4"
       initial={prefersReducedMotion ? false : { opacity: 0, y: 24 }}
       whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.45, ease: 'easeOut' }}
     >
-      <h3
-        className="mb-4 flex items-center gap-1.5 text-sm font-semibold"
-        style={{ color: 'var(--text)' }}
-      >
-        <Flame size={16} strokeWidth={2} />
+      <h3 className="ed-section-title mb-5 flex items-center gap-2 text-[1.125rem]">
+        <Flame size={14} strokeWidth={2} aria-hidden="true" />
         기간 TOP 뉴스
       </h3>
       <div className="flex flex-col gap-4">
         {groups.map((g) => (
-          <div key={g.date}>
-            <p
-              className="mb-2 text-xs font-semibold"
-              style={{ color: 'var(--muted)' }}
-            >
-              {g.date}
-            </p>
+          <div key={g.date} className="border-t border-[var(--rule)] pt-3">
+            <p className="kicker mb-2">{g.date}</p>
             <ul className="flex flex-col gap-2">
               {g.items.map((item) => (
                 <li
@@ -63,10 +55,11 @@ export function TrendHighlights({
                   className="flex items-start gap-2 text-sm"
                 >
                   <span
-                    className="mt-0.5 shrink-0 text-xs font-bold"
-                    style={{ color: 'var(--brand-light)' }}
+                    className="mt-0.5 shrink-0 font-[family-name:var(--font-mono)] text-xs tabular-nums"
+                    style={{ color: 'var(--rule-strong)' }}
+                    aria-hidden="true"
                   >
-                    #{item.rank}
+                    {String(item.rank).padStart(2, '0')}
                   </span>
                   <span style={{ color: 'var(--muted2)' }}>
                     {item.title}
