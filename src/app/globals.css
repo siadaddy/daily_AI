@@ -101,8 +101,9 @@
   --r-full: 999px;
 
   /* Type scale — 13/14/16/18/24/32/40.
-     신문 1면의 힘은 서체가 아니라 크기 점프에서 나온다. 본문 14px 옆에
-     헤드라인 64~80px를 놓아야 지면이 소리를 낸다. */
+     대비는 크기 점프에서 나오지만, 매일 읽는 화면이라 1면처럼 80px까지
+     밀면 데스크톱에서 과하다. 리드 26~40px / 디스플레이 30~48px로
+     본문 대비 약 3배까지만 벌린다. */
   --fs-xs: 0.8125rem;
   --fs-sm: 0.875rem;
   --fs-base: 1rem;
@@ -110,9 +111,9 @@
   --fs-lg: 1.5rem;
   --fs-xl: 2rem;
   --fs-2xl: 2.5rem;
-  --fs-display: clamp(2.75rem, 8vw, 5rem);
+  --fs-display: clamp(1.875rem, 4.4vw, 3rem);
   /* 리드 기사 헤드라인 */
-  --fs-lead: clamp(2rem, 5.5vw, 4rem);
+  --fs-lead: clamp(1.625rem, 3.4vw, 2.5rem);
 
   /* Spacing rhythm — 8pt 베이스라인 (커스텀 CSS 클래스 전용) */
   --space-xs: 4px;
@@ -122,7 +123,7 @@
   --space-xl: 40px;
 
   /* 고정 상단바 높이 — 제호 확대분 반영 */
-  --header-h: 68px;
+  --header-h: 64px;
   --tabnav-h: 44px;
 }
 
@@ -328,10 +329,10 @@ h4 {
 }
 .ed-section-title {
   font-family: var(--font-display);
-  font-size: var(--fs-xl);
+  font-size: 1.75rem;
   font-weight: 400;
   letter-spacing: -0.02em;
-  line-height: 1.2;
+  line-height: 1.25;
   color: var(--text);
 }
 .ed-section-count {
@@ -378,9 +379,9 @@ h4 {
    목록에 리듬을 만든다. */
 .ed-index {
   font-family: var(--font-mono);
-  font-size: 2.75rem;
+  font-size: 2rem;
   font-weight: 600;
-  line-height: 0.85;
+  line-height: 0.9;
   color: var(--rule-strong);
   font-variant-numeric: tabular-nums;
   flex-shrink: 0;
@@ -530,7 +531,7 @@ h4 {
 }
 .blog-title {
   font-family: var(--font-display);
-  font-size: clamp(var(--fs-lg), 4vw, 2.75rem);
+  font-size: clamp(1.375rem, 2.8vw, 2rem);
   font-weight: 400;
   letter-spacing: -0.02em;
   line-height: 1.2;
@@ -785,7 +786,7 @@ h4 {
 /* 제호 — 세리프, 단색 */
 .header-title {
   font-family: var(--font-display);
-  font-size: 1.55rem;
+  font-size: 1.4rem;
   font-weight: 400;
   letter-spacing: -0.01em;
   color: var(--text);
