@@ -1,5 +1,10 @@
 import type { Metadata, Viewport } from 'next'
-import { Gowun_Batang, IBM_Plex_Mono, Noto_Sans_KR } from 'next/font/google'
+import {
+  Gowun_Batang,
+  IBM_Plex_Mono,
+  Noto_Sans_KR,
+  Song_Myung,
+} from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { ThemeProvider } from '@/components/layout/ThemeProvider'
@@ -26,6 +31,20 @@ const notoSansKR = Noto_Sans_KR({
   variable: '--font-noto-kr',
   subsets: ['latin'],
   weight: ['300', '400', '500', '700'],
+  display: 'swap',
+})
+
+/**
+ * 송명 — 거대 헤드라인 전용. 세로획이 굵고 가로획이 얇은 고대비 명조라
+ * 40px 이상에서 인쇄물 특유의 긴장감이 나온다. 다만 Google Fonts에 400
+ * 단일 웨이트뿐이라 작은 크기에서는 획이 사라진다 — 그래서 28px 미만
+ * 제목은 고운바탕 700이 받는 2단 운용(globals.css의 --font-display /
+ * --font-serif 구분)을 쓴다.
+ */
+const songMyung = Song_Myung({
+  variable: '--font-display-kr',
+  // 송명은 한글 전용이라 subsets 옵션을 받지 않는다 (라틴 글리프는 최소)
+  weight: '400',
   display: 'swap',
 })
 
@@ -127,7 +146,7 @@ export default function RootLayout({
   return (
     <html
       lang="ko"
-      className={`${notoSansKR.variable} ${gowunBatang.variable} ${ibmPlexMono.variable}`}
+      className={`${notoSansKR.variable} ${songMyung.variable} ${gowunBatang.variable} ${ibmPlexMono.variable}`}
       suppressHydrationWarning
     >
       <body className="flex min-h-screen flex-col antialiased">

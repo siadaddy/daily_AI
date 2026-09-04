@@ -20,7 +20,7 @@ export function PageHeader({
   meta?: string
 }) {
   return (
-    <header className="flex flex-col gap-3 border-t-2 border-[var(--text)] pt-4">
+    <header className="flex flex-col gap-3 border-t-4 border-[var(--text)] pt-5">
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         {Icon && (
           <Icon
@@ -35,7 +35,7 @@ export function PageHeader({
         {meta && <span className="ed-section-count">{meta}</span>}
       </div>
 
-      <h1 className="ed-display text-[clamp(1.75rem,4vw,2.5rem)]">{title}</h1>
+      <h1 className="ed-headline text-[length:var(--fs-lead)]">{title}</h1>
 
       {description && (
         <p className="ed-lede max-w-[62ch] text-[0.9375rem]">{description}</p>

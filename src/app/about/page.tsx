@@ -188,7 +188,7 @@ export default function AboutPage() {
             <span className="kicker ml-auto">About</span>
           </div>
 
-          <h1 className="ed-display mb-5 text-[var(--fs-display)]">
+          <h1 className="ed-headline mb-5 text-[length:var(--fs-display)]">
             시아아빠의 AI 데일리
           </h1>
 

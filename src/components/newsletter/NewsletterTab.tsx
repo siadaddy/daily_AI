@@ -89,7 +89,7 @@ function IssueLine({
 }) {
   const [y, m, d] = date.split('-')
   return (
-    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-[var(--rule)] pb-3">
+    <div className="ed-issue-bar">
       <time dateTime={date} className="kicker kicker-accent">
         {y}.{m}.{d}
       </time>
@@ -199,7 +199,9 @@ export async function NewsletterTab({ date }: { date?: string }) {
           aria-hidden="true"
           style={{ color: 'var(--muted)' }}
         />
-        <p className="ed-display text-2xl">해당 날짜의 지면이 없습니다</p>
+        <p className="ed-headline text-[length:var(--fs-lead)]">
+          해당 날짜의 지면이 없습니다
+        </p>
         <p className="kicker">시스템 오류 또는 미운영일</p>
       </div>
     )

@@ -118,7 +118,7 @@ export default async function AgentDetailPage({
             <span className="text-4xl">{emoji}</span>
             <div className="flex flex-col gap-1">
               <span className="kicker kicker-accent">{role}</span>
-              <h1 className="ed-display text-[clamp(1.75rem,4vw,2.5rem)]">
+              <h1 className="ed-headline text-[length:var(--fs-lead)]">
                 {name}
               </h1>
             </div>

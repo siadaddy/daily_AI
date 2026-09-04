@@ -26,7 +26,7 @@ export function NewsCard({ card, idx }: { card: ContentCard; idx: number }) {
         <span className="ed-index" aria-hidden="true">
           {String(idx + 1).padStart(2, '0')}
         </span>
-        <h3 className="ed-display flex-1 text-[1.0625rem] leading-snug">
+        <h3 className="ed-display flex-1 text-[1.1875rem] leading-snug">
           {card.headline}
         </h3>
       </div>

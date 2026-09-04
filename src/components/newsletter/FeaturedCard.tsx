@@ -17,7 +17,7 @@ export function FeaturedCard({ card }: { card: ContentCard }) {
 
   return (
     <motion.article
-      className="grid grid-cols-1 gap-x-10 gap-y-6 border-t-2 border-b border-t-[var(--text)] border-b-[var(--rule)] pt-6 pb-8 md:grid-cols-12"
+      className="grid grid-cols-1 gap-x-10 gap-y-6 border-t-4 border-b border-t-[var(--text)] border-b-[var(--rule)] pt-7 pb-10 md:grid-cols-12"
       initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
       whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
@@ -29,7 +29,7 @@ export function FeaturedCard({ card }: { card: ContentCard }) {
           Lead&nbsp;Story · 오늘의 카드뉴스
         </p>
 
-        <h3 className="ed-display mb-4 text-[clamp(1.5rem,3.4vw,2.25rem)]">
+        <h3 className="ed-headline mb-5 text-[length:var(--fs-lead)]">
           {card.headline}
         </h3>
 

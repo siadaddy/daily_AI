@@ -16,7 +16,7 @@ export default function NotFound() {
       <p className="kicker kicker-accent border-b border-[var(--rule)] pb-4">
         Error 404
       </p>
-      <h1 className="ed-display text-[var(--fs-display)]">
+      <h1 className="ed-headline text-[length:var(--fs-display)]">
         페이지를 찾을 수 없습니다
       </h1>
       <p className="ed-lede max-w-[52ch]">
