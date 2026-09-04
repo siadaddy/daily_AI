@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
-import { createBrowserClient } from '@supabase/ssr'
 import type { User } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/client'
 
 const AuthModal = dynamic(
   () =>
@@ -13,10 +13,22 @@ const AuthModal = dynamic(
   { loading: () => null }
 )
 
-const supabase = createBrowserClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+/**
+ * 브라우저 클라이언트는 첫 호출 때 만든다.
+ *
+ * 모듈 스코프에서 즉시 만들거나 렌더 중(useState 초기화 포함)에 만들면
+ * SSR·프리렌더에서도 실행된다. Supabase 환경변수가 없는 환경(env가 Production
+ * 스코프로만 설정된 프리뷰 배포 등)에서는 @supabase/ssr이 그 자리에서 throw해
+ * SiteShell을 쓰는 모든 정적 페이지의 빌드가 죽는다.
+ *
+ * 아래 getter는 이펙트·이벤트 핸들러에서만 불리므로 서버에서는 절대 실행되지
+ * 않는다. NewsTicker·ContentInteraction·AuthModal이 쓰는 방식과 동일하다.
+ */
+let browserClient: ReturnType<typeof createClient> | null = null
+function getSupabase() {
+  browserClient ??= createClient()
+  return browserClient
+}
 
 export function UserButton() {
   const [user, setUser] = useState<User | null>(null)
@@ -25,6 +37,7 @@ export function UserButton() {
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    const supabase = getSupabase()
     supabase.auth.getUser().then(({ data }) => setUser(data.user))
     const {
       data: { subscription },
@@ -102,7 +115,7 @@ export function UserButton() {
             type="button"
             onClick={async () => {
               setShowDropdown(false)
-              await supabase.auth.signOut()
+              await getSupabase().auth.signOut()
             }}
             className="w-full rounded-lg px-3 py-2 text-left text-xs transition-colors hover:opacity-70"
             style={{ color: 'var(--muted2)' }}

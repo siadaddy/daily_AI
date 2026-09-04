@@ -13,13 +13,14 @@ const RECENT_LIMIT = 30
  */
 export async function GET() {
   const base = getSiteUrl()
-  const supabase = createPublicClient()
 
   async function fetchRecentArticles(): Promise<
     { date: string; title: string }[]
   > {
     try {
-      const { data, error } = await supabase
+      // 클라이언트 생성도 try 안에서 — 환경변수가 없으면 여기서 throw하고,
+      // 그게 밖에 있으면 빌드 타임 프리렌더 전체가 죽는다 (content-dates.ts 주석 참고)
+      const { data, error } = await createPublicClient()
         .from('articles')
         .select('date, title')
         .order('date', { ascending: false })
