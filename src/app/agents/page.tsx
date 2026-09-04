@@ -31,7 +31,7 @@ export default async function AgentsIndexPage() {
   }
 
   return (
-    <SiteShell>
+    <SiteShell activeTab={null}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

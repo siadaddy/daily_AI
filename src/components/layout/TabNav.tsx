@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import {
   Newspaper,
@@ -15,7 +14,7 @@ import {
 } from 'lucide-react'
 import { useTheme } from '@/components/layout/ThemeProvider'
 import type { TabId } from '@/lib/types'
-import { tabHref, resolveTab } from '@/lib/tabs'
+import { tabHref } from '@/lib/tabs'
 
 const TABS: { id: TabId; label: string; icon: LucideIcon }[] = [
   { id: 'newsletter', label: 'AI 뉴스레터', icon: Newspaper },
@@ -25,13 +24,15 @@ const TABS: { id: TabId; label: string; icon: LucideIcon }[] = [
   { id: 'portfolio', label: '포트폴리오', icon: Wrench },
 ]
 
-export function TabNav() {
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
+/**
+ * 활성 탭은 서버에서 결정해 prop으로 내려준다.
+ * 여기서 `useSearchParams()`로 읽으면 정적 페이지에서 이 경계가
+ * 클라이언트 렌더로 빠져 서버 HTML에 탭 내비게이션이 아예 없어진다.
+ * 어느 탭에도 속하지 않는 경로(`/keyword`, `/agents`)는 null을 넘긴다.
+ */
+export function TabNav({ activeTab }: { activeTab: TabId | null }) {
   const { theme, setTheme } = useTheme()
   const prefersReducedMotion = useReducedMotion()
-
-  const currentTab = resolveTab(pathname, searchParams.get('tab'))
 
   return (
     <nav
@@ -43,7 +44,7 @@ export function TabNav() {
         <div className="tn-list-wrap">
           <div className="tn-list">
             {TABS.map((tab) => {
-              const isActive = currentTab === tab.id
+              const isActive = activeTab === tab.id
               const Icon = tab.icon
               return (
                 <Link

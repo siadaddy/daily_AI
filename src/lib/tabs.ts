@@ -1,5 +1,13 @@
 import type { TabId } from '@/lib/types'
 
+const TAB_IDS: readonly TabId[] = [
+  'newsletter',
+  'reports',
+  'music',
+  'office',
+  'portfolio',
+]
+
 /**
  * 각 탭의 진입 경로. **반드시 절대 경로여야 한다.**
  *
@@ -13,16 +21,12 @@ export function tabHref(id: TabId): string {
 }
 
 /**
- * 활성 탭 판정 — 탭 SPA(`/`)는 `?tab=`이, 독립 라우트는 경로가 결정한다.
- * 어느 탭에도 속하지 않는 경로(`/keyword`, `/agents`, `/about`)는 null이라
- * 아무 탭도 강조하지 않는다.
+ * `?tab=` 파라미터를 TabId로 정규화한다. 알 수 없는 값은 뉴스레터로 떨어진다.
+ *
+ * 활성 탭 판정은 **서버에서** 이뤄져야 한다 — 클라이언트에서
+ * `useSearchParams()`로 읽으면 정적 페이지의 해당 Suspense 경계가
+ * 클라이언트 렌더로 빠져 탭 내비게이션이 서버 HTML에서 사라진다.
  */
-export function resolveTab(
-  pathname: string,
-  tabParam: string | null
-): TabId | null {
-  if (pathname === '/') return (tabParam as TabId) ?? 'newsletter'
-  if (pathname.startsWith('/news/')) return 'newsletter'
-  if (pathname.startsWith('/reports/')) return 'reports'
-  return null
+export function parseTab(value: string | null | undefined): TabId {
+  return TAB_IDS.includes(value as TabId) ? (value as TabId) : 'newsletter'
 }

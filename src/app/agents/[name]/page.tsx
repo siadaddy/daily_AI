@@ -102,7 +102,7 @@ export default async function AgentDetailPage({
   }
 
   return (
-    <SiteShell>
+    <SiteShell activeTab={null}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

@@ -33,7 +33,7 @@ export default async function KeywordIndexPage() {
   }
 
   return (
-    <SiteShell>
+    <SiteShell activeTab={null}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

@@ -98,7 +98,7 @@ export default async function ReportPermalinkPage({
   }
 
   return (
-    <SiteShell>
+    <SiteShell activeTab="reports">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}

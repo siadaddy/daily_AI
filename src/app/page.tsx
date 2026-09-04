@@ -10,6 +10,7 @@ import { OfficeTab } from '@/components/office/OfficeTab'
 import { MusicUniverse } from '@/components/music/MusicUniverse'
 import { PortfolioSection } from '@/components/portfolio/PortfolioCard'
 import { getToday, newsHref } from '@/lib/dates'
+import { parseTab } from '@/lib/tabs'
 import { fetchAvailableDates } from '@/lib/content-dates'
 import { plainTextExcerpt } from '@/lib/utils/caption'
 import type { TabId } from '@/lib/types'
@@ -43,7 +44,7 @@ export async function generateMetadata({
   searchParams: Promise<{ tab?: string; date?: string }>
 }): Promise<Metadata> {
   const params = await searchParams
-  const tab = (params.tab ?? 'newsletter') as TabId
+  const tab = parseTab(params.tab)
 
   if (tab !== 'newsletter') {
     const meta = TAB_META[tab]
@@ -89,7 +90,7 @@ export default async function Home({
   }>
 }) {
   const params = await searchParams
-  const tab = (params.tab ?? 'newsletter') as TabId
+  const tab = parseTab(params.tab)
   const date = params.date
   const today = getToday()
   const selectedDate = date ?? today
@@ -102,6 +103,7 @@ export default async function Home({
 
   return (
     <SiteShell
+      activeTab={tab}
       dateNav={tab === 'newsletter' ? { selectedDate, dates } : undefined}
     >
       {tab === 'newsletter' && (

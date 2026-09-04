@@ -95,7 +95,7 @@ export default async function NewsDatePage({
   }
 
   return (
-    <SiteShell dateNav={{ selectedDate: date, dates }}>
+    <SiteShell activeTab="newsletter" dateNav={{ selectedDate: date, dates }}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
