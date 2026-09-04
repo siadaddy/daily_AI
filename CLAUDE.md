@@ -112,17 +112,31 @@ src/
 
 Tailwind CSS v4 — uses `@import "tailwindcss"` (not the v3 `@tailwind` directives).
 
+**Design language: Editorial Dark.** The site is a publication, not a dashboard — hierarchy comes from size, hairline rules and whitespace, never from colored fills or glows. Three concrete consequences when writing UI here:
+
+- **No gradients, no glows, no big radii.** `--shadow-glow-*` and `--shadow-card` resolve to `none` on purpose (the names survive only for legacy references). Separate things with a rule (`--rule`, `--rule-strong`), not a shadow or a card border.
+- **Three type roles, no overlap.** Serif (`--font-serif`) for headlines, sans (`--font-sans`) for Korean body copy, mono (`--font-mono`) for kickers, dates and every number — numeric UI also needs `font-variant-numeric: tabular-nums`.
+- **`@theme` retunes Tailwind's radius scale to 2–10px.** `rounded-2xl` is 8px here. Do not "fix" a corner by reaching for a bigger utility.
+
+Reusable primitives in `globals.css`: `.kicker` (mono micro-label), `.ed-section-head` / `.ed-section-title`, `.ed-display`, `.ed-lede`, `.ed-index`, `.ed-rule`.
+
 Design tokens live in `src/app/globals.css` as CSS custom properties:
 
 ```css
---brand: #1c69d4 /* primary blue accent */ --accent-purple: #a78bfa
-  /* purple secondary */ --bg: #080c14 /* dark background (default) */
-  --card: #111827 --glass: rgba(255, 255, 255, 0.04);
+--brand: #3b7dd8; /* ink blue — accent only, never a fill */
+--accent: #d2604a; /* editorial ink red (rules, section marks) */
+--accent-purple: var(--accent); /* legacy alias — repointed, not a purple */
+--bg: #0b0b0c; /* neutral ink (dark, default) */
+--card: #101011;
+--text: #f2efe9; /* warm paper, not pure white */
+--rule: rgba(242, 239, 233, 0.14); /* hairline separator */
 ```
 
-Dark mode is **default**: the `:root` block in `globals.css` holds the dark values directly, and `[data-theme="light"]` overrides them for light mode. Theme state itself is a custom React Context (`src/components/layout/ThemeProvider.tsx`) — `next-themes` is not used/installed.
+Dark mode is **default**: the `:root` block in `globals.css` holds the dark values directly, and `[data-theme="light"]` overrides them for light mode (a warm paper `#f2efe9`, not white). Theme state itself is a custom React Context (`src/components/layout/ThemeProvider.tsx`) — `next-themes` is not used/installed.
 
-`lucide-react` is the icon library (replaces emoji in structural UI elements — content-layer emoji like `Category` labels or `PortfolioCard` project glyphs are intentionally left alone). `framer-motion` drives interaction animations (tab underline, theme toggle, card reveals, KPI count-up); any new animation must respect `useReducedMotion()`.
+`lucide-react` is the icon library (replaces emoji in structural UI elements — content-layer emoji like `Category` labels or `PortfolioCard` project glyphs are intentionally left alone). Icons are subordinate to type: 11–14px, `--muted`, and `aria-hidden` when decorative. Never hand-roll SVG icon paths. `framer-motion` drives interaction animations (tab underline, theme toggle, card reveals, KPI count-up); any new animation must respect `useReducedMotion()`, and hover must not scale or glow — brighten the rule instead.
+
+UI is reviewed against the [Web Interface Guidelines](https://github.com/vercel-labs/web-interface-guidelines) (installed as the `web-design-guidelines` skill). Non-negotiables already established: a skip link to `main#main`, global `:focus-visible` (never bare `outline-none`), `type="button"` on non-submit buttons, `aria-expanded`/`aria-controls` on disclosures, labels + `autocomplete` on every input, and explicit `width`/`height` on `<img>`.
 
 Prettier auto-sorts Tailwind classes via `prettier-plugin-tailwindcss`. Run format before committing.
 

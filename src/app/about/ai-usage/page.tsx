@@ -49,14 +49,6 @@ export default function AiUsagePage() {
     >
       {/* ── Hero ─────────────────────────────────── */}
       <section className="relative overflow-hidden px-4 py-20 text-center">
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(28,105,212,0.18) 0%, transparent 70%)',
-          }}
-        />
-
         <div className="relative mx-auto max-w-3xl">
           <div className="mb-4 flex items-center justify-center gap-3">
             <span className="text-5xl">🏆</span>
@@ -97,10 +89,7 @@ export default function AiUsagePage() {
       {/* ── 목적 ─────────────────────────────────── */}
       <section className="px-4 py-16">
         <div className="mx-auto max-w-4xl">
-          <h2
-            className="mb-3 text-center text-2xl font-bold"
-            style={{ color: 'var(--text)' }}
-          >
+          <h2 className="ed-section-head ed-section-title mb-3">
             목적 — 왜 AI로 자동화했나
           </h2>
           <p
@@ -155,10 +144,7 @@ export default function AiUsagePage() {
       {/* ── 방법 ─────────────────────────────────── */}
       <section className="px-4 py-16" style={{ background: 'var(--surface)' }}>
         <div className="mx-auto max-w-5xl">
-          <h2
-            className="mb-3 text-center text-2xl font-bold"
-            style={{ color: 'var(--text)' }}
-          >
+          <h2 className="ed-section-head ed-section-title mb-3">
             방법 — 무엇을 어떻게 만들었나
           </h2>
           <p
@@ -216,10 +202,7 @@ export default function AiUsagePage() {
       {/* ── 결과 ─────────────────────────────────── */}
       <section className="px-4 py-16">
         <div className="mx-auto max-w-4xl">
-          <h2
-            className="mb-10 text-center text-2xl font-bold"
-            style={{ color: 'var(--text)' }}
-          >
+          <h2 className="ed-section-head ed-section-title mb-10">
             결과 — 숫자로 보는 자동화
           </h2>
 
@@ -267,10 +250,7 @@ export default function AiUsagePage() {
       {/* ── 완성도 및 재현성 ─────────────────────── */}
       <section className="px-4 py-16" style={{ background: 'var(--surface)' }}>
         <div className="mx-auto max-w-4xl">
-          <h2
-            className="mb-10 text-center text-2xl font-bold"
-            style={{ color: 'var(--text)' }}
-          >
+          <h2 className="ed-section-head ed-section-title mb-10">
             완성도 및 재현성
           </h2>
 

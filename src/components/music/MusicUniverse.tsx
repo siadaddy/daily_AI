@@ -68,8 +68,9 @@ export function MusicUniverse() {
 
       {loaded && (
         <button
+          type="button"
           onClick={toggleFullscreen}
-          className="absolute right-4 bottom-4 z-20 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium backdrop-blur-sm transition-all hover:scale-105"
+          className="absolute right-4 bottom-4 z-20 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium backdrop-blur-sm transition-colors"
           style={{
             background: 'rgba(255,255,255,0.1)',
             border: '1px solid rgba(255,255,255,0.15)',

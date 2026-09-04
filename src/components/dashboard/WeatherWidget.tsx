@@ -65,7 +65,7 @@ export function WeatherWidget({ compact = false }: { compact?: boolean }) {
               <span style={{ color: pm!.color }}>{pm!.label}</span>
             </>
           ) : (
-            '날씨 로딩...'
+            '날씨 로딩…'
           )}
         </p>
       </div>

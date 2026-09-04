@@ -50,11 +50,8 @@ function SectionCard({
   children: React.ReactNode
 }) {
   return (
-    <div className="glass-card rounded-2xl p-5">
-      <h3
-        className="mb-4 flex items-center gap-1.5 text-sm font-bold"
-        style={{ color: 'var(--muted2)' }}
-      >
+    <div className="border-t-2 border-[var(--text)] pt-4">
+      <h3 className="ed-section-title mb-4 flex items-center gap-2 text-[1.125rem]">
         <Icon size={16} strokeWidth={2} />
         {title}
       </h3>
@@ -77,10 +74,7 @@ export function ReportsDashboard() {
     <div className="flex flex-col gap-5">
       {/* 헤더 */}
       <div className="flex items-center justify-between">
-        <h2
-          className="flex items-center gap-2 text-base font-bold"
-          style={{ color: 'var(--text)' }}
-        >
+        <h2 className="ed-section-title flex items-center gap-2">
           <LineChart size={18} strokeWidth={2} />
           뉴스 분석 대시보드
         </h2>

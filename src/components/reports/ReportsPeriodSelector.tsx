@@ -23,6 +23,7 @@ export function ReportsPeriodSelector({
         const isActive = value === p
         return (
           <button
+            type="button"
             key={p}
             onClick={() => onChange(p)}
             className="relative rounded-full px-4 py-1 text-sm font-semibold transition-colors duration-200"

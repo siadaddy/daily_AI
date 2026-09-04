@@ -57,6 +57,7 @@ export function UserButton() {
     return (
       <>
         <button
+          type="button"
           onClick={() => setShowModal(true)}
           className="rounded-full px-3 py-1 text-xs font-medium transition-opacity hover:opacity-80"
           style={{
@@ -75,6 +76,7 @@ export function UserButton() {
   return (
     <div ref={dropdownRef} className="relative">
       <button
+        type="button"
         onClick={() => setShowDropdown((p) => !p)}
         className="flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition-opacity hover:opacity-80"
         style={{
@@ -97,6 +99,7 @@ export function UserButton() {
           }}
         >
           <button
+            type="button"
             onClick={async () => {
               setShowDropdown(false)
               await supabase.auth.signOut()

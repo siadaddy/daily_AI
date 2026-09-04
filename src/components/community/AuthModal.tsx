@@ -114,12 +114,16 @@ export function AuthModal({ onClose }: Props) {
           {mode === 'signup' && (
             <input
               type="text"
+              name="nickname"
+              aria-label="닉네임"
+              autoComplete="nickname"
+              spellCheck={false}
               placeholder="닉네임 (1~20자)"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
               maxLength={20}
               required
-              className="rounded-lg border px-3 py-2 text-sm outline-none"
+              className="w-full rounded-sm border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-[var(--brand-light)] focus-visible:outline-none"
               style={{
                 background: 'var(--surface)',
                 borderColor: 'var(--border)',
@@ -129,11 +133,16 @@ export function AuthModal({ onClose }: Props) {
           )}
           <input
             type="email"
-            placeholder="이메일"
+            name="email"
+            aria-label="이메일"
+            autoComplete="email"
+            inputMode="email"
+            spellCheck={false}
+            placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="rounded-lg border px-3 py-2 text-sm outline-none"
+            className="w-full rounded-sm border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-[var(--brand-light)] focus-visible:outline-none"
             style={{
               background: 'var(--surface)',
               borderColor: 'var(--border)',
@@ -142,12 +151,18 @@ export function AuthModal({ onClose }: Props) {
           />
           <input
             type="password"
+            name="password"
+            aria-label="비밀번호"
+            autoComplete={
+              mode === 'login' ? 'current-password' : 'new-password'
+            }
+            spellCheck={false}
             placeholder="비밀번호 (6자 이상)"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             minLength={6}
             required
-            className="rounded-lg border px-3 py-2 text-sm outline-none"
+            className="w-full rounded-sm border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-[var(--brand-light)] focus-visible:outline-none"
             style={{
               background: 'var(--surface)',
               borderColor: 'var(--border)',
@@ -156,12 +171,16 @@ export function AuthModal({ onClose }: Props) {
           />
 
           {errorMsg && (
-            <p className="text-xs" style={{ color: 'var(--red, #ef4444)' }}>
+            <p role="alert" className="text-xs" style={{ color: 'var(--red)' }}>
               {errorMsg}
             </p>
           )}
           {successMsg && (
-            <p className="text-xs" style={{ color: '#22c55e' }}>
+            <p
+              aria-live="polite"
+              className="text-xs"
+              style={{ color: 'var(--green)' }}
+            >
               {successMsg}
             </p>
           )}
@@ -172,11 +191,7 @@ export function AuthModal({ onClose }: Props) {
             className="mt-1 rounded-lg py-2 text-sm font-semibold transition-opacity disabled:opacity-50"
             style={{ background: 'var(--accent-purple)', color: '#fff' }}
           >
-            {isPending
-              ? '처리 중...'
-              : mode === 'login'
-                ? '로그인'
-                : '가입하기'}
+            {isPending ? '처리 중…' : mode === 'login' ? '로그인' : '가입하기'}
           </button>
         </form>
 

@@ -58,7 +58,7 @@ const LikeButton = memo(function LikeButton({
       onClick={onToggle}
       disabled={disabled}
       whileTap={prefersReducedMotion ? undefined : { scale: 0.9 }}
-      className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all hover:opacity-80 disabled:opacity-50"
+      className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-opacity hover:opacity-80 disabled:opacity-50"
       style={{
         background: isLiked ? 'rgba(239,68,68,0.12)' : 'var(--glass)',
         border: `1px solid ${isLiked ? 'rgba(239,68,68,0.4)' : 'var(--border)'}`,
@@ -211,8 +211,9 @@ export function ContentInteraction({ contentKey }: { contentKey: string }) {
           onToggle={handleLike}
         />
         <button
+          type="button"
           onClick={() => setShowComments((p) => !p)}
-          className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all hover:opacity-80"
+          className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
           style={{
             background: showComments
               ? 'rgba(167,139,250,0.12)'
@@ -269,6 +270,7 @@ export function ContentInteraction({ contentKey }: { contentKey: string }) {
                 </span>
                 {user?.id === c.user_id && (
                   <button
+                    type="button"
                     onClick={() => handleDelete(c.id)}
                     disabled={isPending}
                     className="text-[10px] hover:opacity-70 disabled:opacity-40"
@@ -291,9 +293,12 @@ export function ContentInteraction({ contentKey }: { contentKey: string }) {
                 ref={inputRef}
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
-                placeholder="댓글을 남겨보세요..."
+                name="comment"
+                aria-label="댓글 입력"
+                autoComplete="off"
+                placeholder="댓글을 남겨보세요…"
                 maxLength={500}
-                className="flex-1 rounded-lg border px-3 py-2 text-xs outline-none sm:py-1.5"
+                className="flex-1 rounded-sm border px-3 py-2 text-xs focus-visible:ring-2 focus-visible:ring-[var(--brand-light)] focus-visible:outline-none sm:py-1.5"
                 style={{
                   background: 'var(--surface)',
                   borderColor: 'var(--border)',
@@ -306,7 +311,7 @@ export function ContentInteraction({ contentKey }: { contentKey: string }) {
                 className="w-full rounded-lg px-3 py-2 text-xs font-semibold transition-opacity disabled:opacity-40 sm:w-auto sm:py-1.5"
                 style={{ background: 'var(--accent-purple)', color: '#fff' }}
               >
-                {isPending ? '...' : '등록'}
+                {isPending ? '등록 중…' : '등록'}
               </button>
             </form>
           ) : (

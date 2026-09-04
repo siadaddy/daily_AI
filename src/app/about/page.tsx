@@ -181,38 +181,18 @@ export default function AboutPage() {
       style={{ background: 'var(--bg)', color: 'var(--text)' }}
     >
       {/* ── Hero ─────────────────────────────────── */}
-      <section className="relative overflow-hidden px-4 py-20 text-center">
-        {/* 배경 글로우 */}
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(28,105,212,0.18) 0%, transparent 70%)',
-          }}
-        />
-
-        <div className="relative mx-auto max-w-3xl">
-          <div className="mb-4 flex items-center justify-center gap-3">
-            <span className="text-5xl">🤖</span>
-            <span
-              className="rounded-full px-3 py-1 text-xs font-bold tracking-widest uppercase"
-              style={{ background: 'var(--green)', color: '#fff' }}
-            >
-              LIVE
-            </span>
+      <section className="relative overflow-hidden px-4 py-20">
+        <div className="relative mx-auto max-w-3xl text-left">
+          <div className="mb-5 flex items-center gap-3 border-b border-[var(--rule)] pb-4">
+            <span className="kicker kicker-accent">Live · 매일 06:40 KST</span>
+            <span className="kicker ml-auto">About</span>
           </div>
 
-          <h1
-            className="mb-4 text-4xl font-bold tracking-tight md:text-5xl"
-            style={{ color: 'var(--text)' }}
-          >
+          <h1 className="ed-display mb-5 text-[var(--fs-display)]">
             시아아빠의 AI 데일리
           </h1>
 
-          <p
-            className="mb-3 text-xl font-medium md:text-2xl"
-            style={{ color: 'var(--brand-light)' }}
-          >
+          <p className="ed-lede mb-4 font-[family-name:var(--font-serif)]">
             AI가 뉴스를 읽고, 당신은 인사이트를 얻는다
           </p>
 
@@ -227,7 +207,7 @@ export default function AboutPage() {
 
           <Link
             href="/"
-            className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-80"
+            className="inline-flex items-center gap-2 rounded-sm px-6 py-3 font-[family-name:var(--font-mono)] text-xs tracking-[0.1em] uppercase transition-opacity hover:opacity-80"
             style={{ background: 'var(--brand)', color: '#fff' }}
           >
             오늘의 뉴스레터 보기 →
@@ -238,10 +218,7 @@ export default function AboutPage() {
       {/* ── Problem → Solution ───────────────────── */}
       <section className="px-4 py-16">
         <div className="mx-auto max-w-5xl">
-          <h2
-            className="mb-10 text-center text-2xl font-bold"
-            style={{ color: 'var(--text)' }}
-          >
+          <h2 className="ed-section-head ed-section-title mb-10">
             왜 만들었나
           </h2>
 
@@ -352,10 +329,7 @@ export default function AboutPage() {
           >
             자동화 파이프라인
           </div>
-          <h2
-            className="mb-4 text-center text-2xl font-bold"
-            style={{ color: 'var(--text)' }}
-          >
+          <h2 className="ed-section-head ed-section-title mb-4">
             매일 06:40, 이렇게 동작합니다
           </h2>
           <p
@@ -433,10 +407,7 @@ export default function AboutPage() {
           >
             AI 크루
           </div>
-          <h2
-            className="mb-3 text-center text-2xl font-bold"
-            style={{ color: 'var(--text)' }}
-          >
+          <h2 className="ed-section-head ed-section-title mb-3">
             5명의 AI Agent가 함께 일합니다
           </h2>
           <p
@@ -515,10 +486,7 @@ export default function AboutPage() {
       {/* ── Features ─────────────────────────────── */}
       <section className="px-4 py-16" style={{ background: 'var(--surface)' }}>
         <div className="mx-auto max-w-5xl">
-          <h2
-            className="mb-10 text-center text-2xl font-bold"
-            style={{ color: 'var(--text)' }}
-          >
+          <h2 className="ed-section-head ed-section-title mb-10">
             플랫폼 기능
           </h2>
 
@@ -556,10 +524,7 @@ export default function AboutPage() {
       {/* ── Stats ────────────────────────────────── */}
       <section className="px-4 py-16">
         <div className="mx-auto max-w-4xl">
-          <h2
-            className="mb-10 text-center text-2xl font-bold"
-            style={{ color: 'var(--text)' }}
-          >
+          <h2 className="ed-section-head ed-section-title mb-10">
             숫자로 보는 프로젝트
           </h2>
 
@@ -597,12 +562,7 @@ export default function AboutPage() {
       {/* ── Tech Stack ───────────────────────────── */}
       <section className="px-4 py-16" style={{ background: 'var(--surface)' }}>
         <div className="mx-auto max-w-4xl">
-          <h2
-            className="mb-10 text-center text-2xl font-bold"
-            style={{ color: 'var(--text)' }}
-          >
-            기술 스택
-          </h2>
+          <h2 className="ed-section-head ed-section-title mb-10">기술 스택</h2>
 
           <div className="grid gap-5 sm:grid-cols-2">
             {STACK.map((group) => (
@@ -645,10 +605,7 @@ export default function AboutPage() {
       <section className="px-4 py-20 text-center">
         <div className="mx-auto max-w-2xl">
           <p className="mb-2 text-3xl">🤖</p>
-          <h2
-            className="mb-3 text-2xl font-bold"
-            style={{ color: 'var(--text)' }}
-          >
+          <h2 className="ed-section-head ed-section-title mb-3">
             오늘 아침 뉴스가 기다리고 있어요
           </h2>
           <p className="mb-8 text-sm" style={{ color: 'var(--muted2)' }}>
@@ -657,7 +614,7 @@ export default function AboutPage() {
           </p>
           <Link
             href="/"
-            className="inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-semibold transition-opacity hover:opacity-80"
+            className="inline-flex items-center gap-2 rounded-sm px-8 py-3.5 font-[family-name:var(--font-mono)] text-xs tracking-[0.1em] uppercase transition-opacity hover:opacity-80"
             style={{ background: 'var(--brand)', color: '#fff' }}
           >
             뉴스레터 바로가기 →

@@ -84,12 +84,13 @@ export function TabNav({ activeTab }: { activeTab: TabId | null }) {
             aria-label="서비스 소개"
             title="서비스 소개"
           >
-            <Info size={16} strokeWidth={2} />
+            <Info size={16} strokeWidth={2} aria-hidden="true" />
           </Link>
           <div className="header-stats">
             <span>60일 아카이브</span>
           </div>
           <button
+            type="button"
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             className="header-theme-btn"
             aria-label="테마 전환"

@@ -55,16 +55,12 @@ function CountUpNumber({ value }: { value: number }) {
 
 function DeltaChip({ pct, prevLabel }: { pct: number; prevLabel: string }) {
   if (pct === 0) {
-    return (
-      <span className="text-xs" style={{ color: 'var(--muted)' }}>
-        변동 없음
-      </span>
-    )
+    return <span className="kicker">변동 없음</span>
   }
   const up = pct > 0
   return (
     <span
-      className="text-xs font-semibold"
+      className="font-[family-name:var(--font-mono)] text-xs tabular-nums"
       style={{ color: up ? 'var(--green)' : 'var(--red)' }}
     >
       {up ? '▲' : '▼'} {Math.abs(pct)}%{' '}
@@ -114,24 +110,20 @@ export function StatsKpiRow({ data }: { data: AnalyticsPayload }) {
   ]
 
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+    <div className="grid grid-cols-2 gap-x-6 gap-y-5 md:grid-cols-4">
       {boxes.map((box) => {
         const Icon = box.icon
         return (
           <div
             key={box.label}
-            className="glass-card flex flex-col gap-1 rounded-2xl p-4"
+            className="flex flex-col gap-1.5 border-t-2 border-[var(--rule-strong)] pt-3"
           >
-            <Icon
-              size={18}
-              strokeWidth={2}
-              style={{ color: 'var(--brand-light)' }}
-            />
-            <span className="text-xs" style={{ color: 'var(--muted)' }}>
+            <span className="kicker flex items-center gap-1.5">
+              <Icon size={11} strokeWidth={2} aria-hidden="true" />
               {box.label}
             </span>
             <span
-              className="text-lg font-bold"
+              className="font-[family-name:var(--font-serif)] text-2xl font-bold tabular-nums"
               style={{ color: 'var(--text)' }}
             >
               {box.numericValue !== undefined ? (
@@ -146,9 +138,7 @@ export function StatsKpiRow({ data }: { data: AnalyticsPayload }) {
             {box.deltaPct !== undefined ? (
               <DeltaChip pct={box.deltaPct} prevLabel={prevLabel} />
             ) : box.sub ? (
-              <span className="text-xs" style={{ color: 'var(--muted2)' }}>
-                {box.sub}
-              </span>
+              <span className="kicker">{box.sub}</span>
             ) : null}
           </div>
         )
