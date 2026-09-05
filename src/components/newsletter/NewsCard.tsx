@@ -16,6 +16,7 @@ export function NewsCard({ card, idx }: { card: ContentCard; idx: number }) {
 
   return (
     <motion.article
+      data-capture={`card-${String(idx + 1).padStart(2, '0')}`}
       className="news-card-item group flex flex-col border-t border-[var(--rule)] pt-4 transition-colors"
       initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }}
       whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}

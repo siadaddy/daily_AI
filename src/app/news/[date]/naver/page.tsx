@@ -6,7 +6,8 @@ import { ArrowLeft, Download } from 'lucide-react'
 import { SiteShell } from '@/components/layout/SiteShell'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { CopyForNaver } from '@/components/naver/CopyForNaver'
-import { ShareCards } from '@/components/naver/ShareCards'
+import { ShareImages } from '@/components/naver/ShareImages'
+import { fetchScreens, shotLabel, sortShots } from '@/lib/naver/screens'
 import {
   fetchCardNews,
   fetchTodayArticle,
@@ -40,10 +41,11 @@ export default async function NaverExportPage({
   const { date } = await params
   if (!isValidDate(date)) notFound()
 
-  const [cards, article, trend] = await Promise.all([
+  const [cards, article, trend, screens] = await Promise.all([
     fetchCardNews(date),
     fetchTodayArticle(date),
     fetchTodayTrend(date),
+    fetchScreens(date),
   ])
 
   if (cards.length === 0 && !article) notFound()
@@ -139,6 +141,69 @@ export default async function NaverExportPage({
           </p>
         </section>
 
+        {/* 사이트 화면 캡처 — 매일 GitHub Actions가 배포된 사이트를 그대로
+            찍어 올린다. 조판한 카드가 아니라 "실제 화면"이 필요할 때 쓴다. */}
+        <section className="flex flex-col gap-4">
+          <h2 className="ed-section-head ed-section-title">사이트 화면</h2>
+          {screens && screens.shots.length > 0 ? (
+            <>
+              <p className="ed-lede text-[0.9375rem]">
+                배포된 사이트를 그대로 찍은 이미지입니다. 전체 페이지는 모바일
+                9,000px가 넘어 읽을 수 없으므로 기사·섹션 단위로 잘라 뒀습니다.
+              </p>
+              <div className="flex flex-col gap-4">
+                {(['mobile', 'desktop'] as const).map((vp) => {
+                  const shots = sortShots(
+                    screens.shots.filter((s) => s.viewport === vp)
+                  )
+                  if (shots.length === 0) return null
+                  return (
+                    <ShareImages
+                      key={vp}
+                      shareTitle={`${date} 사이트 화면`}
+                      label={`${vp === 'mobile' ? '모바일' : '데스크톱'} 화면 ${shots.length}장 공유`}
+                      items={shots.map((s) => ({
+                        url: s.url,
+                        filename: `${date}_${s.viewport}_${s.key}.png`,
+                      }))}
+                    />
+                  )
+                })}
+              </div>
+              <ol className="grid list-none grid-cols-2 gap-x-6 gap-y-8 p-0 sm:grid-cols-3">
+                {sortShots(
+                  screens.shots.filter((s) => s.viewport === 'mobile')
+                ).map((s) => (
+                  <li key={s.key} className="flex flex-col gap-2">
+                    {/* 캡처는 이미 최종 크기라 next/image 최적화 대상이 아니다 */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={s.url}
+                      alt={`${shotLabel(s.key)} 모바일 화면`}
+                      width={s.width}
+                      height={s.height}
+                      loading="lazy"
+                      className="h-auto w-full border border-[var(--border)]"
+                    />
+                    <a
+                      href={s.url}
+                      download={`${date}_mobile_${s.key}.png`}
+                      className="kicker inline-flex items-center gap-1.5 hover:text-[var(--text)]"
+                    >
+                      <Download size={11} strokeWidth={2} aria-hidden="true" />
+                      {shotLabel(s.key)}
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </>
+          ) : (
+            <p className="kicker">
+              아직 캡처 전입니다 — 매일 발행 직후 자동으로 찍힙니다
+            </p>
+          )}
+        </section>
+
         {/* 카드 이미지 — 스마트에디터가 CSS를 버리므로, 카드 레이아웃은
             HTML이 아니라 이미지로 넘긴다 (네이버 카드뉴스의 실제 관행) */}
         {cards.length > 0 && (
@@ -154,17 +219,21 @@ export default async function NaverExportPage({
               오른쪽, PC 화면에 맞습니다. 캡션은 둘 다 잘리지 않습니다.
             </p>
             <div className="flex flex-col gap-4">
-              <ShareCards
-                date={date}
-                count={cards.length}
-                layout="tall"
+              <ShareImages
+                shareTitle={`${date} AI 뉴스 카드`}
                 label={`세로형 ${cards.length}장 공유 · 모바일`}
+                items={cards.map((_, i) => ({
+                  url: `/api/naver-card/${date}/${i}`,
+                  filename: `${date}_tall_${String(i + 1).padStart(2, '0')}.png`,
+                }))}
               />
-              <ShareCards
-                date={date}
-                count={cards.length}
-                layout="wide"
+              <ShareImages
+                shareTitle={`${date} AI 뉴스 카드`}
                 label={`가로형 ${cards.length}장 공유 · PC`}
+                items={cards.map((_, i) => ({
+                  url: `/api/naver-card/${date}/${i}?layout=wide`,
+                  filename: `${date}_wide_${String(i + 1).padStart(2, '0')}.png`,
+                }))}
               />
             </div>
             <ol className="grid list-none grid-cols-2 gap-x-6 gap-y-8 p-0 sm:grid-cols-3">

@@ -241,7 +241,7 @@ export async function NewsletterTab({ date }: { date?: string }) {
         />
       )}
 
-      <div className="flex flex-col gap-4">
+      <div data-capture="summary" className="flex flex-col gap-4">
         <IssueLine
           date={targetDate}
           cardCount={cards.length}
@@ -279,7 +279,7 @@ export async function NewsletterTab({ date }: { date?: string }) {
 
       {/* 2. AI Pick TOP3 */}
       {trend?.top3 && trend.top3.length > 0 && (
-        <section className="flex flex-col gap-5">
+        <section data-capture="top3" className="flex flex-col gap-5">
           <SectionTitle
             icon={Bot}
             kicker="Editor's Pick"
@@ -295,7 +295,7 @@ export async function NewsletterTab({ date }: { date?: string }) {
 
       {/* 3. 오늘의 대화 소재 */}
       {talkingPoints.length > 0 && (
-        <section className="flex flex-col gap-5">
+        <section data-capture="talking" className="flex flex-col gap-5">
           <SectionTitle
             icon={MessagesSquare}
             kicker="Talking Points"
@@ -309,7 +309,7 @@ export async function NewsletterTab({ date }: { date?: string }) {
 
       {/* 4. AI 편집장의 리뷰 */}
       {article && (
-        <section className="flex flex-col gap-5">
+        <section data-capture="editorial" className="flex flex-col gap-5">
           <SectionTitle
             icon={PenLine}
             kicker="Editorial"

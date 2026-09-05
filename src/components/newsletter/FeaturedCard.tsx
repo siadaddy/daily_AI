@@ -17,6 +17,7 @@ export function FeaturedCard({ card }: { card: ContentCard }) {
 
   return (
     <motion.article
+      data-capture="card-01"
       className="grid grid-cols-1 gap-x-10 gap-y-6 border-t-4 border-b border-t-[var(--text)] border-b-[var(--rule)] pt-7 pb-10 md:grid-cols-12"
       initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
       whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
