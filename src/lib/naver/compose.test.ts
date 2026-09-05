@@ -89,12 +89,13 @@ describe('composeNaverPost', () => {
     expect(html).toContain('<br />')
   })
 
-  it('카드 번호와 이미지·출처를 함께 싣는다', () => {
+  it('카드 번호와 출처를 싣되 이미지는 넣지 않는다', () => {
     const { html } = composeNaverPost({ ...base, cards: [card(), card()] })
     expect(html).toContain('<h3>01.')
     expect(html).toContain('<h3>02.')
-    expect(html).toContain('<img src="https://img.example.com/a.png"')
     expect(html).toContain('href="https://news.example.com/1"')
+    // 스마트에디터는 붙여넣은 외부 이미지를 가져오지 않는다 — 넣어도 사라진다
+    expect(html).not.toContain('<img')
   })
 
   it('출처가 없는 카드도 깨지지 않는다', () => {
@@ -103,7 +104,7 @@ describe('composeNaverPost', () => {
       cards: [card({ source_url: '', image_url: null })],
     })
     expect(html).toContain('오픈AI, GPT-6 공개')
-    expect(html).not.toContain('<img')
+    expect(html).not.toContain('▶')
   })
 
   it('중복 콘텐츠 대비로 원문 역링크를 항상 넣는다', () => {

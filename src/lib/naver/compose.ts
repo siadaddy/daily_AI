@@ -6,9 +6,14 @@ import { mdToHtml } from '@/lib/utils/caption'
  *
  * 에디터가 붙여넣기를 자기 컴포넌트 모델로 다시 만들기 때문에 클래스·CSS 변수·
  * 레이아웃은 전부 버려진다. 살아남는 것만 쓴다:
- *   h2/h3 · p · strong · blockquote · ol/ul/li · a · img · hr,
+ *   h2/h3 · p · strong · blockquote · ol/ul/li · a · hr,
  *   그리고 span의 인라인 color(리터럴 hex만 — var()는 해석되지 않는다).
  * div·table·flex는 쓰지 않는다. 지면의 "생김새"가 아니라 "순서와 위계"를 옮긴다.
+ *
+ * <img>도 쓰지 않는다. 스마트에디터는 붙여넣은 외부 이미지를 가져오지 않는다
+ * (이미지 서버 문제가 아니다 — CORS도 열려 있고 핫링크 차단도 없다. 네이버가
+ * 자기 저장소에 업로드된 이미지만 본문에 넣는다). 그래서 이미지는 카드 이미지
+ * 파일로 따로 첨부하고, 본문에는 "01." 번호만 남겨 첨부 위치를 맞춘다.
  */
 
 export interface NaverPostInput {
@@ -79,11 +84,7 @@ function cardBlock(card: ContentCard, index: number): string {
   const num = String(index + 1).padStart(2, '0')
   const parts: string[] = []
 
-  if (card.image_url) {
-    parts.push(
-      `<p><img src="${escapeHtml(card.image_url)}" alt="${escapeHtml(card.headline)}" /></p>`
-    )
-  }
+  // 이미지는 넣지 않는다 — 위 주석 참고. 번호가 카드 이미지의 "CARD 01"과 맞는다.
   parts.push(`<h3>${num}. ${escapeHtml(card.headline)}</h3>`)
   parts.push(`<p>${captionToHtml(card.caption)}</p>`)
   const src = sourceLink(card)

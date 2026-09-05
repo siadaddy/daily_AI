@@ -71,7 +71,7 @@ export default async function NaverExportPage({
           kicker="Naver Export"
           title="네이버 블로그용 옮겨쓰기"
           meta={`카드 ${cards.length}`}
-          description="아래 본문을 복사해 네이버 블로그 스마트에디터에 붙여넣으세요. 순서와 위계·이미지·출처 링크는 그대로 넘어가지만, 사이트의 서체·괘선·색은 에디터가 걷어냅니다."
+          description="본문을 복사해 스마트에디터에 붙여넣고, 이미지는 아래 카드 이미지를 첨부하세요. 네이버는 붙여넣은 외부 이미지를 가져오지 않기 때문에 본문에는 이미지가 들어가지 않습니다 — 본문의 01·02 번호가 카드 이미지의 CARD 01·02와 맞습니다."
         />
 
         {/* 제안 제목 */}
@@ -97,7 +97,8 @@ export default async function NaverExportPage({
                 '아래 “카드 이미지 N장 공유”를 누른다 — 공유 시트가 열린다',
                 '네이버 블로그 앱을 고르거나, 사진에 일괄 저장한다',
                 '“제목 복사” → 네이버 글쓰기에 붙여넣기',
-                '“본문 복사” → 본문에 붙여넣기 (이미지는 위에서 첨부한 것을 쓴다)',
+                '“본문 복사” → 본문에 붙여넣기 (글만 들어간다)',
+                '본문의 01·02… 번호 자리에 같은 번호의 카드 이미지를 끼워 넣는다',
               ].map((step, i) => (
                 <li key={i} className="flex items-baseline gap-3 text-sm">
                   <span
@@ -116,8 +117,8 @@ export default async function NaverExportPage({
             <h2 className="kicker">데스크톱에서</h2>
             <ol className="flex list-none flex-col gap-2 p-0">
               {[
-                '“본문 복사” → 스마트에디터 본문에 ⌘V / Ctrl+V',
-                '카드 이미지는 아래에서 내려받아 첨부하거나 끌어다 놓는다',
+                '“본문 복사” → 스마트에디터 본문에 ⌘V / Ctrl+V (글만 들어간다)',
+                '카드 이미지를 내려받아 본문의 01·02… 번호 자리에 첨부한다',
               ].map((step, i) => (
                 <li key={i} className="flex items-baseline gap-3 text-sm">
                   <span
@@ -144,9 +145,10 @@ export default async function NaverExportPage({
           <section className="flex flex-col gap-4">
             <h2 className="ed-section-head ed-section-title">카드 이미지</h2>
             <p className="ed-lede text-[0.9375rem]">
-              지면의 카드 구조를 그대로 담은 1080×1350 이미지입니다. 에디터가
-              CSS를 버리기 때문에 카드 모양은 HTML로 못 넘깁니다 — 이미지로
-              올리면 사이트에서 보던 그대로 나옵니다. 캡처할 필요 없습니다.
+              헤드라인과 본문이 박혀 있는 1080×1350 이미지입니다. 네이버는
+              붙여넣기로는 외부 이미지를 가져오지 않으므로, 이미지는 반드시
+              파일로 첨부해야 합니다. 캡처할 필요는 없습니다 — 아래에서 바로
+              공유하거나 내려받으세요.
             </p>
             <ShareCards date={date} count={cards.length} />
             <ol className="grid list-none grid-cols-2 gap-x-6 gap-y-8 p-0 sm:grid-cols-3">
@@ -180,6 +182,9 @@ export default async function NaverExportPage({
         {/* 미리보기 — 복사 폴백에서 이 노드를 그대로 선택한다 */}
         <section className="flex flex-col gap-4">
           <h2 className="ed-section-head ed-section-title">붙여넣을 내용</h2>
+          <p className="kicker">
+            이미지는 포함되지 않습니다 — 위 카드 이미지를 따로 첨부하세요
+          </p>
           <div
             id="naver-preview"
             className="article-body naver-preview"
