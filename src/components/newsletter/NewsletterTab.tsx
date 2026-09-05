@@ -264,7 +264,7 @@ export async function NewsletterTab({ date }: { date?: string }) {
           </div>
         )}
         {grid.length > 0 && (
-          <div className="grid grid-cols-1 gap-x-10 gap-y-8 sm:grid-cols-2">
+          <div className="flex flex-col gap-2">
             {grid.map((card, i) => (
               <div key={i} className="flex flex-col gap-3">
                 <NewsCard card={card} idx={i + 1} />
