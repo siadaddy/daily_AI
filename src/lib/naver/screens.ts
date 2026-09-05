@@ -1,22 +1,20 @@
 import { unstable_cache } from 'next/cache'
 
 /**
- * GitHub Actions가 매일 찍어 올리는 사이트 화면 캡처.
- * `scripts/capture-site.mjs`가 같은 경로에 manifest.json을 함께 올린다.
+ * GitHub Actions가 매일 찍어 올리는 사이트 화면 캡처 목록.
+ *
+ * manifest.json을 함께 올리려 했으나 card-images 버킷이 이미지 MIME만 받는다
+ * (application/json → 415). 대신 스토리지 목록 API로 파일명을 읽고,
+ * 파일명에 실어 둔 크기를 파싱한다: `{viewport}-{key}-{w}x{h}.png`
  */
+const BUCKET = 'card-images'
+
 export interface Shot {
   key: string
   viewport: 'mobile' | 'desktop'
   width: number
   height: number
-  bytes: number
   url: string
-}
-
-export interface ScreenManifest {
-  date: string
-  capturedAt: string
-  shots: Shot[]
 }
 
 /** 캡처 키를 사람이 읽는 이름으로 */
@@ -47,19 +45,48 @@ export function sortShots(shots: Shot[]): Shot[] {
   )
 }
 
+/** `mobile-card-01-358x971.png` → Shot */
+export function parseShotName(name: string, publicBase: string): Shot | null {
+  const m = name.match(/^(mobile|desktop)-(.+)-(\d+)x(\d+)\.png$/)
+  if (!m) return null
+  return {
+    viewport: m[1] as Shot['viewport'],
+    key: m[2],
+    width: Number(m[3]),
+    height: Number(m[4]),
+    url: `${publicBase}/${name}`,
+  }
+}
+
 export const fetchScreens = unstable_cache(
-  async (date: string): Promise<ScreenManifest | null> => {
+  async (date: string): Promise<Shot[]> => {
     const base = process.env.NEXT_PUBLIC_SUPABASE_URL
-    if (!base) return null
-    const url = `${base}/storage/v1/object/public/card-images/screens/${date}/manifest.json`
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    if (!base || !key) return []
+
+    const prefix = `screens/${date}`
+    const publicBase = `${base}/storage/v1/object/public/${BUCKET}/${prefix}`
+
     try {
-      const res = await fetch(url, { cache: 'no-store' })
-      // 아직 캡처 전이면 404 — 오류가 아니라 정상 상태다
-      if (!res.ok) return null
-      return (await res.json()) as ScreenManifest
+      const res = await fetch(`${base}/storage/v1/object/list/${BUCKET}`, {
+        method: 'POST',
+        headers: {
+          apikey: key,
+          Authorization: `Bearer ${key}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prefix, limit: 100 }),
+        cache: 'no-store',
+      })
+      if (!res.ok) throw new Error(`list ${res.status}`)
+      const rows = (await res.json()) as { name: string }[]
+      return rows
+        .map((r) => parseShotName(r.name, publicBase))
+        .filter((s): s is Shot => s !== null)
     } catch (e) {
-      console.error('[naver/screens] manifest 조회 실패:', e)
-      return null
+      // 아직 캡처 전이거나 스토리지에 닿지 못한 것 — 페이지는 계속 떠야 한다
+      console.error('[naver/screens] 캡처 목록 조회 실패:', e)
+      return []
     }
   },
   ['naver-screens'],

@@ -10,7 +10,8 @@
  *
  * 사용: node scripts/capture-site.mjs [YYYY-MM-DD] [--dry [출력경로]]
  *   --dry 는 업로드 없이 로컬에 저장한다 (선택자·크기 확인용).
- * 필요 환경변수: SITE_URL, 그리고 --dry가 아니면 SUPABASE_URL·SUPABASE_SERVICE_ROLE_KEY
+ * 필요 환경변수: SITE_URL, 그리고 --dry가 아니면 SUPABASE_URL·SUPABASE_KEY
+ *   (pipeline/agents/designer.py가 같은 버킷에 쓸 때 쓰는 키와 같다)
  */
 import { chromium } from 'playwright'
 import { mkdir, writeFile } from 'node:fs/promises'
@@ -24,7 +25,7 @@ const VIEWPORTS = [
 
 const SITE_URL = (process.env.SITE_URL ?? '').replace(/\/$/, '')
 const SUPABASE_URL = (process.env.SUPABASE_URL ?? '').replace(/\/$/, '')
-const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? ''
+const SUPABASE_KEY = process.env.SUPABASE_KEY ?? ''
 
 function today() {
   // 파이프라인과 같은 KST 기준
@@ -49,7 +50,9 @@ async function upload(objectPath, body, contentType) {
   const res = await fetch(url, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${SERVICE_KEY}`,
+      // designer.py와 동일하게 apikey·Authorization 둘 다 보낸다
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
       'Content-Type': contentType,
       // 같은 날 재실행 시 덮어쓴다
       'x-upsert': 'true',
@@ -68,7 +71,7 @@ async function main() {
     : today()
   const required = DRY
     ? { SITE_URL }
-    : { SITE_URL, SUPABASE_URL, SERVICE_KEY }
+    : { SITE_URL, SUPABASE_URL, SUPABASE_KEY }
   for (const [k, v] of Object.entries(required)) {
     if (!v) throw new Error(`환경변수 누락: ${k}`)
   }
@@ -124,7 +127,11 @@ async function main() {
         if (!box || box.height < 40) continue
 
         const buf = await node.screenshot({ type: 'png' })
-        const objectPath = `screens/${date}/${vp.name}-${key}.png`
+        // 버킷이 이미지 MIME만 받아 manifest.json을 올릴 수 없다(415).
+        // 대신 파일명에 크기를 실어 목록 API만으로 <img> 치수를 알 수 있게 한다.
+        const w = Math.round(box.width)
+        const h = Math.round(box.height)
+        const objectPath = `screens/${date}/${vp.name}-${key}-${w}x${h}.png`
         const url = await upload(objectPath, buf, 'image/png')
         shots.push({
           key,
@@ -141,13 +148,6 @@ async function main() {
       await page.close()
     }
 
-    // 페이지가 어떤 캡처가 있는지 알아야 하므로 목록을 함께 올린다
-    const manifest = { date, capturedAt: new Date().toISOString(), shots }
-    await upload(
-      `screens/${date}/manifest.json`,
-      JSON.stringify(manifest, null, 2),
-      'application/json'
-    )
     console.log(`\n총 ${shots.length}장 업로드 완료`)
   } finally {
     await browser.close()

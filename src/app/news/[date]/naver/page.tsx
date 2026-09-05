@@ -145,7 +145,7 @@ export default async function NaverExportPage({
             찍어 올린다. 조판한 카드가 아니라 "실제 화면"이 필요할 때 쓴다. */}
         <section className="flex flex-col gap-4">
           <h2 className="ed-section-head ed-section-title">사이트 화면</h2>
-          {screens && screens.shots.length > 0 ? (
+          {screens.length > 0 ? (
             <>
               <p className="ed-lede text-[0.9375rem]">
                 배포된 사이트를 그대로 찍은 이미지입니다. 전체 페이지는 모바일
@@ -154,7 +154,7 @@ export default async function NaverExportPage({
               <div className="flex flex-col gap-4">
                 {(['mobile', 'desktop'] as const).map((vp) => {
                   const shots = sortShots(
-                    screens.shots.filter((s) => s.viewport === vp)
+                    screens.filter((s) => s.viewport === vp)
                   )
                   if (shots.length === 0) return null
                   return (
@@ -171,30 +171,34 @@ export default async function NaverExportPage({
                 })}
               </div>
               <ol className="grid list-none grid-cols-2 gap-x-6 gap-y-8 p-0 sm:grid-cols-3">
-                {sortShots(
-                  screens.shots.filter((s) => s.viewport === 'mobile')
-                ).map((s) => (
-                  <li key={s.key} className="flex flex-col gap-2">
-                    {/* 캡처는 이미 최종 크기라 next/image 최적화 대상이 아니다 */}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={s.url}
-                      alt={`${shotLabel(s.key)} 모바일 화면`}
-                      width={s.width}
-                      height={s.height}
-                      loading="lazy"
-                      className="h-auto w-full border border-[var(--border)]"
-                    />
-                    <a
-                      href={s.url}
-                      download={`${date}_mobile_${s.key}.png`}
-                      className="kicker inline-flex items-center gap-1.5 hover:text-[var(--text)]"
-                    >
-                      <Download size={11} strokeWidth={2} aria-hidden="true" />
-                      {shotLabel(s.key)}
-                    </a>
-                  </li>
-                ))}
+                {sortShots(screens.filter((s) => s.viewport === 'mobile')).map(
+                  (s) => (
+                    <li key={s.key} className="flex flex-col gap-2">
+                      {/* 캡처는 이미 최종 크기라 next/image 최적화 대상이 아니다 */}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={s.url}
+                        alt={`${shotLabel(s.key)} 모바일 화면`}
+                        width={s.width}
+                        height={s.height}
+                        loading="lazy"
+                        className="h-auto w-full border border-[var(--border)]"
+                      />
+                      <a
+                        href={s.url}
+                        download={`${date}_mobile_${s.key}.png`}
+                        className="kicker inline-flex items-center gap-1.5 hover:text-[var(--text)]"
+                      >
+                        <Download
+                          size={11}
+                          strokeWidth={2}
+                          aria-hidden="true"
+                        />
+                        {shotLabel(s.key)}
+                      </a>
+                    </li>
+                  )
+                )}
               </ol>
             </>
           ) : (
