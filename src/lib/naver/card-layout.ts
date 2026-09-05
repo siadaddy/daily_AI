@@ -74,3 +74,42 @@ export function cutAtSentence(text: string, max: number): string {
   const cut = boundary > max * 0.55 ? slice.slice(0, boundary + 1) : slice
   return cut.trimEnd() + '…'
 }
+
+/* ── 가로형(16:9) ────────────────────────────────────────────
+   PC 블로그 본문 폭에 맞는 판형. 사진이 왼쪽 46%, 글이 오른쪽을 쓴다.
+   세로형과 달리 사진 크기가 고정이라, 캡션이 길면 글자만 줄인다. */
+
+export const WIDE_W = 1600
+export const WIDE_H = 900
+/** 사진이 차지하는 좌측 폭 */
+export const WIDE_PHOTO_W = 736
+/** 글 영역의 실제 글자 폭 (전체 - 사진 - 좌우 여백) */
+export const WIDE_TEXT_W = WIDE_W - WIDE_PHOTO_W - 56 * 2
+/** 제자 띠 + 상하 여백 + 액센트 괘선 + 출처 푸터 */
+export const WIDE_CHROME = 72 + 88 + 48 + 60
+
+export interface WideLayout {
+  font: number
+  maxChars: number
+}
+
+/**
+ * 가로형은 사진 폭이 고정이라 글자 크기만으로 맞춘다.
+ * 헤드라인은 우측 폭 기준으로 줄 수를 센다(48px 세리프 ≈ 줄당 15자).
+ */
+export function pickWideLayout(headline: string, caption: string): WideLayout {
+  const headlineLines = Math.max(1, Math.ceil(headline.length / 15))
+  const headlineH = headlineLines * 60
+  const avail = WIDE_H - WIDE_CHROME - headlineH
+
+  for (const font of [30, 29, 28, 27, 26, 25, 24]) {
+    const perLine = Math.floor(WIDE_TEXT_W / (font * AVG_CHAR_RATIO))
+    const lines = Math.ceil(caption.length / perLine)
+    if (lines * font * 1.6 <= avail) return { font, maxChars: caption.length }
+  }
+
+  const font = 24
+  const perLine = Math.floor(WIDE_TEXT_W / (font * AVG_CHAR_RATIO))
+  const maxLines = Math.max(1, Math.floor(avail / (font * 1.6)))
+  return { font, maxChars: maxLines * perLine }
+}

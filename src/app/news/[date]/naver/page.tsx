@@ -145,12 +145,28 @@ export default async function NaverExportPage({
           <section className="flex flex-col gap-4">
             <h2 className="ed-section-head ed-section-title">카드 이미지</h2>
             <p className="ed-lede text-[0.9375rem]">
-              헤드라인과 본문이 박혀 있는 1080×1350 이미지입니다. 네이버는
-              붙여넣기로는 외부 이미지를 가져오지 않으므로, 이미지는 반드시
-              파일로 첨부해야 합니다. 캡처할 필요는 없습니다 — 아래에서 바로
-              공유하거나 내려받으세요.
+              헤드라인과 본문이 박혀 있는 이미지입니다. 네이버는 붙여넣기로는
+              외부 이미지를 가져오지 않으므로, 이미지는 반드시 파일로 첨부해야
+              합니다. 캡처할 필요는 없습니다.
+              <br />
+              <strong>세로형</strong> 1080×1350 — 사진 위·글 아래, 모바일에서
+              읽기 좋습니다. <strong>가로형</strong> 1600×900 — 사진 왼쪽·글
+              오른쪽, PC 화면에 맞습니다. 캡션은 둘 다 잘리지 않습니다.
             </p>
-            <ShareCards date={date} count={cards.length} />
+            <div className="flex flex-col gap-4">
+              <ShareCards
+                date={date}
+                count={cards.length}
+                layout="tall"
+                label={`세로형 ${cards.length}장 공유 · 모바일`}
+              />
+              <ShareCards
+                date={date}
+                count={cards.length}
+                layout="wide"
+                label={`가로형 ${cards.length}장 공유 · PC`}
+              />
+            </div>
             <ol className="grid list-none grid-cols-2 gap-x-6 gap-y-8 p-0 sm:grid-cols-3">
               {cards.map((c, i) => {
                 const src = `/api/naver-card/${date}/${i}`
@@ -164,14 +180,35 @@ export default async function NaverExportPage({
                       sizes="(max-width: 640px) 45vw, 30vw"
                       className="h-auto w-full border border-[var(--border)]"
                     />
-                    <a
-                      href={src}
-                      download={`${date}_card_${String(i + 1).padStart(2, '0')}.png`}
-                      className="kicker inline-flex items-center gap-1.5 hover:text-[var(--text)]"
-                    >
-                      <Download size={11} strokeWidth={2} aria-hidden="true" />
-                      CARD {String(i + 1).padStart(2, '0')}
-                    </a>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                      <span className="kicker">
+                        CARD {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <a
+                        href={src}
+                        download={`${date}_tall_${String(i + 1).padStart(2, '0')}.png`}
+                        className="kicker inline-flex items-center gap-1 hover:text-[var(--text)]"
+                      >
+                        <Download
+                          size={11}
+                          strokeWidth={2}
+                          aria-hidden="true"
+                        />
+                        세로
+                      </a>
+                      <a
+                        href={`${src}?layout=wide`}
+                        download={`${date}_wide_${String(i + 1).padStart(2, '0')}.png`}
+                        className="kicker inline-flex items-center gap-1 hover:text-[var(--text)]"
+                      >
+                        <Download
+                          size={11}
+                          strokeWidth={2}
+                          aria-hidden="true"
+                        />
+                        가로
+                      </a>
+                    </div>
                   </li>
                 )
               })}

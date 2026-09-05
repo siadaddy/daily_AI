@@ -3,15 +3,16 @@ import { fetchCardNews } from '@/components/newsletter/NewsletterTab'
 import { isValidDate } from '@/lib/dates'
 import {
   pickLayout,
+  pickWideLayout,
   cutAtSentence,
   CARD_W,
   CARD_H,
+  WIDE_W,
+  WIDE_H,
+  WIDE_PHOTO_W,
 } from '@/lib/naver/card-layout'
 
 export const revalidate = 300
-
-const W = CARD_W
-const H = CARD_H
 
 /** 사이트의 [사실]/[분석]/[전망] 강조색 (이미지라 리터럴 값만 쓴다) */
 const MARK_COLORS: Record<string, string> = {
@@ -19,6 +20,13 @@ const MARK_COLORS: Record<string, string> = {
   '[분석]': '#7aa9ee',
   '[전망]': '#e8836c',
 }
+
+const INK = '#0b0b0c'
+const PAPER = '#f2efe9'
+const BODY = '#b3aea5'
+const DIM = '#7a766e'
+const ACCENT = '#d2604a'
+const RULE = 'rgba(242,239,233,0.14)'
 
 /**
  * Satori는 woff2를 못 읽어 OTF/TTF가 필요하다. Google Fonts는 UA를 보고
@@ -55,17 +63,22 @@ function captionSegments(caption: string) {
     .map((part, i) => ({
       key: i,
       text: part,
-      color: MARK_COLORS[part] ?? '#b3aea5',
+      color: MARK_COLORS[part] ?? BODY,
       bold: part in MARK_COLORS,
     }))
 }
 
+/**
+ * 카드 이미지. `?layout=wide`면 PC 블로그용 가로형(사진 왼쪽·글 오른쪽),
+ * 기본은 모바일용 세로형(사진 위·글 아래).
+ */
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ date: string; index: string }> }
 ) {
   const { date, index } = await params
   const i = Number(index)
+  const wide = new URL(req.url).searchParams.get('layout') === 'wide'
 
   if (!isValidDate(date) || !Number.isInteger(i) || i < 0) {
     return new Response('Not found', { status: 404 })
@@ -77,10 +90,15 @@ export async function GET(
 
   const [y, m, d] = date.split('-')
   const num = String(i + 1).padStart(2, '0')
-  const layout = pickLayout(card.headline, card.caption)
-  const caption = cutAtSentence(card.caption, layout.maxChars)
-  const segments = captionSegments(caption)
   const source = card.source_name || '원문 보기'
+
+  const tall = pickLayout(card.headline, card.caption)
+  const flat = pickWideLayout(card.headline, card.caption)
+  const caption = cutAtSentence(
+    card.caption,
+    wide ? flat.maxChars : tall.maxChars
+  )
+  const segments = captionSegments(caption)
 
   const headlineText = card.headline + '시아아빠의AI데일리'
   const bodyText = caption + source + `${y}.${m}.${d}CARD${num}·▶ 사실분석전망`
@@ -91,14 +109,184 @@ export async function GET(
     loadGoogleFont('Noto+Sans+KR', 700, bodyText),
   ])
 
+  const fonts = [
+    {
+      name: 'SongMyung',
+      data: serif,
+      weight: 400 as const,
+      style: 'normal' as const,
+    },
+    {
+      name: 'NotoSansKR',
+      data: sans,
+      weight: 400 as const,
+      style: 'normal' as const,
+    },
+    {
+      name: 'NotoSansKR',
+      data: sansBold,
+      weight: 700 as const,
+      style: 'normal' as const,
+    },
+  ]
+
+  const photo = card.image_url ? (
+    // Satori는 next/image를 이해하지 못한다 — ImageResponse 트리 안에서는
+    // 순수 <img>만 렌더된다. 여기 결과물 자체가 이미지라 LCP와도 무관하다.
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={card.image_url}
+      width={wide ? WIDE_PHOTO_W : CARD_W}
+      height={wide ? WIDE_H : tall.photo}
+      style={{ objectFit: 'cover' }}
+      alt=""
+    />
+  ) : null
+
+  const captionBlock = (font: number) => (
+    <div
+      style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        fontSize: `${font}px`,
+        lineHeight: 1.6,
+        color: BODY,
+      }}
+    >
+      {segments.map((s) => (
+        <span
+          key={s.key}
+          style={{
+            color: s.color,
+            fontWeight: s.bold ? 700 : 400,
+            marginRight: s.bold ? '10px' : '0',
+          }}
+        >
+          {s.text}
+        </span>
+      ))}
+    </div>
+  )
+
+  const footer = (fontSize: number, padTop: number) => (
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        marginTop: 'auto',
+        paddingTop: `${padTop}px`,
+        borderTop: `1px solid ${RULE}`,
+        fontSize: `${fontSize}px`,
+        color: DIM,
+      }}
+    >
+      <div style={{ display: 'flex' }}>▶ {source}</div>
+      <div style={{ display: 'flex' }}>시아아빠의 AI 데일리</div>
+    </div>
+  )
+
+  /* ── 가로형: 사진 왼쪽 · 글 오른쪽 (PC 블로그용) ───────────── */
+  if (wide) {
+    return new ImageResponse(
+      <div
+        style={{
+          width: `${WIDE_W}px`,
+          height: `${WIDE_H}px`,
+          display: 'flex',
+          backgroundColor: INK,
+          fontFamily: 'NotoSansKR',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            width: `${WIDE_PHOTO_W}px`,
+            height: `${WIDE_H}px`,
+            overflow: 'hidden',
+            backgroundColor: '#17171a',
+          }}
+        >
+          {photo}
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            flex: 1,
+            padding: '0 56px',
+          }}
+        >
+          {/* 세로형의 반전 제자 띠를, 우측 단 안에서는 괘선 한 줄로 옮겼다 */}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              height: '72px',
+              borderBottom: `1px solid ${RULE}`,
+              fontSize: '26px',
+              letterSpacing: '4px',
+              color: DIM,
+            }}
+          >
+            <div style={{ display: 'flex' }}>
+              {y}.{m}.{d}
+            </div>
+            <div style={{ display: 'flex', color: ACCENT, fontWeight: 700 }}>
+              CARD {num}
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              flex: 1,
+              padding: '44px 0',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                fontFamily: 'SongMyung',
+                fontSize: '48px',
+                lineHeight: 1.25,
+                color: PAPER,
+                letterSpacing: '-1px',
+              }}
+            >
+              {card.headline}
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                width: '100px',
+                height: '3px',
+                backgroundColor: ACCENT,
+                margin: '24px 0',
+              }}
+            />
+
+            {captionBlock(flat.font)}
+            {footer(24, 24)}
+          </div>
+        </div>
+      </div>,
+      { width: WIDE_W, height: WIDE_H, fonts }
+    )
+  }
+
+  /* ── 세로형: 사진 위 · 글 아래 (모바일용) ──────────────────── */
   return new ImageResponse(
     <div
       style={{
-        width: `${W}px`,
-        height: `${H}px`,
+        width: `${CARD_W}px`,
+        height: `${CARD_H}px`,
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: '#0b0b0c',
+        backgroundColor: INK,
         fontFamily: 'NotoSansKR',
       }}
     >
@@ -108,8 +296,8 @@ export async function GET(
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          backgroundColor: '#f2efe9',
-          color: '#0b0b0c',
+          backgroundColor: PAPER,
+          color: INK,
           padding: '0 48px',
           height: '96px',
           fontSize: '30px',
@@ -122,31 +310,18 @@ export async function GET(
         <div style={{ display: 'flex', fontWeight: 700 }}>CARD {num}</div>
       </div>
 
-      {/* 도판 */}
       <div
         style={{
           display: 'flex',
-          width: `${W}px`,
-          height: `${layout.photo}px`,
+          width: `${CARD_W}px`,
+          height: `${tall.photo}px`,
           overflow: 'hidden',
           backgroundColor: '#17171a',
         }}
       >
-        {card.image_url ? (
-          // Satori는 next/image를 이해하지 못한다 — ImageResponse 트리 안에서는
-          // 순수 <img>만 렌더된다. 여기 결과물 자체가 이미지라 LCP와도 무관하다.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={card.image_url}
-            width={W}
-            height={620}
-            style={{ objectFit: 'cover' }}
-            alt=""
-          />
-        ) : null}
+        {photo}
       </div>
 
-      {/* 기사 */}
       <div
         style={{
           display: 'flex',
@@ -161,7 +336,7 @@ export async function GET(
             fontFamily: 'SongMyung',
             fontSize: '58px',
             lineHeight: 1.25,
-            color: '#f2efe9',
+            color: PAPER,
             letterSpacing: '-1px',
           }}
         >
@@ -173,58 +348,15 @@ export async function GET(
             display: 'flex',
             width: '120px',
             height: '3px',
-            backgroundColor: '#d2604a',
+            backgroundColor: ACCENT,
             margin: '32px 0 28px',
           }}
         />
 
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            fontSize: `${layout.font}px`,
-            lineHeight: 1.6,
-            color: '#b3aea5',
-          }}
-        >
-          {segments.map((s) => (
-            <span
-              key={s.key}
-              style={{
-                color: s.color,
-                fontWeight: s.bold ? 700 : 400,
-                marginRight: s.bold ? '10px' : '0',
-              }}
-            >
-              {s.text}
-            </span>
-          ))}
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            marginTop: 'auto',
-            paddingTop: '32px',
-            borderTop: '1px solid rgba(242,239,233,0.14)',
-            fontSize: '26px',
-            color: '#7a766e',
-          }}
-        >
-          <div style={{ display: 'flex' }}>▶ {source}</div>
-          <div style={{ display: 'flex' }}>시아아빠의 AI 데일리</div>
-        </div>
+        {captionBlock(tall.font)}
+        {footer(26, 32)}
       </div>
     </div>,
-    {
-      width: W,
-      height: H,
-      fonts: [
-        { name: 'SongMyung', data: serif, weight: 400, style: 'normal' },
-        { name: 'NotoSansKR', data: sans, weight: 400, style: 'normal' },
-        { name: 'NotoSansKR', data: sansBold, weight: 700, style: 'normal' },
-      ],
-    }
+    { width: CARD_W, height: CARD_H, fonts }
   )
 }

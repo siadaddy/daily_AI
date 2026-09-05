@@ -16,7 +16,18 @@ type Phase = 'idle' | 'loading' | 'ready' | 'shared' | 'unsupported' | 'failed'
  * 이미지를 먼저 받아오는 동안 제스처 컨텍스트가 끊기면 NotAllowedError가 난다.
  * 그래서 받아온 파일을 들고 있다가, 그 경우 "한 번 더" 누르면 즉시 공유한다.
  */
-export function ShareCards({ date, count }: { date: string; count: number }) {
+export function ShareCards({
+  date,
+  count,
+  layout = 'tall',
+  label: labelText,
+}: {
+  date: string
+  count: number
+  /** tall = 세로형(모바일), wide = 가로형(PC) */
+  layout?: 'tall' | 'wide'
+  label?: string
+}) {
   const [phase, setPhase] = useState<Phase>('idle')
   const [progress, setProgress] = useState(0)
   const [files, setFiles] = useState<File[] | null>(null)
@@ -27,13 +38,16 @@ export function ShareCards({ date, count }: { date: string; count: number }) {
   async function fetchCards(): Promise<File[]> {
     const out: File[] = []
     for (let i = 0; i < count; i++) {
-      const res = await fetch(`/api/naver-card/${date}/${i}`)
+      const q = layout === 'wide' ? '?layout=wide' : ''
+      const res = await fetch(`/api/naver-card/${date}/${i}${q}`)
       if (!res.ok) throw new Error(`card ${i} ${res.status}`)
       const blob = await res.blob()
       out.push(
-        new File([blob], `${date}_card_${String(i + 1).padStart(2, '0')}.png`, {
-          type: 'image/png',
-        })
+        new File(
+          [blob],
+          `${date}_${layout}_${String(i + 1).padStart(2, '0')}.png`,
+          { type: 'image/png' }
+        )
       )
       setProgress(i + 1)
     }
@@ -86,7 +100,7 @@ export function ShareCards({ date, count }: { date: string; count: number }) {
         ? '공유했습니다'
         : phase === 'ready'
           ? '한 번 더 눌러 공유'
-          : `카드 이미지 ${count}장 공유`
+          : (labelText ?? `카드 이미지 ${count}장 공유`)
 
   return (
     <div className="flex flex-col gap-2">
