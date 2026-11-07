@@ -50,9 +50,12 @@ class Breaking(unittest.TestCase):
     def test_bmw_recall_is_breaking(self):
         self.assertTrue(is_breaking("BMW 5시리즈 리콜", "", ["BMW"], 3))
 
-    def test_competitor_recall_needs_high_importance(self):
-        self.assertFalse(is_breaking("벤츠 리콜", "", ["벤츠"], 3))
-        self.assertTrue(is_breaking("벤츠 리콜", "", ["벤츠"], 4))
+    def test_competitor_recall_is_never_breaking(self):
+        self.assertFalse(is_breaking("벤츠 리콜", "", ["벤츠"], 5))
+        self.assertFalse(is_breaking("볼보 과징금", "", ["볼보"], 5))
+
+    def test_bmw_recall_needs_importance_3(self):
+        self.assertFalse(is_breaking("BMW 리콜", "", ["BMW"], 2))
 
     def test_group_plant_halt_is_breaking(self):
         self.assertTrue(is_breaking("Mini Oxford Factory Halted: Missing Part Could Idle Plant", "", ["MINI"], 3))

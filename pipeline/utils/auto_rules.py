@@ -104,18 +104,19 @@ OPINION_MARKERS = ("칼럼", "컬럼", "사설", "기고", "오피니언", "opin
 
 
 def is_breaking(title: str, summary: str, brands: list[str], importance: int) -> bool:
-    """속보 룰. LLM importance 는 보조 신호일 뿐, 핵심 조건은 키워드 + 브랜드다.
+    """속보 룰. BMW 그룹 브랜드 + 리콜/규제/중대 사안 + 중요도 3 이상.
 
-    (A) BMW 그룹 브랜드 + 리콜/규제/중대 사안
-    (B) 리콜·규제 + 중요도 4 이상 (타 브랜드 포함 — 경쟁사 리콜도 서비스 기획엔 신호)
+    경쟁사 리콜·규제는 속보가 아니다 — 경쟁사 비교표(auto_competitor_log)로만 쌓는다.
+    (실제 데이터에서 경쟁사까지 포함하면 하루 114건 중 25건이 속보로 잡혀 의미가 없었다)
+    LLM importance 는 보조 신호일 뿐, 핵심 조건은 키워드 + 브랜드다.
     """
     if any(m in (title or "").lower() for m in OPINION_MARKERS):
         return False
+    if not set(brands) & BMW_GROUP:
+        return False
     text = f"{title} {summary}"
     recall_or_reg = _has(text, RECALL_TERMS) or _has(text, REGULATION_TERMS)
-    if set(brands) & BMW_GROUP and (recall_or_reg or _has(text, CRITICAL_TERMS)) and importance >= 3:
-        return True
-    return recall_or_reg and importance >= 4
+    return (recall_or_reg or _has(text, CRITICAL_TERMS)) and importance >= 3
 
 
 def rule_importance(title: str, summary: str, brands: list[str]) -> int:
