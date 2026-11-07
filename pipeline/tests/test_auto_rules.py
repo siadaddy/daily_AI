@@ -32,7 +32,7 @@ class Relevance(unittest.TestCase):
 
     def test_short_terms_use_word_boundary(self):
         # 'ai' 는 'repair'·'again' 안에서 맞으면 안 된다
-        self.assertLessEqual(relevance_score("Ford Taurus owner gets car back again after repair"), 0)
+        self.assertLessEqual(relevance_score("Taurus owner gets car back again after repair"), 0)
         self.assertGreater(relevance_score("Automakers bet on AI agents"), 0)
 
     def test_bmw_group_never_dropped(self):
@@ -40,6 +40,23 @@ class Relevance(unittest.TestCase):
 
     def test_aftermarket_english_kept(self):
         self.assertGreater(relevance_score("Bosch names its Shop of the Year, technician training"), 0)
+
+
+class NewBrands(unittest.TestCase):
+    def test_ev_brands_tagged(self):
+        self.assertEqual(tag_brands("BYD 코리아 서비스센터 확대"), ["BYD"])
+        self.assertIn("리비안", tag_brands("Rivian recalls R1T"))
+        self.assertEqual(tag_brands("XPeng and NIO expand in Europe"), ["샤오펑", "니오"])
+
+    def test_no_false_positives(self):
+        self.assertEqual(tag_brands("아니오 라고 답했다"), [])           # 한글 '니오' 별칭을 쓰지 않는 이유
+        self.assertEqual(tag_brands("Stanford study on batteries"), [])  # ford 단어 경계
+        self.assertEqual(tag_brands("샤오미 신형 스마트폰 출시"), [])       # 휴대폰은 제외
+        self.assertEqual(set(tag_brands("Honda and Toyota")), {"토요타", "혼다"})
+
+    def test_new_brands_are_competitors_not_group(self):
+        from utils.auto_rules import BMW_GROUP
+        self.assertFalse({"BYD", "토요타", "GM"} & BMW_GROUP)
 
 
 class Breaking(unittest.TestCase):

@@ -26,6 +26,25 @@ class Select(unittest.TestCase):
         self.assertEqual(len(aa.select_for_analysis(arts, limit=10)), 2)
 
 
+class SelectFairness(unittest.TestCase):
+    def test_bmw_group_guaranteed_over_higher_scored_competitor_news(self):
+        # 테슬라 기사 30건은 점수가 높고(우선어+브랜드), BMW 기사 3건은 점수가 낮다 → 그래도 BMW 는 전부 들어가야 한다
+        tesla = [art(f"테슬라 서비스센터 수리 {i}", topic_hint="ev_aftersales") for i in range(30)]
+        bmw = [art(f"BMW 신차 공개 행사 {i}") for i in range(3)]
+        out = aa.select_for_analysis(tesla + bmw, limit=10)
+        self.assertEqual(sum(1 for a in out if a["title"].startswith("BMW")), 3)
+
+    def test_one_brand_cannot_monopolize(self):
+        tesla = [art(f"테슬라 서비스센터 수리 {i}", topic_hint="ev_aftersales") for i in range(30)]
+        others = [art(f"벤츠 서비스센터 {i}") for i in range(5)] + [art(f"BYD 서비스센터 {i}") for i in range(5)]
+        out = aa.select_for_analysis(tesla + others, limit=20)
+        self.assertEqual(sum(1 for a in out if a["title"].startswith("테슬라")), aa.PER_BRAND_CAP)
+
+    def test_cap_is_soft_when_slots_remain(self):
+        tesla = [art(f"테슬라 서비스센터 수리 {i}") for i in range(15)]
+        self.assertEqual(len(aa.select_for_analysis(tesla, limit=15)), 15)
+
+
 class Parse(unittest.TestCase):
     def test_code_fence_and_chatter(self):
         self.assertEqual(aa.parse_llm_json('설명입니다\n```json\n{"items": []}\n```'), {"items": []})

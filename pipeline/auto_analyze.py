@@ -45,6 +45,8 @@ TODAY = datetime.now(_KST).strftime("%Y-%m-%d")
 
 MAX_ANALYZE = 120      # 하루에 LLM 으로 보내는 상한 (무료 쿼터 보호). 점수 높은 순으로 채운다.
 BATCH_SIZE = 12
+GROUP_RESERVE = 40     # BMW 그룹 기사에 먼저 보장하는 자리
+PER_BRAND_CAP = 10     # 타 브랜드 하나가 독점하지 못하게 거는 소프트 캡
 MAX_BREAKING_PUSH = 5  # 하루 속보 푸시 상한 — 알림 피로 방지
 MIN_KEEP_IMPORTANCE = 2  # 1 = 무관 판정 → 저장하지 않는다
 
@@ -55,13 +57,44 @@ COMPETITOR_ITEMS = ("service_policy", "price", "campaign", "recall")
 # ───────────────────────── 순수 함수 (테스트 대상) ─────────────────────────
 
 def select_for_analysis(articles: list[dict], limit: int = MAX_ANALYZE) -> list[dict]:
-    """점수 내림차순(동점이면 최신순)으로 상한까지. 0점 이하도 자리가 남으면 채운다(재현율 보호)."""
+    """분석 대상 선별. 상한(limit)이 있으니 무엇을 먼저 채울지가 곧 편집 방침이다.
+
+    1) BMW 그룹 기사를 먼저(최대 GROUP_RESERVE) — 이 팀장이 가장 놓치면 안 되는 영역이라 점수와 무관하게 보장한다.
+    2) 나머지는 점수 내림차순(동점이면 최신순). 단, 브랜드 하나가 자리를 독점하지 않게 브랜드당 PER_BRAND_CAP 까지만.
+    3) 그래도 자리가 남으면 캡에 걸린 기사·0점 기사로 채운다(재현율 보호).
+    """
     scored = []
     for a in articles:
+        text = f"{a.get('title', '')} {a.get('summary', '')}"
+        brands = tag_brands(text)
         s = relevance_score(a.get("title", ""), a.get("summary", ""), a.get("topic_hint"))
-        scored.append((s, a.get("published_at") or "", a))
+        scored.append((s, a.get("published_at") or "", a, brands))
     scored.sort(key=lambda t: (t[0], t[1]), reverse=True)
-    return [a for _, _, a in scored[:limit]]
+
+    picked: list[dict] = []
+    group = [t for t in scored if set(t[3]) & BMW_GROUP][:GROUP_RESERVE]
+    picked.extend(t[2] for t in group)
+    taken = {id(t[2]) for t in group}
+
+    per_brand: dict[str, int] = {}
+    overflow: list[dict] = []
+    for s, _, a, brands in scored:
+        if id(a) in taken or len(picked) >= limit:
+            continue
+        if s <= 0:
+            overflow.append(a)
+            continue
+        key = brands[0] if brands else ""
+        if key and per_brand.get(key, 0) >= PER_BRAND_CAP:
+            overflow.append(a)
+            continue
+        per_brand[key] = per_brand.get(key, 0) + 1
+        picked.append(a)
+    for a in overflow:
+        if len(picked) >= limit:
+            break
+        picked.append(a)
+    return picked[:limit]
 
 
 def build_prompt(batch: list[dict]) -> str:

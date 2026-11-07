@@ -23,6 +23,25 @@ BRANDS: dict[str, tuple[str, ...]] = {
     "제네시스": ("genesis", "제네시스"),
     "현대차": ("hyundai", "현대차", "현대자동차"),
     "기아": ("kia", "기아"),
+    # 전기차 전업·신흥 (한국 진출·유럽 서비스망 확장 동향이 경쟁 구도의 변수)
+    "BYD": ("byd", "비야디"),
+    "리비안": ("rivian", "리비안"),
+    "루시드": ("lucid motors", "lucid air", "lucid gravity", "루시드"),
+    "샤오펑": ("xpeng", "샤오펑"),
+    "니오": ("nio",),  # 한글 '니오'는 '아니오' 등에 걸려 쓰지 않는다
+    "지커": ("zeekr", "지커"),
+    "샤오미": ("xiaomi su7", "xiaomi yu7", "샤오미 su7", "샤오미 yu7", "샤오미 전기차"),  # 휴대폰 기사는 제외
+    "KG모빌리티": ("kg모빌리티", "kg mobility", "kgm", "케이지모빌리티"),
+    # 국내 판매 수입·외산 브랜드
+    "토요타": ("toyota", "토요타", "도요타"),
+    "혼다": ("honda", "혼다"),
+    "포드": ("ford", "포드"),
+    "지프": ("jeep", "지프"),
+    "랜드로버": ("land rover", "landrover", "range rover", "랜드로버", "레인지로버"),
+    "재규어": ("jaguar", "재규어"),
+    "마세라티": ("maserati", "마세라티"),
+    "스텔란티스": ("stellantis", "스텔란티스"),
+    "GM": ("general motors", "제너럴모터스", "한국gm", "쉐보레", "chevrolet", "캐딜락", "cadillac"),
 }
 _EN_ONLY = re.compile(r"^[a-z\- ]+$")
 

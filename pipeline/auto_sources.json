@@ -143,6 +143,51 @@
       "q": "automotive AI agent OR AI diagnostics car service",
       "lang": "en",
       "topic_hint": "ai_auto"
+    },
+    {
+      "q": "BYD 코리아 OR 비야디 한국",
+      "lang": "ko",
+      "topic_hint": "import_market"
+    },
+    {
+      "q": "테슬라 서비스센터 OR 테슬라 AS",
+      "lang": "ko",
+      "topic_hint": "ev_aftersales"
+    },
+    {
+      "q": "전기차 신규등록 OR 전기차 판매 순위",
+      "lang": "ko",
+      "topic_hint": "import_market"
+    },
+    {
+      "q": "중국 전기차 한국 진출 OR 샤오펑 OR 지커",
+      "lang": "ko",
+      "topic_hint": "import_market"
+    },
+    {
+      "q": "전기차 리콜 OR 전기차 배터리 화재",
+      "lang": "ko",
+      "topic_hint": "regulation"
+    },
+    {
+      "q": "Rivian OR Lucid service OR recall",
+      "lang": "en",
+      "topic_hint": "ev_aftersales"
+    },
+    {
+      "q": "BYD OR NIO OR XPeng Europe service network",
+      "lang": "en",
+      "topic_hint": "import_market"
+    },
+    {
+      "q": "EV recall battery",
+      "lang": "en",
+      "topic_hint": "regulation"
+    },
+    {
+      "q": "Tesla service center",
+      "lang": "en",
+      "topic_hint": "ev_aftersales"
     }
   ],
   "naver": [
@@ -201,6 +246,26 @@
     {
       "q": "차량용 AI 비서",
       "topic_hint": "ai_auto"
+    },
+    {
+      "q": "BYD 코리아",
+      "topic_hint": "import_market"
+    },
+    {
+      "q": "테슬라 서비스센터",
+      "topic_hint": "ev_aftersales"
+    },
+    {
+      "q": "전기차 신규등록",
+      "topic_hint": "import_market"
+    },
+    {
+      "q": "중국 전기차 한국",
+      "topic_hint": "import_market"
+    },
+    {
+      "q": "전기차 리콜 배터리",
+      "topic_hint": "regulation"
     }
   ],
   "auto_keywords": [
@@ -248,7 +313,19 @@
     "Volvo",
     "Toyota",
     "Hyundai",
-    "Porsche"
+    "Porsche",
+    "BYD",
+    "비야디",
+    "리비안",
+    "샤오펑",
+    "Rivian",
+    "Lucid",
+    "XPeng",
+    "NIO",
+    "Toyota",
+    "토요타",
+    "포드",
+    "랜드로버"
   ],
   "_removed": {
     "오토타임즈": "사이트 인증서가 자체 서명이라 TLS 검증 실패 — 검증을 끄지 않고 제외(2026-11-07)",
