@@ -39,6 +39,11 @@
             "type": "command",
             "command": "node -e \"const {execSync}=require('child_process');try{execSync('npm run lint --silent',{stdio:'pipe',encoding:'utf8'});console.log('✅ ESLint: 문제 없음')}catch(e){const out=(e.stdout||'')+(e.stderr||'');const lines=out.split('\\n').filter(l=>l.includes('error')||l.includes('warning')).slice(0,15);if(lines.length)console.log('⚠️  ESLint 이슈:\\n'+lines.join('\\n'))}\"",
             "timeout": 30000
+          },
+          {
+            "type": "command",
+            "command": "npm run codemap --silent || true",
+            "timeout": 15000
           }
         ]
       }

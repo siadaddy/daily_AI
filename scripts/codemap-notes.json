@@ -1,0 +1,245 @@
+{
+  "intro": "한국 AI 뉴스 대시보드. 3개 코드베이스: `src/`(Next.js 16 · Vercel), `pipeline/`(Python · GitHub Actions 매일 06:00 KST → Supabase), `ai-crew/`(수동 음악 큐레이터). 규칙·스타일·환경변수는 `CLAUDE.md`, 이 파일은 \"어디에 무엇이 있나\"만 다룬다.",
+  "tasks": [
+    [
+      "뉴스레터 화면·카드",
+      "`components/newsletter/NewsletterTab.tsx`(데이터 fetch 포함) · `FeaturedCard` · `NewsCard` · `BlogArticle`"
+    ],
+    [
+      "홈 탭 라우팅(`?tab=`,`?date=`)",
+      "`app/page.tsx` · `lib/tabs.ts` · `components/layout/TabNav.tsx`"
+    ],
+    [
+      "일자별 영구 링크 `/news/[date]`",
+      "`app/news/[date]/page.tsx` · `lib/content-dates.ts` · `lib/dates.ts`"
+    ],
+    [
+      "주간/월간 리포트 생성",
+      "`lib/reports/generate.ts` · `app/api/reports/generate/route.ts` · `vercel.json` 크론"
+    ],
+    [
+      "리포트 화면·아카이브",
+      "`components/reports/*` · `lib/reports/query.ts` · `app/reports/[period]/[start]/page.tsx`"
+    ],
+    [
+      "분석 대시보드 데이터",
+      "`app/api/analytics/route.ts` · `components/reports/ReportsDashboard.tsx` · `lib/utils/category-stats.ts`"
+    ],
+    [
+      "키워드 추출·아카이브",
+      "`lib/utils/keywords.ts` · `lib/keywords/archive.ts` · `app/keyword/*`"
+    ],
+    [
+      "네이버 블로그 내보내기",
+      "`app/news/[date]/naver/page.tsx` · `lib/naver/*` · `components/naver/*` · `app/api/naver-card/[date]/[index]/route.tsx` · `scripts/capture-site.mjs`"
+    ],
+    [
+      "로그인·댓글·좋아요",
+      "`app/actions/community.ts` · `components/community/AuthModal.tsx` · `components/newsletter/ContentInteraction.tsx` · `lib/utils/validation.ts`"
+    ],
+    [
+      "AI Office 탭",
+      "`components/office/*` (Canvas+RAF, agents/logs Realtime)"
+    ],
+    [
+      "에이전트 소개·일기",
+      "`app/agents/*` · `lib/agents/memory.ts` (`agent_memories`)"
+    ],
+    [
+      "Music Universe",
+      "`components/music/MusicUniverse.tsx` → `public/music/music.html`(iframe) · 곡 생성은 `ai-crew/agents/music_curator.py`"
+    ],
+    [
+      "시장·날씨 위젯",
+      "`components/dashboard/*` · `app/api/{market,crypto,exchange,weather}`"
+    ],
+    [
+      "디자인 토큰·타이포",
+      "`app/globals.css` · `app/layout.tsx`(폰트) · `components/layout/ThemeProvider.tsx`"
+    ],
+    [
+      "SEO·피드",
+      "`app/sitemap.ts` · `robots.ts` · `feed.xml/route.ts` · `llms.txt/route.ts` · `opengraph-image.tsx`"
+    ],
+    ["인증 세션 갱신", "`src/proxy.ts` · `lib/supabase/*`"],
+    [
+      "일일 파이프라인",
+      "`pipeline/collect.py` → `pipeline/main.py` · `.github/workflows/pipeline-daily.yml`"
+    ],
+    [
+      "'삼천리' 제외 필터",
+      "`lib/utils/exclude.ts`(쓰기·읽기 양쪽에 적용) · `pipeline/collect.py`"
+    ]
+  ],
+  "gotchas": [
+    "`news_cards`(수집한 원본 뉴스)와 `card_news`(AI가 만든 카드뉴스)는 **다른 테이블**이다. 역색인(§4)에서 확인.",
+    "Supabase 클라이언트 4종: `supabase/public.ts`(익명·쿠키 없음 → `unstable_cache`·sitemap·feed), `server.ts`(쿠키 · Route Handler/Action), `client.ts`(브라우저 전용), `admin.ts`(service-role · `lib/reports/generate.ts` 전용). `route.ts`/`actions`/`server.ts` 에서 `createBrowserClient` 금지(훅이 막음).",
+    "`NewsletterTab.tsx` 는 컴포넌트이면서 데이터 접근 모듈이다. `fetchCardNews` 등을 `api/naver-card`, `news/[date]/naver` 가 import 하고, 자체 `getSupabase()` 를 쓴다(`createPublicClient` 아님).",
+    "`fetchAllPages` 는 `lib/reports/generate.ts` 에 있지만 `api/analytics`·`keywords/archive` 도 쓰는 공용 페이지네이션이다.",
+    "`pipeline/` 과 `ai-crew/` 는 의도적으로 분기됨 — 같은 파일명(`music_curator.py` 등)이어도 합치지 말 것. pipeline 은 곡 라이브러리를 Supabase `agent_memories` 에, ai-crew 는 `public/music/*.json` 에 쓴다.",
+    "`data-capture` 속성은 `scripts/capture-site.mjs`(Playwright)가 화면 캡처 대상으로 쓴다. 속성을 지우면 야간 capture 잡이 실패한다.",
+    "주간/월간 리포트는 Python이 아니라 웹 크론(`/api/reports/generate`, `Authorization: Bearer $CRON_SECRET`)이 만든다. `/api/weekly-briefing/generate` 는 레거시 별칭."
+  ],
+  "listTypesIn": ["src/lib/types/index.ts"],
+  "dirs": {
+    "src/lib/supabase": "클라이언트 4종 (위 주의사항 참고)",
+    "src/lib/utils": "순수 함수 모음 (대부분 테스트 있음)",
+    "src/lib/naver": "네이버 블로그 내보내기: 카드 레이아웃 계산 · SmartEditor용 HTML 조립 · 캡처 이미지 목록",
+    "src/lib/reports": "주간/월간 리포트 생성(쓰기)과 조회(읽기)",
+    "src/lib/keywords": "키워드 아카이브 조회",
+    "src/lib/agents": "AI 에이전트 장기 기억 조회",
+    "src/lib/hooks": "클라이언트 훅",
+    "src/lib/types": "공용 타입",
+    "src/components/dashboard": "상단 시세 바. 위젯은 `useEffect`+`fetch` 로 `/api/*` 호출(SWR 아님)",
+    "src/components/layout": "사이트 셸 · 헤더 · 탭 · 테마 · 푸터",
+    "src/components/newsletter": "뉴스레터 탭 본문 (서버 컴포넌트 + 상호작용)",
+    "src/components/naver": "네이버 블로그 복사·이미지 공유 UI",
+    "src/components/reports": "리포트 탭 · 차트(Chart.js)",
+    "src/components/office": "AI Office 탭 (Canvas + Realtime)",
+    "src/components/music": "Music Universe iframe 래퍼",
+    "src/components/community": "로그인/가입 모달",
+    "src/components/portfolio": "포트폴리오 탭"
+  },
+  "compactDirs": ["src/components/dashboard"],
+  "files": {
+    "src/proxy.ts": "Next 16 proxy(미들웨어) — Supabase 인증 쿠키 갱신, 정적 자산 제외",
+    "src/store/app.ts": "Zustand `useAppStore` (카테고리 필터 — RawNewsSection만 사용)",
+    "src/lib/site-url.ts": "`getSiteUrl()`",
+    "src/lib/dates.ts": "날짜 검증·링크 헬퍼(`newsHref`, `reportHref`, `keywordHref`는 URL 인코딩)",
+    "src/lib/tabs.ts": "`tabHref`, `parseTab`",
+    "src/lib/content-dates.ts": "콘텐츠가 있는 날짜 목록(`card_news`), 오류 시 `[]`",
+    "src/lib/supabase/client.ts": "브라우저용 `createClient`",
+    "src/lib/supabase/server.ts": "쿠키 기반 서버용 `createClient`",
+    "src/lib/supabase/admin.ts": "service-role `createAdminClient` (RLS 우회)",
+    "src/lib/supabase/public.ts": "익명 `createPublicClient` — 모든 캐시 fetcher·sitemap·feed",
+    "src/lib/types/index.ts": "공용 타입 전부",
+    "src/lib/agents/memory.ts": "에이전트 기억·일기 조회, `getAgentRole`",
+    "src/lib/keywords/archive.ts": "상위 키워드·키워드별 뉴스(PostgREST `.or ilike`; `isSafeKeyword` 가 필터 문자 방어)",
+    "src/lib/reports/generate.ts": "리포트 생성(OpenAI→`weekly_reports` upsert), `fetchAllPages`, `previousRange`",
+    "src/lib/reports/query.ts": "리포트 조회(`sanitizeReport`·`filterTop3` 적용), 캐시 키 `weekly-reports` v2",
+    "src/lib/naver/card-layout.ts": "세로(1080×1350)·가로(1600×900) 카드 레이아웃 계산, `cutAtSentence`",
+    "src/lib/naver/compose.ts": "SmartEditor-safe HTML 조립 `composeNaverPost`",
+    "src/lib/naver/screens.ts": "Storage `card-images/screens/{date}` 의 캡처 이미지 목록 (`{viewport}-{key}-{w}x{h}.png`)",
+    "src/lib/hooks/useInterval.ts": "`useInterval` (ClockWidget)",
+    "src/lib/hooks/useChartColors.ts": "차트 테마 색상 훅(차트 4종이 사용)",
+    "src/lib/utils/caption.ts": "마크다운→HTML, 캡션 하이라이트, 읽기 시간",
+    "src/lib/utils/category-stats.ts": "카테고리 통계·증감률",
+    "src/lib/utils/exclude.ts": "'삼천리' 제외 필터: `isExcludedNews`, `filterTop3`, `sanitizeReport`",
+    "src/lib/utils/keywords.ts": "한국어 키워드 추출 `extractKeywords`",
+    "src/lib/utils/validation.ts": "Server Action 입력 검증(`LIMITS`, `validateText`)",
+    "src/app/layout.tsx": "루트 레이아웃(폰트·ThemeProvider·메타데이터)",
+    "src/app/page.tsx": "홈 — `?tab=`/`?date=` 탭 SPA (서버 컴포넌트)",
+    "src/app/not-found.tsx": "404",
+    "src/app/opengraph-image.tsx": "홈 OG 이미지",
+    "src/app/robots.ts": "robots",
+    "src/app/sitemap.ts": "sitemap (콘텐츠·리포트·키워드·에이전트 URL)",
+    "src/app/globals.css": "디자인 토큰 + Tailwind v4",
+    "src/app/about/page.tsx": "AI 스태프 소개(정적)",
+    "src/app/about/opengraph-image.tsx": "about OG 이미지",
+    "src/app/about/ai-usage/page.tsx": "AI 활용 안내(정적)",
+    "src/app/agents/page.tsx": "에이전트 목록",
+    "src/app/agents/[name]/page.tsx": "에이전트 상세 + 일기",
+    "src/app/keyword/page.tsx": "키워드 인덱스",
+    "src/app/keyword/[keyword]/page.tsx": "키워드별 뉴스 아카이브",
+    "src/app/news/[date]/page.tsx": "일자별 뉴스 영구 링크(NewsletterTab 렌더)",
+    "src/app/news/[date]/naver/page.tsx": "네이버 블로그 내보내기 화면",
+    "src/app/naver/page.tsx": "`/news/{오늘}/naver` 로 리다이렉트(force-dynamic)",
+    "src/app/reports/[period]/[start]/page.tsx": "리포트 영구 링크",
+    "src/app/feed.xml/route.ts": "RSS(`articles`)",
+    "src/app/llms.txt/route.ts": "llms.txt(`articles`)",
+    "src/app/actions/community.ts": "인증(signUp/signIn/signOut) · 게시글/댓글 · 좋아요/인라인 댓글",
+    "src/app/api/weather/route.ts": "날씨(open-meteo)",
+    "src/app/api/exchange/route.ts": "환율",
+    "src/app/api/crypto/route.ts": "BTC/ETH(CoinGecko)",
+    "src/app/api/market/route.ts": "KOSPI·KOSDAQ·NASDAQ·S&P·DXY·금·유가·VIX(Yahoo)",
+    "src/app/api/music-search/route.ts": "음악 검색(YouTube Data API)",
+    "src/app/api/analytics/route.ts": "리포트 탭 집계(`?period=day|week|month`, 이전 기간 비교)",
+    "src/app/api/reports/generate/route.ts": "주간/월간 리포트 생성 크론(`?period=`, `?start=` 백필, CRON_SECRET)",
+    "src/app/api/weekly-briefing/generate/route.ts": "레거시 별칭 — `reports/generate` 재export",
+    "src/app/api/naver-card/[date]/[index]/route.tsx": "카드 이미지 렌더(`next/og`, 세로·가로)",
+    "src/components/layout/SiteShell.tsx": "Header·TabNav·DashboardBar·DateNav·Footer 조립(서버)",
+    "src/components/layout/Header.tsx": "헤더(시계·날씨·UserButton)",
+    "src/components/layout/TabNav.tsx": "5개 탭 네비(`activeTab: null` = 독립 라우트)",
+    "src/components/layout/ThemeProvider.tsx": "커스텀 테마 컨텍스트(next-themes 아님)",
+    "src/components/layout/UserButton.tsx": "인증 상태 + AuthModal",
+    "src/components/layout/Footer.tsx": "푸터",
+    "src/components/layout/PageHeader.tsx": "독립 라우트용 페이지 헤더",
+    "src/components/newsletter/NewsletterTab.tsx": "뉴스레터 탭 본문 + 데이터 fetcher(`fetchCardNews`·`fetchTodayArticle`·`fetchTodayTrend`)",
+    "src/components/newsletter/ContentInteraction.tsx": "좋아요·댓글(SWR+Realtime+Server Action)",
+    "src/components/newsletter/DateNav.tsx": "날짜 이동",
+    "src/components/newsletter/FeaturedCard.tsx": "대표 카드(`data-capture=card-01`)",
+    "src/components/newsletter/NewsCard.tsx": "카드뉴스 카드(`data-capture=card-NN`)",
+    "src/components/newsletter/BlogArticle.tsx": "블로그 글 본문",
+    "src/components/newsletter/RawNewsSection.tsx": "수집 원본 뉴스 목록(zustand 필터)",
+    "src/components/newsletter/AiPicksSection.tsx": "AI 픽",
+    "src/components/newsletter/TalkingPointsSection.tsx": "대화 소재",
+    "src/components/newsletter/FactSummary.tsx": "사실 요약(서버)",
+    "src/components/newsletter/PreparingBanner.tsx": "오늘 콘텐츠 준비중 배너",
+    "src/components/naver/CopyForNaver.tsx": "조립된 HTML 클립보드 복사",
+    "src/components/naver/ShareImages.tsx": "카드 이미지 공유·다운로드",
+    "src/components/reports/ReportsTab.tsx": "리포트 탭(서버, `?view=`/`?report=`)",
+    "src/components/reports/ReportsSubNav.tsx": "weekly/monthly/dashboard 서브탭",
+    "src/components/reports/PeriodReport.tsx": "주간/월간 리포트 본문",
+    "src/components/reports/ReportArchiveList.tsx": "지난 리포트 목록",
+    "src/components/reports/TrendHighlights.tsx": "트렌드 하이라이트",
+    "src/components/reports/ReportsDashboard.tsx": "분석 대시보드(SWR `/api/analytics`)",
+    "src/components/reports/ReportsPeriodSelector.tsx": "기간 선택",
+    "src/components/reports/StatsKpiRow.tsx": "KPI 행(count-up)",
+    "src/components/reports/CategoryChart.tsx": "카테고리 차트",
+    "src/components/reports/KeywordChart.tsx": "키워드 차트(`/keyword/..` 링크)",
+    "src/components/reports/VolumeChart.tsx": "일별 볼륨 차트",
+    "src/components/reports/SourcePieChart.tsx": "출처 파이 차트",
+    "src/components/office/OfficeTab.tsx": "오피스 탭 컨테이너",
+    "src/components/office/OfficeCanvas.tsx": "Canvas + requestAnimationFrame 애니메이션(DOM 변환 금지)",
+    "src/components/office/AgentStatusPanel.tsx": "에이전트 상태(Realtime `agents`)",
+    "src/components/office/ActivityLog.tsx": "활동 로그(Realtime `logs`)",
+    "src/components/music/MusicUniverse.tsx": "`/music/music.html` iframe",
+    "src/components/community/AuthModal.tsx": "로그인/가입 모달",
+    "src/components/portfolio/PortfolioCard.tsx": "`PortfolioSection` + 프로젝트 카드",
+    "pipeline/collect.py": "1단계 뉴스 수집(Naver 8카테고리, '삼천리' 제외) → Groq TOP3·대화소재 → `news_cards`/`news_trends` + `output/` 파일",
+    "pipeline/main.py": "2단계 오케스트레이터: planner→writer→designer→`card_news`/`articles` upsert, ntfy 알림, 90일마다 음악 큐레이션",
+    "pipeline/check_gemini_keys.py": "수동 진단(키·모델 조합 점검) — CI에서 안 씀",
+    "pipeline/agents/planner.py": "박기획 — 카드 5장+블로그 기획, 최근 3일 제목 중복 회피",
+    "pipeline/agents/writer.py": "이작가('시아아빠' 페르소나) — 캡션·본문 + 품질검사/반복 제거",
+    "pipeline/agents/designer.py": "최디자 — 이미지 5장: HF FLUX → OpenAI → PIL 순 폴백, Storage 업로드",
+    "pipeline/agents/music_curator.py": "한뮤직 — 13장르×10곡, 곡 라이브러리를 `agent_memories` 에 저장",
+    "pipeline/agents/supabase_logger.py": "Office 탭용 `agents`/`logs` 기록",
+    "pipeline/utils/gemini_client.py": "LLM 클라이언트: Gemini 2.5 우선(키 2개) → Groq 폴백(키 4개)",
+    "pipeline/utils/agent_memory.py": "에이전트 장기 기억·페르소나·일기 (로컬 JSON ↔ `agent_memories`)",
+    "pipeline/utils/quality_tracker.py": "writer 품질 이슈 누적(`quality_log.json`, gitignore)",
+    "ai-crew/agents/music_curator.py": "pipeline 판과 달리 `public/music/music.json`·`music_YYYY-MM-DD.json` 파일로 저장",
+    "ai-crew/utils/agent_memory.py": "pipeline 판 + `get_summary`",
+    "ai-crew/utils/gemini_client.py": "pipeline 판 + `ask_groq_first`",
+    "scripts/capture-site.mjs": "Playwright로 배포 사이트의 `[data-capture]` 를 390px/1280px 캡처 → Storage `card-images/screens/{date}` (`--dry` 지원)",
+    ".github/workflows/pipeline-daily.yml": "06:00 KST. collect → generate → capture 3잡 순차, 실패 시 ntfy",
+    ".github/workflows/keepalive.yml": "60일 비활성으로 스케줄이 꺼지지 않게 pipeline-daily 를 enable"
+  },
+  "pipelineFlow": [
+    "호출 순서: `collect.py main` (수집봇 online → Naver 수집 → TOP3 → 대화소재 → `news_cards`/`news_trends`) → artifact 전달 → `main.py main` (output 로드 → `planner.run` → `writer.run` → `designer.run`(실패 시 빈 이미지로 계속) → `card_news`/`articles` upsert → ntfy → `_should_run_music()`(90일↑) 이면 `music_curator.run/save`, 아니면 `reflect()`). 각 단계 `retry` 3회, 실패 시 exit 1 + 긴급 ntfy.",
+    "리포트(주간/월간)는 Python에서 제거됨 — 웹 크론이 담당."
+  ],
+  "aiCrewNote": "`main.py` 없음. 에이전트를 직접 import/실행한다. pipeline 과 합치지 말 것.",
+  "tables": {
+    "news_cards": "수집한 원본 뉴스(일일 크롤)",
+    "card_news": "AI 생성 카드뉴스(하루 5장)",
+    "articles": "AI 생성 블로그 글",
+    "news_trends": "일일 TOP3 트렌드",
+    "weekly_reports": "주간·월간 리포트 JSON (`period_type`, unique `period_type,week_start`) — service-role 만 쓰기",
+    "agents": "Office 탭 에이전트 상태(Realtime)",
+    "logs": "Office 탭 활동 로그(Realtime)",
+    "agent_memories": "에이전트 장기 기억·일기·곡 라이브러리",
+    "community_posts": "커뮤니티 게시글",
+    "community_comments": "커뮤니티 댓글",
+    "content_likes": "콘텐츠 좋아요",
+    "content_comments": "콘텐츠 인라인 댓글"
+  },
+  "infra": [
+    "Storage 버킷 `card-images`: `designer.py` 가 카드 이미지, `capture-site.mjs` 가 `screens/{date}/` 캡처를 업로드 · `lib/naver/screens.ts` 가 목록 조회.",
+    "필요 env: 웹앱 `NEXT_PUBLIC_SUPABASE_URL/ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `OPENAI_API_KEY`, `CRON_SECRET`, `YOUTUBE_API_KEY` (`.env.example`) · 파이프라인 키 목록은 §6 `env:`."
+  ],
+  "excluded": [
+    "`docs/` Obsidian 볼트(수동 작성·갱신 중단, 2026-09-04) — 배경 설명용. 최신 구조는 이 파일을 신뢰.",
+    "`public/works/*`(정적 포트폴리오 데모), `public/music/*`(Three.js `music.html` + 곡 JSON), `.claude/skills/*`(디자인 스킬), `test.html`(무관한 보고서), `package-lock.json`.",
+    "`node_modules`, `.next`, `__pycache__`, `pipeline/output`(생성물)."
+  ]
+}
