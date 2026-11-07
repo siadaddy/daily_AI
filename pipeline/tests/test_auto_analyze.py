@@ -30,6 +30,14 @@ class Parse(unittest.TestCase):
     def test_code_fence_and_chatter(self):
         self.assertEqual(aa.parse_llm_json('설명입니다\n```json\n{"items": []}\n```'), {"items": []})
 
+    def test_bare_array(self):
+        self.assertEqual(aa.parse_llm_json('[{"i": 0, "topic": "sdv"}]'), {"items": [{"i": 0, "topic": "sdv"}]})
+
+    def test_truncated_keeps_complete_items(self):
+        cut = '{"items":[{"i":0,"topic":"sdv","summary_ko":"가"},{"i":1,"topic":"ev_aftersales","summary_ko":"나"},{"i":2,"topic":"re'
+        got = aa.parse_llm_json(cut)
+        self.assertEqual([r["i"] for r in got["items"]], [0, 1])
+
     def test_garbage(self):
         self.assertIsNone(aa.parse_llm_json("죄송합니다"))
         self.assertIsNone(aa.parse_llm_json('{"items": [oops'))

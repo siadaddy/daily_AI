@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import os
 import sys
 import time
@@ -89,17 +90,49 @@ def build_prompt(batch: list[dict]) -> str:
 
 
 def parse_llm_json(text: str) -> Optional[dict]:
-    """코드펜스·앞뒤 잡설이 붙어도 첫 '{' ~ 마지막 '}' 를 JSON 으로 읽는다. 실패하면 None."""
+    """LLM 응답에서 {"items": [...]} 를 복구한다. 못 읽으면 None.
+
+    - 정상: {"items": [...]}  /  배열만 온 경우: [...]  /  코드펜스·잡설이 붙은 경우
+    - 출력이 잘렸거나 일부가 깨졌어도, 끝까지 읽힌 항목({"i": 정수 …})은 건져 쓴다.
+      (이 배치를 통째로 버리면 번역·시사점·경쟁사 기록이 전부 사라지기 때문)
+    """
     if not text:
         return None
-    start, end = text.find("{"), text.rfind("}")
-    if start < 0 or end <= start:
-        return None
+    body = re.sub(r"```(?:json)?", "", text).strip()
     try:
-        data = json.loads(text[start:end + 1])
+        data = json.loads(body)
+        if isinstance(data, dict) and isinstance(data.get("items"), list):
+            return data
+        if isinstance(data, list):
+            return {"items": data}
     except json.JSONDecodeError:
-        return None
-    return data if isinstance(data, dict) else None
+        pass
+    lo, hi = body.find("{"), body.rfind("}")
+    if 0 <= lo < hi:  # 앞뒤에 잡설이 붙은 정상 객체
+        try:
+            data = json.loads(body[lo:hi + 1])
+            if isinstance(data, dict) and isinstance(data.get("items"), list):
+                return data
+        except json.JSONDecodeError:
+            pass
+    # 부분 복구: '{' 마다 객체 하나를 읽어 보고 "i" 가 있는 것만 모은다
+    decoder = json.JSONDecoder()
+    items, pos = [], 0
+    while True:
+        pos = body.find("{", pos)
+        if pos < 0:
+            break
+        try:
+            obj, used = decoder.raw_decode(body[pos:])
+        except json.JSONDecodeError:
+            pos += 1
+            continue
+        if isinstance(obj, dict) and isinstance(obj.get("i"), int):
+            items.append(obj)
+            pos += used
+        else:
+            pos += 1
+    return {"items": items} if items else None
 
 
 def _clamp_int(value, lo: int, hi: int, default: int) -> int:
@@ -182,7 +215,7 @@ def analyze_batch(batch: list[dict], use_llm: bool) -> list[dict]:
     if use_llm:
         try:
             from utils.gemini_client import ask_ai
-            text = ask_ai(build_prompt(batch), temperature=0.2, max_tokens=4096, json_mode=True)
+            text = ask_ai(build_prompt(batch), temperature=0.2, max_tokens=8192, json_mode=True)
             data = parse_llm_json(text)
             if data and isinstance(data.get("items"), list):
                 by_idx = {}
@@ -190,7 +223,8 @@ def analyze_batch(batch: list[dict], use_llm: bool) -> list[dict]:
                     if isinstance(raw, dict) and isinstance(raw.get("i"), int) and 0 <= raw["i"] < len(batch):
                         by_idx[raw["i"]] = raw
                 return [normalize_item(by_idx[i], a) if i in by_idx else fallback_item(a) for i, a in enumerate(batch)]
-            print("    ⚠️  LLM 응답 파싱 실패 — 이 배치는 규칙 기반으로 저장")
+            head, tail = (text or "")[:150].replace("\n", " "), (text or "")[-150:].replace("\n", " ")
+            print(f"    ⚠️  LLM 응답 파싱 실패({len(text or '')}자) — 이 배치는 규칙 기반으로 저장\n       앞: {head}\n       뒤: {tail}")
         except Exception as e:  # noqa: BLE001
             print(f"    ⚠️  LLM 호출 실패 — 이 배치는 규칙 기반으로 저장: {e}")
     return [fallback_item(a) for a in batch]
