@@ -27,6 +27,7 @@
 | SEO·피드 | `app/sitemap.ts` · `robots.ts` · `feed.xml/route.ts` · `llms.txt/route.ts` · `opengraph-image.tsx` |
 | 인증 세션 갱신 | `src/proxy.ts` · `lib/supabase/*` |
 | 일일 파이프라인 | `pipeline/collect.py` → `pipeline/main.py` · `.github/workflows/pipeline-daily.yml` |
+| 자동차 인사이트(`?tab=auto`) | `components/auto/AutoTab.tsx` · `lib/auto/*` · 수집·분석 `pipeline/auto_collect.py` → `pipeline/auto_analyze.py` (소스는 `pipeline/auto_sources.json`) · `.github/workflows/auto-daily.yml` · DDL `pipeline/sql/auto_insight.sql` · 보고서 `lib/auto/report.ts` |
 | '삼천리' 제외 필터 | `lib/utils/exclude.ts`(쓰기·읽기 양쪽에 적용) · `pipeline/collect.py` |
 
 ### 주의사항 (코드만 봐서는 놓치기 쉬운 것)
@@ -38,6 +39,7 @@
 - `pipeline/` 과 `ai-crew/` 는 의도적으로 분기됨 — 같은 파일명(`music_curator.py` 등)이어도 합치지 말 것. pipeline 은 곡 라이브러리를 Supabase `agent_memories` 에, ai-crew 는 `public/music/*.json` 에 쓴다.
 - `data-capture` 속성은 `scripts/capture-site.mjs`(Playwright)가 화면 캡처 대상으로 쓴다. 속성을 지우면 야간 capture 잡이 실패한다.
 - 주간/월간 리포트는 Python이 아니라 웹 크론(`/api/reports/generate`, `Authorization: Bearer $CRON_SECRET`)이 만든다. `/api/weekly-briefing/generate` 는 레거시 별칭.
+- 자동차 인사이트는 `auto_*` 테이블을 쓰며 `news_cards`/`weekly_reports` 와 완전히 분리돼 있다(AI 뉴스 통계·리포트가 오염되지 않게). 테이블은 `pipeline/sql/auto_insight.sql` 을 Supabase 에서 직접 실행해야 생기고, 없으면 화면은 빈 상태로 떨어진다.
 
 ## 1. 라우트 (`src/app`)
 
@@ -51,11 +53,12 @@
 - `/naver` ≈20 — `/news/{오늘}/naver` 로 리다이렉트(force-dynamic)
 - `/news/[date]/naver` ≈300 — 네이버 블로그 내보내기 화면 | rev=300 · fetch /api/naver-card · → components/naver/CopyForNaver, components/naver/ShareImages, components/newsletter/NewsletterTab, lib/naver/compose, lib/naver/screens
 - `/news/[date]` ≈100 — 일자별 뉴스 영구 링크(NewsletterTab 렌더) | rev=300 · SSG · → components/newsletter/NewsletterTab, lib/content-dates, lib/utils/caption
-- `/` ≈150 — 홈 — `?tab=`/`?date=` 탭 SPA (서버 컴포넌트) | → components/music/MusicUniverse, components/newsletter/NewsletterTab, components/office/OfficeTab, components/portfolio/PortfolioCard, components/reports/ReportsTab, lib/content-dates, lib/tabs, lib/utils/caption
+- `/` ≈150 — 홈 — `?tab=`/`?date=` 탭 SPA (서버 컴포넌트) | → components/auto/AutoTab, components/music/MusicUniverse, components/newsletter/NewsletterTab, components/office/OfficeTab, components/portfolio/PortfolioCard, components/reports/ReportsTab, lib/content-dates, lib/tabs, lib/utils/caption
 - `/reports/[period]/[start]` ≈150 — 리포트 영구 링크 | rev=3600 · SSG · → components/reports/PeriodReport, components/reports/ReportArchiveList, components/reports/ReportsSubNav, components/reports/TrendHighlights, lib/reports/query
 
 ### Route Handlers (외부 API는 서버에서 프록시)
 - `/api/analytics` ≈200 — 리포트 탭 집계(`?period=day|week|month`, 이전 기간 비교) | exports GET · db r:articles,news_cards,news_trends · → lib/reports/generate, lib/supabase/server, lib/utils/category-stats, lib/utils/exclude, lib/utils/keywords
+- `/api/auto-reports/generate` ≈40 — [자동차 인사이트] 보고서 크론/백필 엔드포인트 (Bearer CRON_SECRET) | exports GET, POST · env CRON_SECRET · → lib/auto/report
 - `/api/crypto` ≈30 — BTC/ETH(CoinGecko) | rev=300 · exports GET · ext api.coingecko.com
 - `/api/exchange` ≈20 — 환율 | rev=3600 · exports GET · ext open.er-api.com
 - `/api/market` ≈60 — KOSPI·KOSDAQ·NASDAQ·S&P·DXY·금·유가·VIX(Yahoo) | rev=300 · exports GET · ext query2.finance.yahoo.com
@@ -89,6 +92,12 @@
 **lib/agents/** — AI 에이전트 장기 기억 조회
 - `memory.ts` ≈90 — 에이전트 기억·일기 조회, `getAgentRole` | exports getAgentRole, fetchAgentMemories, fetchAgentMemory · db r:agent_memories · cache 3600s · → lib/supabase/public · ← app/agents/[name]/page, app/agents/page, app/sitemap
 
+**lib/auto/**
+- `query.ts` ≈150 — [자동차 인사이트] auto_* 조회(익명 클라이언트+unstable_cache). 테이블이 없으면 빈 값 — 화면은 빈 상태로 떨어진다 | exports fetchAutoDates, fetchAutoArticles, fetchAutoArticlesInRange, fetchCompetitorLog, fetchAutoReports · db r:auto_articles,auto_competitor_log,auto_reports · cache 300/3600s · → lib/auto/types, lib/supabase/public · ← components/auto/AutoBriefing, components/auto/AutoCompetitors, components/auto/AutoReports +1
+- `report.ts` ≈300 — [자동차 인사이트] 주간·월간 보고서 생성 — 건수·근거 기사는 코드, 서술만 LLM(gpt-4o-mini). auto_reports upsert(admin) | exports resolveAutoRange, aggregateStats, pickSources, buildReportPrompt, extractJsonObject, normalizeReport, generateAutoReport · db w:auto_reports · ADMIN-client · env OPENAI_API_KEY · → lib/auto/query, lib/auto/topics, lib/auto/types, lib/supabase/admin · ← app/api/auto-reports/generate/route
+- `topics.ts` ≈150 — [자동차 인사이트] 주제 라벨·표시 순서, 오늘의 핵심 선정·주제별 묶음·경쟁사 비교표·브랜드 칩(순수 함수) | exports TOPIC_ORDER, TOPIC_LABEL, ITEM_ORDER, ITEM_LABEL, isAutoTopic, pickLead, groupByTopic, buildCompetitorMatrix, +2 · → lib/auto/types · ← components/auto/AutoBriefing, components/auto/AutoCompetitors, components/auto/AutoReports +1
+- `types.ts` ≈70 — [자동차 인사이트] auto_articles·auto_competitor_log·auto_reports 행 타입, 보고서 본문 JSON 모양 | ← components/auto/AutoArticleItem, components/auto/AutoReports, lib/auto/query +2
+
 **lib/hooks/** — 클라이언트 훅
 - `useChartColors.ts` ≈60 — 차트 테마 색상 훅(차트 4종이 사용) | client · exports withAlpha, useChartColors · ← components/reports/CategoryChart, components/reports/KeywordChart, components/reports/SourcePieChart +1
 - `useInterval.ts` ≈20 — `useInterval` (ClockWidget) | ← components/dashboard/ClockWidget
@@ -106,9 +115,9 @@
 - `query.ts` ≈70 — 리포트 조회(`sanitizeReport`·`filterTop3` 적용), 캐시 키 `weekly-reports` v2 | exports fetchReports, fetchAllReportKeys, fetchTrendsInRange · db r:news_trends,weekly_reports · cache 3600s · → lib/supabase/public, lib/utils/exclude · ← app/llms.txt/route, app/reports/[period]/[start]/page, app/sitemap +1
 
 **lib/supabase/** — 클라이언트 4종 (위 주의사항 참고)
-- `admin.ts` ≈20 — service-role `createAdminClient` (RLS 우회) | exports createAdminClient · ADMIN-client · env SUPABASE_SERVICE_ROLE_KEY · ← lib/reports/generate
+- `admin.ts` ≈20 — service-role `createAdminClient` (RLS 우회) | exports createAdminClient · ADMIN-client · env SUPABASE_SERVICE_ROLE_KEY · ← lib/auto/report, lib/reports/generate
 - `client.ts` ≈10 — 브라우저용 `createClient` | exports createClient · ← components/layout/UserButton, components/office/ActivityLog, components/office/AgentStatusPanel
-- `public.ts` ≈10 — 익명 `createPublicClient` — 모든 캐시 fetcher·sitemap·feed | exports createPublicClient · ← app/feed.xml/route, app/llms.txt/route, lib/agents/memory +3
+- `public.ts` ≈10 — 익명 `createPublicClient` — 모든 캐시 fetcher·sitemap·feed | exports createPublicClient · ← app/feed.xml/route, app/llms.txt/route, lib/agents/memory +4
 - `server.ts` ≈30 — 쿠키 기반 서버용 `createClient` | exports createClient · ← app/actions/community, app/api/analytics/route
 
 **lib/types/** — 공용 타입
@@ -129,6 +138,15 @@
 - `app.ts` ≈20 — Zustand `useAppStore` (카테고리 필터 — RawNewsSection만 사용) | exports useAppStore · ← components/newsletter/RawNewsSection
 
 ## 3. `src/components`
+
+**auto/**
+- `AutoArticleItem.tsx` ≈80 — [자동차 인사이트] 기사 1건(속보·중요도·요약·AI 시사점) | → lib/auto/types
+- `AutoBriefing.tsx` ≈200 — [자동차 인사이트] 일일 브리핑 — 날짜·주제·브랜드 필터(서버 처리, URL이 상태) | → lib/auto/query, lib/auto/topics
+- `AutoCompetitors.tsx` ≈100 — [자동차 인사이트] 경쟁사 서비스 동향 비교표(브랜드×정책/가격/캠페인/리콜) | → lib/auto/query, lib/auto/topics
+- `AutoReports.tsx` ≈150 — [자동차 인사이트] 주간·월간 보고서 목록·본문 | → lib/auto/query, lib/auto/topics, lib/auto/types
+- `AutoSubNav.tsx` ≈60 — [자동차 인사이트] 하위 내비 밑줄 탭 | client
+- `AutoTab.tsx` ≈40 — [자동차 인사이트] `?tab=auto` 진입점 — view=briefing|competitors|reports | rev=300
+- `href.ts` ≈20 — [자동차 인사이트] `?tab=auto` URL 생성 헬퍼 | exports autoHref
 
 **community/** — 로그인/가입 모달
 - `AuthModal.tsx` ≈200 — 로그인/가입 모달 | client
@@ -195,6 +213,9 @@
 | `agent_memories` | ai-crew/utils/agent_memory.py, lib/agents/memory, pipeline/agents/music_curator.py, pipeline/main.py, pipeline/utils/agent_memory.py | ai-crew/utils/agent_memory.py, pipeline/agents/music_curator.py, pipeline/utils/agent_memory.py | 에이전트 장기 기억·일기·곡 라이브러리 |
 | `agents` | components/office/AgentStatusPanel | pipeline/agents/supabase_logger.py | Office 탭 에이전트 상태(Realtime) |
 | `articles` | app/api/analytics/route, app/feed.xml/route, app/llms.txt/route, components/newsletter/NewsletterTab, lib/keywords/archive | pipeline/main.py | AI 생성 블로그 글 |
+| `auto_articles` | lib/auto/query, pipeline/auto_analyze.py | pipeline/auto_analyze.py |  |
+| `auto_competitor_log` | lib/auto/query | pipeline/auto_analyze.py |  |
+| `auto_reports` | lib/auto/query | lib/auto/report |  |
 | `card_news` | components/dashboard/NewsTicker, components/newsletter/NewsletterTab, lib/content-dates, pipeline/agents/planner.py | pipeline/main.py | AI 생성 카드뉴스(하루 5장) |
 | `community_comments` | — | app/actions/community | 커뮤니티 댓글 |
 | `community_posts` | — | app/actions/community | 커뮤니티 게시글 |
@@ -209,8 +230,8 @@ _Python 쪽 REST 호출의 읽기/쓰기는 `requests.<method>` 로 추정한 �
 
 ## 5. 데이터 가져오기 방식 한눈에
 
-- **unstable_cache**: components/newsletter/NewsletterTab(300s), lib/agents/memory(3600s), lib/content-dates(3600s), lib/keywords/archive(3600s), lib/naver/screens(300s), lib/reports/query(3600s)
-- **라우트 revalidate**: /agents/[name](3600), /agents(3600), /api/crypto(300), /api/exchange(3600), /api/market(300), /api/music-search(86400), /api/naver-card/[date]/[index](300), /api/weather(1800), /feed.xml(3600), /keyword/[keyword](3600), /keyword(3600), /llms.txt(3600), /news/[date]/naver(300), /news/[date](300), /reports/[period]/[start](3600), app/sitemap(3600), components/reports/ReportsTab(3600)
+- **unstable_cache**: components/newsletter/NewsletterTab(300s), lib/agents/memory(3600s), lib/auto/query(300/3600s), lib/content-dates(3600s), lib/keywords/archive(3600s), lib/naver/screens(300s), lib/reports/query(3600s)
+- **라우트 revalidate**: /agents/[name](3600), /agents(3600), /api/crypto(300), /api/exchange(3600), /api/market(300), /api/music-search(86400), /api/naver-card/[date]/[index](300), /api/weather(1800), /feed.xml(3600), /keyword/[keyword](3600), /keyword(3600), /llms.txt(3600), /news/[date]/naver(300), /news/[date](300), /reports/[period]/[start](3600), app/sitemap(3600), components/auto/AutoTab(300), components/reports/ReportsTab(3600)
 - **SWR**: components/newsletter/ContentInteraction, components/reports/ReportsDashboard
 - **Realtime(postgres_changes)**: components/newsletter/ContentInteraction(content_comments), components/office/ActivityLog(logs), components/office/AgentStatusPanel(agents)
 - 대시보드 위젯은 SWR이 아니라 `useEffect`+`fetch` 로 `/api/*` 를 호출한다.
@@ -225,11 +246,17 @@ _Python 쪽 REST 호출의 읽기/쓰기는 `requests.<method>` 로 추정한 �
 - `agents/planner.py` ≈300 — 박기획 — 카드 5장+블로그 기획, 최근 3일 제목 중복 회피 | defs run (+2 private) · db r:card_news · → utils.agent_memory, utils.gemini_client
 - `agents/supabase_logger.py` ≈90 — Office 탭용 `agents`/`logs` 기록 | defs update_agent_status, log_action (+1 private) · db w:agents,logs
 - `agents/writer.py` ≈600 — 이작가('시아아빠' 페르소나) — 캡션·본문 + 품질검사/반복 제거 | defs quality_check, run (+15 private) · → utils.agent_memory, utils.gemini_client, utils.quality_tracker
+- `auto_analyze.py` ≈300 — [자동차 인사이트] 2단계 — 사전 필터→LLM 배치 분류·요약·시사점→속보 룰→`auto_articles` 저장→속보 ntfy. LLM 실패 시 규칙 기반 저장 | defs select_for_analysis, build_prompt, parse_llm_json, normalize_item, fallback_item, to_row, analyze_batch, save_rows, notify, main (+1 private) · db r:auto_articles w:auto_articles,auto_competitor_log · ext ntfy.sh · → utils.auto_rules, utils.gemini_client
+- `auto_collect.py` ≈250 — [자동차 인사이트] 1단계 수집 — 전문지·해외 RSS + Google News RSS + Naver 를 모아 중복 제거, `output/auto_*.json` 저장(`--dry-run` 지원). collect.py(AI 뉴스)와 독립 | defs collect_rss, collect_google_news, collect_naver, collect_all, main (+3 private) · ext news.google.com,openapi.naver.com · → utils.news_common
 - `check_gemini_keys.py` ≈60 — 수동 진단(키·모델 조합 점검) — CI에서 안 씀 | ext generativelanguage.googleapis.com
 - `collect.py` ≈450 — 1단계 뉴스 수집(Naver 8카테고리, '삼천리' 제외) → Groq TOP3·대화소재 → `news_cards`/`news_trends` + `output/` 파일 | defs ask_ai, search_naver_news, clean_html, extract_source, fetch_all, build_ai_summary, generate_talking_points, insert_to_supabase, insert_trends_to_supabase, save_output, main (+2 private) · db w:news_cards,news_trends · ext api.groq.com,openapi.naver.com · → agents.supabase_logger
 - `main.py` ≈250 — 2단계 오케스트레이터: planner→writer→designer→`card_news`/`articles` upsert, ntfy 알림, 90일마다 음악 큐레이션 | defs notify, retry, main (+3 private) · db r:agent_memories w:articles,card_news · ext ntfy.sh · → agents.designer, agents.music_curator, agents.planner, agents.supabase_logger, agents.writer
+- `tests/test_auto_analyze.py` ≈90 — [자동차 인사이트] 분석 단계 순수 함수(선별·LLM JSON 파싱·정규화·fallback) 단위 테스트 | defs art, Select, Parse, Normalize, Row · ext e.com,x.com
+- `tests/test_auto_rules.py` ≈90 — [자동차 인사이트] 브랜드 태깅·사전 필터·속보 룰·중복 제거 단위 테스트 (`python -m unittest discover -s pipeline/tests`, auto-daily 워크플로우가 먼저 실행) | defs TagBrands, Relevance, Breaking, Dedupe · ext a.com,b.com,news.google.com · → utils.auto_rules, utils.news_common
 - `utils/agent_memory.py` ≈350 — 에이전트 장기 기억·페르소나·일기 (로컬 JSON ↔ `agent_memories`) | defs remember, recall, get_hints, get_persona, get_diary, get_growth_score, add_diary, update_persona, should_update_persona (+9 private) · db r:agent_memories w:agent_memories
+- `utils/auto_rules.py` ≈150 — [자동차 인사이트] LLM 없는 결정적 규칙 — 브랜드 태깅·노이즈 사전 필터(relevance_score)·속보 룰(is_breaking) | defs tag_brands, relevance_score, is_breaking, rule_importance (+2 private)
 - `utils/gemini_client.py` ≈250 — LLM 클라이언트: Gemini 2.5 우선(키 2개) → Groq 폴백(키 4개) | defs reset_rate_limit_cache, ask_gemini, ask_ai, ask_gemini25_first (+3 private) · ext api.groq.com,generativelanguage.googleapis.com
+- `utils/news_common.py` ≈100 — [자동차 인사이트] 링크 정규화·제목 키 중복 제거·HTML 정리 등 순수 함수 (collect.py 와 의도적으로 중복) | defs clean_html, extract_source, normalize_url, title_key, strip_publisher_suffix, contains_any, is_excluded, dedupe, snippet
 - `utils/quality_tracker.py` ≈100 — writer 품질 이슈 누적(`quality_log.json`, gitignore) | defs load_log, record_run, get_adaptive_hints (+2 private)
 
 env: GEMINI_API_KEY, GEMINI_API_KEY_2, GROQ_API_KEY, GROQ_API_KEY_2, GROQ_API_KEY_3, GROQ_API_KEY_4, HF_TOKEN, HF_TOKEN_2, NAVER_CLIENT_ID, NAVER_CLIENT_SECRET, NOTION_TOKEN, NTFY_TOPIC, OPENAI_API_KEY, SUPABASE_KEY, SUPABASE_URL
@@ -246,6 +273,7 @@ env: GEMINI_API_KEY, GEMINI_API_KEY_2, GROQ_API_KEY, GROQ_API_KEY_2, GROQ_API_KE
 
 ## 8. 워크플로우 · 크론 · 스크립트
 
+- `.github/workflows/auto-daily.yml` — 🚗 자동차 인사이트 (수집 + 분석) | cron 30 20 * * * | 30 8 * * * · manual | jobs auto-insight | `python -m unittest discover -s pipeline/tests -v`, `python pipeline/auto_collect.py`, `python pipeline/auto_analyze.py --dry-run`, `python pipeline/auto_analyze.py`
 - `.github/workflows/ci.yml` — ✅ CI (lint + test + build) | push · pull_request | jobs ci | `npm ci`, `npm run lint`, `npm test`, `npm run build`
 - `.github/workflows/keepalive.yml` — 💓 스케줄 유지 (keepalive) | cron 0 0 1,15 * * · manual | jobs keepalive
   - 60일 비활성으로 스케줄이 꺼지지 않게 pipeline-daily 를 enable
@@ -253,6 +281,8 @@ env: GEMINI_API_KEY, GEMINI_API_KEY_2, GROQ_API_KEY, GROQ_API_KEY_2, GROQ_API_KE
   - 06:00 KST. collect → generate → capture 3잡 순차, 실패 시 ntfy
 - vercel cron `/api/reports/generate?period=weekly` @ `0 1 * * 1` (UTC)
 - vercel cron `/api/reports/generate?period=monthly` @ `30 1 1 * *` (UTC)
+- vercel cron `/api/auto-reports/generate?period=weekly` @ `10 1 * * 1` (UTC)
+- vercel cron `/api/auto-reports/generate?period=monthly` @ `40 1 1 * *` (UTC)
 - npm scripts: `dev`, `build`, `start`, `lint`, `test`, `test:watch`, `codemap`
 - `scripts/capture-site.mjs` ≈150 — Playwright로 배포 사이트의 `[data-capture]` 를 390px/1280px 캡처 → Storage `card-images/screens/{date}` (`--dry` 지원) | db storage:card-images · env SITE_URL,SUPABASE_KEY,SUPABASE_URL
 - Storage 버킷 `card-images`: `designer.py` 가 카드 이미지, `capture-site.mjs` 가 `screens/{date}/` 캡처를 업로드 · `lib/naver/screens.ts` 가 목록 조회.
@@ -260,6 +290,8 @@ env: GEMINI_API_KEY, GEMINI_API_KEY_2, GROQ_API_KEY, GROQ_API_KEY_2, GROQ_API_KE
 
 ## 9. 테스트 (vitest, `src/**/*.test.ts`, node 환경) — 컴포넌트·라우트 테스트는 없음
 
+- `auto/report.test` → lib/auto/report, lib/auto/types
+- `auto/topics.test` → lib/auto/topics, lib/auto/types
 - `dates.test` → lib/dates
 - `keywords/archive.test` → lib/keywords/archive
 - `naver/card-layout.test` → lib/naver/card-layout

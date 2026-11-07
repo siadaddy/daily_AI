@@ -67,6 +67,10 @@
       "`pipeline/collect.py` → `pipeline/main.py` · `.github/workflows/pipeline-daily.yml`"
     ],
     [
+      "자동차 인사이트(`?tab=auto`)",
+      "`components/auto/AutoTab.tsx` · `lib/auto/*` · 수집·분석 `pipeline/auto_collect.py` → `pipeline/auto_analyze.py` (소스는 `pipeline/auto_sources.json`) · `.github/workflows/auto-daily.yml` · DDL `pipeline/sql/auto_insight.sql` · 보고서 `lib/auto/report.ts`"
+    ],
+    [
       "'삼천리' 제외 필터",
       "`lib/utils/exclude.ts`(쓰기·읽기 양쪽에 적용) · `pipeline/collect.py`"
     ]
@@ -78,7 +82,8 @@
     "`fetchAllPages` 는 `lib/reports/generate.ts` 에 있지만 `api/analytics`·`keywords/archive` 도 쓰는 공용 페이지네이션이다.",
     "`pipeline/` 과 `ai-crew/` 는 의도적으로 분기됨 — 같은 파일명(`music_curator.py` 등)이어도 합치지 말 것. pipeline 은 곡 라이브러리를 Supabase `agent_memories` 에, ai-crew 는 `public/music/*.json` 에 쓴다.",
     "`data-capture` 속성은 `scripts/capture-site.mjs`(Playwright)가 화면 캡처 대상으로 쓴다. 속성을 지우면 야간 capture 잡이 실패한다.",
-    "주간/월간 리포트는 Python이 아니라 웹 크론(`/api/reports/generate`, `Authorization: Bearer $CRON_SECRET`)이 만든다. `/api/weekly-briefing/generate` 는 레거시 별칭."
+    "주간/월간 리포트는 Python이 아니라 웹 크론(`/api/reports/generate`, `Authorization: Bearer $CRON_SECRET`)이 만든다. `/api/weekly-briefing/generate` 는 레거시 별칭.",
+    "자동차 인사이트는 `auto_*` 테이블을 쓰며 `news_cards`/`weekly_reports` 와 완전히 분리돼 있다(AI 뉴스 통계·리포트가 오염되지 않게). 테이블은 `pipeline/sql/auto_insight.sql` 을 Supabase 에서 직접 실행해야 생기고, 없으면 화면은 빈 상태로 떨어진다."
   ],
   "listTypesIn": ["src/lib/types/index.ts"],
   "dirs": {
@@ -212,7 +217,25 @@
     "ai-crew/utils/gemini_client.py": "pipeline 판 + `ask_groq_first`",
     "scripts/capture-site.mjs": "Playwright로 배포 사이트의 `[data-capture]` 를 390px/1280px 캡처 → Storage `card-images/screens/{date}` (`--dry` 지원)",
     ".github/workflows/pipeline-daily.yml": "06:00 KST. collect → generate → capture 3잡 순차, 실패 시 ntfy",
-    ".github/workflows/keepalive.yml": "60일 비활성으로 스케줄이 꺼지지 않게 pipeline-daily 를 enable"
+    ".github/workflows/keepalive.yml": "60일 비활성으로 스케줄이 꺼지지 않게 pipeline-daily 를 enable",
+    "pipeline/auto_collect.py": "[자동차 인사이트] 1단계 수집 — 전문지·해외 RSS + Google News RSS + Naver 를 모아 중복 제거, `output/auto_*.json` 저장(`--dry-run` 지원). collect.py(AI 뉴스)와 독립",
+    "pipeline/utils/news_common.py": "[자동차 인사이트] 링크 정규화·제목 키 중복 제거·HTML 정리 등 순수 함수 (collect.py 와 의도적으로 중복)",
+    "pipeline/utils/auto_rules.py": "[자동차 인사이트] LLM 없는 결정적 규칙 — 브랜드 태깅·노이즈 사전 필터(relevance_score)·속보 룰(is_breaking)",
+    "src/lib/auto/types.ts": "[자동차 인사이트] auto_articles·auto_competitor_log·auto_reports 행 타입, 보고서 본문 JSON 모양",
+    "src/lib/auto/topics.ts": "[자동차 인사이트] 주제 라벨·표시 순서, 오늘의 핵심 선정·주제별 묶음·경쟁사 비교표·브랜드 칩(순수 함수)",
+    "src/lib/auto/query.ts": "[자동차 인사이트] auto_* 조회(익명 클라이언트+unstable_cache). 테이블이 없으면 빈 값 — 화면은 빈 상태로 떨어진다",
+    "src/lib/auto/report.ts": "[자동차 인사이트] 주간·월간 보고서 생성 — 건수·근거 기사는 코드, 서술만 LLM(gpt-4o-mini). auto_reports upsert(admin)",
+    "src/app/api/auto-reports/generate/route.ts": "[자동차 인사이트] 보고서 크론/백필 엔드포인트 (Bearer CRON_SECRET)",
+    "src/components/auto/AutoTab.tsx": "[자동차 인사이트] `?tab=auto` 진입점 — view=briefing|competitors|reports",
+    "src/components/auto/AutoBriefing.tsx": "[자동차 인사이트] 일일 브리핑 — 날짜·주제·브랜드 필터(서버 처리, URL이 상태)",
+    "src/components/auto/AutoCompetitors.tsx": "[자동차 인사이트] 경쟁사 서비스 동향 비교표(브랜드×정책/가격/캠페인/리콜)",
+    "src/components/auto/AutoReports.tsx": "[자동차 인사이트] 주간·월간 보고서 목록·본문",
+    "src/components/auto/AutoArticleItem.tsx": "[자동차 인사이트] 기사 1건(속보·중요도·요약·AI 시사점)",
+    "src/components/auto/AutoSubNav.tsx": "[자동차 인사이트] 하위 내비 밑줄 탭",
+    "src/components/auto/href.ts": "[자동차 인사이트] `?tab=auto` URL 생성 헬퍼",
+    "pipeline/auto_analyze.py": "[자동차 인사이트] 2단계 — 사전 필터→LLM 배치 분류·요약·시사점→속보 룰→`auto_articles` 저장→속보 ntfy. LLM 실패 시 규칙 기반 저장",
+    "pipeline/tests/test_auto_rules.py": "[자동차 인사이트] 브랜드 태깅·사전 필터·속보 룰·중복 제거 단위 테스트 (`python -m unittest discover -s pipeline/tests`, auto-daily 워크플로우가 먼저 실행)",
+    "pipeline/tests/test_auto_analyze.py": "[자동차 인사이트] 분석 단계 순수 함수(선별·LLM JSON 파싱·정규화·fallback) 단위 테스트"
   },
   "pipelineFlow": [
     "호출 순서: `collect.py main` (수집봇 online → Naver 수집 → TOP3 → 대화소재 → `news_cards`/`news_trends`) → artifact 전달 → `main.py main` (output 로드 → `planner.run` → `writer.run` → `designer.run`(실패 시 빈 이미지로 계속) → `card_news`/`articles` upsert → ntfy → `_should_run_music()`(90일↑) 이면 `music_curator.run/save`, 아니면 `reflect()`). 각 단계 `retry` 3회, 실패 시 exit 1 + 긴급 ntfy.",

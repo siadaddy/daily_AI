@@ -104,7 +104,13 @@ export interface CategoryStat {
   deltaPct?: number
 }
 
-export type TabId = 'newsletter' | 'reports' | 'music' | 'office' | 'portfolio'
+export type TabId =
+  | 'newsletter'
+  | 'reports'
+  | 'auto'
+  | 'music'
+  | 'office'
+  | 'portfolio'
 
 export interface CommunityPost {
   id: number

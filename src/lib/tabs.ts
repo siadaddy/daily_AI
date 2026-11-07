@@ -3,6 +3,7 @@ import type { TabId } from '@/lib/types'
 const TAB_IDS: readonly TabId[] = [
   'newsletter',
   'reports',
+  'auto',
   'music',
   'office',
   'portfolio',

@@ -7,6 +7,7 @@ import {
   BarChart3,
   Sparkles,
   Wrench,
+  Car,
   Info,
   Sun,
   Moon,
@@ -19,6 +20,7 @@ import { tabHref } from '@/lib/tabs'
 const TABS: { id: TabId; label: string; icon: LucideIcon }[] = [
   { id: 'newsletter', label: 'AI 뉴스레터', icon: Newspaper },
   { id: 'reports', label: '리포트', icon: BarChart3 },
+  { id: 'auto', label: '자동차 인사이트', icon: Car },
   { id: 'music', label: '뮤직 유니버스', icon: Sparkles },
   // { id: 'office', label: 'AI 사무실', icon: Wrench },
   { id: 'portfolio', label: '포트폴리오', icon: Wrench },

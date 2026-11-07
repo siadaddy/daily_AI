@@ -6,6 +6,7 @@ import {
   fetchTodayArticle,
 } from '@/components/newsletter/NewsletterTab'
 import { ReportsTab } from '@/components/reports/ReportsTab'
+import { AutoTab } from '@/components/auto/AutoTab'
 import { OfficeTab } from '@/components/office/OfficeTab'
 import { MusicUniverse } from '@/components/music/MusicUniverse'
 import { PortfolioSection } from '@/components/portfolio/PortfolioCard'
@@ -22,6 +23,11 @@ const TAB_META: Record<
   reports: {
     title: '리포트',
     description: 'AI가 분석하는 주간·월간 트렌드 리포트와 비교 분석 대시보드',
+  },
+  auto: {
+    title: '자동차 인사이트',
+    description:
+      'EV 애프터세일즈·수입차 시장·SDV·AI×자동차 뉴스를 매일 수집해 요약한 브리핑과 경쟁사 동향, 주간·월간 보고서',
   },
   music: {
     title: 'Music Universe',
@@ -87,6 +93,9 @@ export default async function Home({
     date?: string
     view?: string
     report?: string
+    topic?: string
+    brand?: string
+    period?: string
   }>
 }) {
   const params = await searchParams
@@ -114,6 +123,11 @@ export default async function Home({
       {tab === 'reports' && (
         <Suspense fallback={<LoadingSkeleton />}>
           <ReportsTab view={params.view} report={params.report} />
+        </Suspense>
+      )}
+      {tab === 'auto' && (
+        <Suspense fallback={<LoadingSkeleton />}>
+          <AutoTab params={params} />
         </Suspense>
       )}
       {tab === 'music' && <MusicUniverse />}

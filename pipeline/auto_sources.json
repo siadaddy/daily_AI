@@ -1,0 +1,257 @@
+{
+  "_comment": "자동차 인사이트 수집원. 코드 수정 없이 여기서 추가·제거한다. require_auto_keyword=true 인 피드는 자동차 키워드가 제목·요약에 있을 때만 채택(일반 매체 피드용).",
+  "lookback_hours": 48,
+  "rss": [
+    {
+      "name": "모터그래프",
+      "url": "https://www.motorgraph.com/rss/allArticle.xml",
+      "type": "trade",
+      "lang": "ko",
+      "require_auto_keyword": false
+    },
+    {
+      "name": "오토헤럴드",
+      "url": "https://www.autoherald.co.kr/rss/allArticle.xml",
+      "type": "trade",
+      "lang": "ko",
+      "require_auto_keyword": false
+    },
+    {
+      "name": "오토데일리",
+      "url": "https://www.autodaily.co.kr/rss/allArticle.xml",
+      "type": "trade",
+      "lang": "ko",
+      "require_auto_keyword": false
+    },
+    {
+      "name": "전자신문",
+      "url": "https://www.etnews.com/rss/Section901.xml",
+      "type": "trade",
+      "lang": "ko",
+      "require_auto_keyword": true
+    },
+    {
+      "name": "Electrek",
+      "url": "https://electrek.co/feed/",
+      "type": "global",
+      "lang": "en",
+      "require_auto_keyword": false
+    },
+    {
+      "name": "InsideEVs",
+      "url": "https://insideevs.com/rss/news/all/",
+      "type": "global",
+      "lang": "en",
+      "require_auto_keyword": false
+    },
+    {
+      "name": "Carscoops",
+      "url": "https://www.carscoops.com/feed/",
+      "type": "global",
+      "lang": "en",
+      "require_auto_keyword": false
+    },
+    {
+      "name": "Motor1",
+      "url": "https://www.motor1.com/rss/news/all/",
+      "type": "global",
+      "lang": "en",
+      "require_auto_keyword": false
+    },
+    {
+      "name": "TechCrunch Transportation",
+      "url": "https://techcrunch.com/category/transportation/feed/",
+      "type": "global",
+      "lang": "en",
+      "require_auto_keyword": false
+    }
+  ],
+  "google_news": [
+    {
+      "q": "BMW 코리아",
+      "lang": "ko",
+      "topic_hint": "bmw_group"
+    },
+    {
+      "q": "한독모터스",
+      "lang": "ko",
+      "topic_hint": "bmw_group",
+      "days": 14
+    },
+    {
+      "q": "MINI 코리아 OR 롤스로이스 모터카",
+      "lang": "ko",
+      "topic_hint": "bmw_group",
+      "days": 14
+    },
+    {
+      "q": "수입차 서비스센터",
+      "lang": "ko",
+      "topic_hint": "ev_aftersales"
+    },
+    {
+      "q": "전기차 정비 OR 전기차 배터리 진단",
+      "lang": "ko",
+      "topic_hint": "ev_aftersales"
+    },
+    {
+      "q": "수입차 리콜",
+      "lang": "ko",
+      "topic_hint": "regulation"
+    },
+    {
+      "q": "벤츠코리아 OR 아우디코리아 OR 렉서스코리아 서비스",
+      "lang": "ko",
+      "topic_hint": "import_market"
+    },
+    {
+      "q": "수입차 신규등록 KAIDA",
+      "lang": "ko",
+      "topic_hint": "import_market"
+    },
+    {
+      "q": "소프트웨어 정의 차량 OR OTA 업데이트 자동차",
+      "lang": "ko",
+      "topic_hint": "sdv"
+    },
+    {
+      "q": "자동차 인공지능 정비 OR 차량 AI 비서",
+      "lang": "ko",
+      "topic_hint": "ai_auto"
+    },
+    {
+      "q": "BMW Group",
+      "lang": "en",
+      "topic_hint": "bmw_group"
+    },
+    {
+      "q": "EV aftersales service",
+      "lang": "en",
+      "topic_hint": "ev_aftersales"
+    },
+    {
+      "q": "software-defined vehicle",
+      "lang": "en",
+      "topic_hint": "sdv"
+    },
+    {
+      "q": "right to repair automotive",
+      "lang": "en",
+      "topic_hint": "regulation"
+    },
+    {
+      "q": "automotive AI agent OR AI diagnostics car service",
+      "lang": "en",
+      "topic_hint": "ai_auto"
+    }
+  ],
+  "naver": [
+    {
+      "q": "BMW 한독모터스",
+      "topic_hint": "bmw_group"
+    },
+    {
+      "q": "BMW코리아 리콜",
+      "topic_hint": "bmw_group"
+    },
+    {
+      "q": "MINI 롤스로이스 코리아",
+      "topic_hint": "bmw_group"
+    },
+    {
+      "q": "수입차 서비스센터",
+      "topic_hint": "ev_aftersales"
+    },
+    {
+      "q": "전기차 정비 인력",
+      "topic_hint": "ev_aftersales"
+    },
+    {
+      "q": "고전압 배터리 진단",
+      "topic_hint": "ev_aftersales"
+    },
+    {
+      "q": "수입차 판매 순위",
+      "topic_hint": "import_market"
+    },
+    {
+      "q": "벤츠코리아 서비스",
+      "topic_hint": "import_market"
+    },
+    {
+      "q": "수입차 AS 불만",
+      "topic_hint": "regulation"
+    },
+    {
+      "q": "자동차 리콜 국토부",
+      "topic_hint": "regulation"
+    },
+    {
+      "q": "소프트웨어 정의 차량",
+      "topic_hint": "sdv"
+    },
+    {
+      "q": "OTA 업데이트 자동차",
+      "topic_hint": "sdv"
+    },
+    {
+      "q": "자동차 AI 정비",
+      "topic_hint": "ai_auto"
+    },
+    {
+      "q": "차량용 AI 비서",
+      "topic_hint": "ai_auto"
+    }
+  ],
+  "auto_keywords": [
+    "자동차",
+    "전기차",
+    "수입차",
+    "완성차",
+    "차량",
+    "정비",
+    "서비스센터",
+    "리콜",
+    "BMW",
+    "MINI",
+    "미니",
+    "롤스로이스",
+    "벤츠",
+    "아우디",
+    "폭스바겐",
+    "렉서스",
+    "테슬라",
+    "볼보",
+    "제네시스",
+    "현대차",
+    "기아",
+    "포르쉐",
+    "폴스타",
+    "배터리",
+    "충전",
+    "자율주행",
+    "SDV",
+    "OTA",
+    "EV",
+    "electric vehicle",
+    "automaker",
+    "automotive",
+    "carmaker",
+    "recall",
+    "dealer",
+    "aftersales",
+    "software-defined",
+    "autonomous",
+    "Tesla",
+    "Mercedes",
+    "Audi",
+    "Volvo",
+    "Toyota",
+    "Hyundai",
+    "Porsche"
+  ],
+  "_removed": {
+    "오토타임즈": "사이트 인증서가 자체 서명이라 TLS 검증 실패 — 검증을 끄지 않고 제외(2026-11-07)",
+    "Automotive News / Autoblog": "403 봇 차단"
+  }
+}
