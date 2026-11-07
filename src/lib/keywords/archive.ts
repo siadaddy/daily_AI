@@ -2,7 +2,7 @@ import { unstable_cache } from 'next/cache'
 import { createPublicClient } from '@/lib/supabase/public'
 import { fetchAllPages } from '@/lib/reports/generate'
 import { extractKeywords } from '@/lib/utils/keywords'
-import { isExcludedNews } from '@/lib/utils/exclude'
+import { filterTop3, isExcludedNews } from '@/lib/utils/exclude'
 import type { KeywordStat, Top3Item } from '@/lib/types'
 
 /** 아카이브 페이지를 만들 상위 키워드 수 */
@@ -64,7 +64,7 @@ export const getTopKeywords = unstable_cache(
       const visible = cards.filter((c) => !isExcludedNews(c))
 
       const trendTitles = ((trends.data ?? []) as { top3: Top3Item[] | null }[])
-        .flatMap((t) => t.top3 ?? [])
+        .flatMap((t) => filterTop3(t.top3))
         .map((i) => i.title)
 
       return extractKeywords({

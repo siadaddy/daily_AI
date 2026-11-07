@@ -2,7 +2,11 @@ import OpenAI from 'openai'
 import dayjs from 'dayjs'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { extractKeywords } from '@/lib/utils/keywords'
-import { isExcludedNews } from '@/lib/utils/exclude'
+import {
+  filterTop3,
+  isExcludedNews,
+  stripExcludedSentences,
+} from '@/lib/utils/exclude'
 import { buildCategoryStats } from '@/lib/utils/category-stats'
 import type {
   CategoryStat,
@@ -65,11 +69,13 @@ export async function fetchAllPages<T>(
 function formatTrendLines(trends: NewsTrendRow[]): string {
   return trends
     .map((t) => {
-      const top = (t.top3 ?? [])
+      // 제외 대상이 프롬프트에 실리면 LLM이 리포트 본문에 되살린다
+      const top = filterTop3(t.top3)
         .map((i) => `#${i.rank} ${i.title} (${i.category})`)
         .join(' / ')
       return `[${t.date ?? ''}] TOP3: ${top}`
     })
+    .filter((line) => !line.endsWith('TOP3: '))
     .join('\n')
 }
 
@@ -133,11 +139,12 @@ function buildMonthlyPrompt(params: {
     trends,
   } = params
 
+  // 과거 주간 리포트 본문에는 제외 대상이 남아 있다 — 월간 프롬프트로 전파되지 않게 도려낸다
   const weeklySection = weeklyReports.length
     ? weeklyReports
         .map(
           (w) =>
-            `[${w.week_start} ~ ${w.week_end}]\n요약: ${w.summary}\n인사이트: ${w.insights}`
+            `[${w.week_start} ~ ${w.week_end}]\n요약: ${stripExcludedSentences(w.summary)}\n인사이트: ${stripExcludedSentences(w.insights)}`
         )
         .join('\n\n')
     : '(주간 리포트 없음 — 아래 집계와 트렌드만으로 분석)'
@@ -192,8 +199,7 @@ function extractJson(text: string): string {
 /** 일별 TOP3를 카테고리 집계용 행으로 편다 */
 function topPicks(trends: NewsTrendRow[]): { category: string | null }[] {
   return trends
-    .flatMap((t) => t.top3 ?? [])
-    .filter((i) => !isExcludedNews({ title: i.title, category: i.category }))
+    .flatMap((t) => filterTop3(t.top3))
     .map((i) => ({ category: i.category ?? null }))
 }
 
@@ -329,7 +335,7 @@ export async function generateReport(params: {
         .map(([name, count]) => ({ name, count }))
 
       const trendTitles = trends.flatMap((t) =>
-        (t.top3 ?? []).map((i) => i.title ?? '')
+        filterTop3(t.top3).map((i) => i.title ?? '')
       )
       const topKeywords = extractKeywords({
         titles: cards.map((c) => c.title ?? ''),

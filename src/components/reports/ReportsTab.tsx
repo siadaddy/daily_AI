@@ -1,51 +1,13 @@
-import { createClient } from '@/lib/supabase/server'
 import { ReportsSubNav, type ReportsView } from './ReportsSubNav'
 import { PeriodReport } from './PeriodReport'
 import { ReportArchiveList } from './ReportArchiveList'
 import { TrendHighlights } from './TrendHighlights'
 import { ReportsDashboard } from './ReportsDashboard'
-import type {
-  PeriodReport as PeriodReportData,
-  PeriodType,
-  Top3Item,
-} from '@/lib/types'
+// 리포트/트렌드 조회는 query.ts 한 곳에만 둔다 —
+// 제외 대상 필터가 조회 함수 안에 있어서 호출부마다 다시 걸 필요가 없다.
+import { fetchReports, fetchTrendsInRange } from '@/lib/reports/query'
 
 export const revalidate = 3600
-
-async function fetchReports(
-  periodType: PeriodType
-): Promise<PeriodReportData[]> {
-  try {
-    const supabase = await createClient()
-    const { data } = await supabase
-      .from('weekly_reports')
-      .select('*')
-      .eq('period_type', periodType)
-      .order('week_start', { ascending: false })
-      .limit(26)
-    return data ?? []
-  } catch {
-    return []
-  }
-}
-
-async function fetchTrends(
-  start: string,
-  end: string
-): Promise<{ date: string; top3: Top3Item[] | null }[]> {
-  try {
-    const supabase = await createClient()
-    const { data } = await supabase
-      .from('news_trends')
-      .select('date, top3')
-      .gte('date', start)
-      .lte('date', end)
-      .order('date', { ascending: true })
-    return data ?? []
-  } catch {
-    return []
-  }
-}
 
 export async function ReportsTab({
   view,
@@ -70,7 +32,7 @@ export async function ReportsTab({
   const selected =
     reports.find((r) => r.week_start === report) ?? reports[0] ?? null
   const trends = selected
-    ? await fetchTrends(selected.week_start, selected.week_end)
+    ? await fetchTrendsInRange(selected.week_start, selected.week_end)
     : []
 
   return (

@@ -1,5 +1,6 @@
 import { unstable_cache } from 'next/cache'
 import { createPublicClient } from '@/lib/supabase/public'
+import { filterTop3, sanitizeReport } from '@/lib/utils/exclude'
 import type { PeriodReport, PeriodType, Top3Item } from '@/lib/types'
 
 /** 기간 타입별 리포트 목록 (최신순) */
@@ -13,13 +14,14 @@ export const fetchReports = unstable_cache(
         .order('week_start', { ascending: false })
         .limit(limit)
       if (error) throw new Error(error.message)
-      return data ?? []
+      // 저장된 리포트에는 과거 제외 대상(삼천리)이 남아 있다 — 읽는 시점에 도려낸다
+      return (data ?? []).map(sanitizeReport)
     } catch (e) {
       console.error('[reports/query] weekly_reports 조회 실패:', e)
       return []
     }
   },
-  ['weekly-reports'],
+  ['weekly-reports', 'v2'],
   { revalidate: 3600 }
 )
 
@@ -56,12 +58,15 @@ export const fetchTrendsInRange = unstable_cache(
         .lte('date', end)
         .order('date', { ascending: true })
       if (error) throw new Error(error.message)
-      return data ?? []
+      // 제외 대상 항목을 빼고, 그 결과 비어버린 날짜는 행째 뺀다
+      return (data ?? [])
+        .map((row) => ({ ...row, top3: filterTop3(row.top3) }))
+        .filter((row) => row.top3.length > 0)
     } catch (e) {
       console.error('[reports/query] news_trends 조회 실패:', e)
       return []
     }
   },
-  ['news-trends-range'],
+  ['news-trends-range', 'v2'],
   { revalidate: 3600 }
 )

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { extractKeywords } from '@/lib/utils/keywords'
-import { isExcludedNews } from '@/lib/utils/exclude'
+import { filterTop3, isExcludedNews } from '@/lib/utils/exclude'
 import { buildCategoryStats, deltaPct } from '@/lib/utils/category-stats'
 import { fetchAllPages } from '@/lib/reports/generate'
 import dayjs from 'dayjs'
@@ -84,10 +84,11 @@ export async function GET(req: NextRequest) {
 
     // Keywords
     const titles = newsCards.map((c) => c.title ?? '')
+    // TOP3도 news_cards와 같은 기준으로 거른다 — 키워드 집계에 새어 들어간다
     const trendTitles = trends.flatMap((t) =>
-      Array.isArray(t.top3)
-        ? (t.top3 as Top3Item[]).map((i) => i.title ?? '')
-        : []
+      filterTop3(Array.isArray(t.top3) ? (t.top3 as Top3Item[]) : []).map(
+        (i) => i.title ?? ''
+      )
     )
     const articleContents = articles.map((a) => a.content ?? '')
     const keywords = extractKeywords({

@@ -22,7 +22,7 @@ import type {
   NewsCard as NewsCardType,
   NewsTrend,
 } from '@/lib/types'
-import { isExcludedNews } from '@/lib/utils/exclude'
+import { filterTop3, isExcludedNews } from '@/lib/utils/exclude'
 import { plainTextExcerpt } from '@/lib/utils/caption'
 import { getSiteUrl } from '@/lib/site-url'
 import { newsHref, getToday } from '@/lib/dates'
@@ -163,12 +163,14 @@ export const fetchTodayTrend = unstable_cache(
         .eq('date', date)
         .limit(1)
         .single()
-      return data ?? null
+      if (!data) return null
+      // TOP 3에도 과거 제외 대상이 남아 있다 (네이버 내보내기도 이 함수를 쓴다)
+      return { ...data, top3: filterTop3(data.top3) }
     } catch {
       return null
     }
   },
-  ['news_trends'],
+  ['news_trends', 'v2'],
   { revalidate: 300 }
 )
 
