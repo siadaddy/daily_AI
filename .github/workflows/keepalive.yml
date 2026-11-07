@@ -1,0 +1,25 @@
+name: 💓 스케줄 유지 (keepalive)
+
+# GitHub은 60일간 저장소 활동(커밋 등)이 없으면 스케줄 워크플로우를 자동으로 끈다.
+# 파이프라인은 DB에만 쓰고 커밋이 없어서 그대로 두면 60일마다 꺼진다.
+# 매월 한 번 API로 파이프라인 워크플로우를 enable 해서 타이머를 갱신한다 (커밋 없음).
+
+on:
+  schedule:
+    # 매월 1일, 15일 00:00 UTC
+    - cron: '0 0 1,15 * *'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 파이프라인 워크플로우 enable
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api -X PUT "repos/${{ github.repository }}/actions/workflows/pipeline-daily.yml/enable"
+          gh workflow list --all --repo "${{ github.repository }}"
