@@ -99,12 +99,18 @@ def relevance_score(title: str, summary: str = "", topic_hint: str | None = None
     return score
 
 
+# 칼럼·사설·기고는 사실 보도가 아니라 의견이므로 속보 대상이 아니다
+OPINION_MARKERS = ("칼럼", "컬럼", "사설", "기고", "오피니언", "opinion:", "editorial")
+
+
 def is_breaking(title: str, summary: str, brands: list[str], importance: int) -> bool:
     """속보 룰. LLM importance 는 보조 신호일 뿐, 핵심 조건은 키워드 + 브랜드다.
 
     (A) BMW 그룹 브랜드 + 리콜/규제/중대 사안
     (B) 리콜·규제 + 중요도 4 이상 (타 브랜드 포함 — 경쟁사 리콜도 서비스 기획엔 신호)
     """
+    if any(m in (title or "").lower() for m in OPINION_MARKERS):
+        return False
     text = f"{title} {summary}"
     recall_or_reg = _has(text, RECALL_TERMS) or _has(text, REGULATION_TERMS)
     if set(brands) & BMW_GROUP and (recall_or_reg or _has(text, CRITICAL_TERMS)) and importance >= 3:

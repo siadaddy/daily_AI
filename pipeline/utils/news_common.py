@@ -27,6 +27,10 @@ _SOURCE_NAMES = {
     "carisyou.com": "카이즈유", "electrek.co": "Electrek", "insideevs.com": "InsideEVs",
     "carscoops.com": "Carscoops", "motor1.com": "Motor1", "techcrunch.com": "TechCrunch",
     "press.bmwgroup.com": "BMW Group PressClub", "reuters.com": "Reuters",
+    "edaily.co.kr": "이데일리", "fnnews.com": "파이낸셜뉴스", "kmib.co.kr": "국민일보",
+    "zdnet.co.kr": "ZDNet Korea", "inews24.com": "아이뉴스24", "imaeil.com": "매일신문",
+    "tf.co.kr": "더팩트", "ekn.kr": "에너지경제", "ebn.co.kr": "EBN", "greened.kr": "녹색경제신문",
+    "consumernews.co.kr": "소비자가만드는신문", "cstimes.com": "컨슈머타임스", "mtn.co.kr": "머니투데이방송",
 }
 
 
@@ -38,12 +42,15 @@ def clean_html(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-def extract_source(url: str, fallback: str = "뉴스") -> str:
+def extract_source(url: str, fallback: str = "") -> str:
+    """도메인 → 매체명. 표에 없으면 fallback, 그것도 없으면 도메인 자체(출처가 '뉴스'로만 찍히지 않게)."""
     host = urlsplit(url or "").netloc.lower()
     for domain, name in _SOURCE_NAMES.items():
         if host == domain or host.endswith("." + domain):
             return name
-    return fallback
+    if fallback:
+        return fallback
+    return host[4:] if host.startswith("www.") else (host or "뉴스")
 
 
 def normalize_url(url: str) -> str:

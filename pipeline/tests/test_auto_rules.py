@@ -43,6 +43,10 @@ class Relevance(unittest.TestCase):
 
 
 class Breaking(unittest.TestCase):
+    def test_opinion_pieces_are_never_breaking(self):
+        self.assertFalse(is_breaking("[데스크칼럼] BMW 리콜, AS도 명차다워야", "", ["BMW"], 5))
+        self.assertFalse(is_breaking("[사설] 수입차 리콜 늑장", "", ["벤츠"], 5))
+
     def test_bmw_recall_is_breaking(self):
         self.assertTrue(is_breaking("BMW 5시리즈 리콜", "", ["BMW"], 3))
 
