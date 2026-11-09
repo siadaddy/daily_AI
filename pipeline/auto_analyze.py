@@ -243,12 +243,40 @@ def to_row(article: dict, item: dict, today: str) -> dict:
 
 # ───────────────────────── 실행부 (네트워크) ─────────────────────────
 
+OPENAI_MODEL = "gpt-4o-mini"
+
+
+def ask_openai(prompt: str) -> str:
+    """자동차 분석 전용 LLM 호출.
+
+    ⚠️ Gemini 를 쓰지 않는 이유: AI 뉴스레터 파이프라인(pipeline-daily)과 같은 Gemini 무료 키를 공유하면
+    하루 쿼터를 먼저 소진해 뉴스레터 글·카드뉴스가 비어 버린다(2026-11-08~09 실제 사고).
+    OpenAI 는 리포트 생성에도 이미 쓰는 키이고, 하루 분석 비용은 몇 센트 수준이다.
+    """
+    key = os.getenv("OPENAI_API_KEY", "")
+    if not key:
+        raise RuntimeError("OPENAI_API_KEY 없음")
+    r = requests.post(
+        "https://api.openai.com/v1/chat/completions",
+        headers={"Authorization": f"Bearer {key}"},
+        json={
+            "model": OPENAI_MODEL,
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.2,
+            "max_tokens": 4096,
+            "response_format": {"type": "json_object"},
+        },
+        timeout=90,
+    )
+    r.raise_for_status()
+    return (r.json()["choices"][0]["message"]["content"] or "").strip()
+
+
 def analyze_batch(batch: list[dict], use_llm: bool) -> list[dict]:
     """배치 하나를 분석해 항목 리스트(배치와 같은 길이·순서)를 돌려준다."""
     if use_llm:
         try:
-            from utils.gemini_client import ask_ai
-            text = ask_ai(build_prompt(batch), temperature=0.2, max_tokens=8192, json_mode=True)
+            text = ask_openai(build_prompt(batch))
             data = parse_llm_json(text)
             if data and isinstance(data.get("items"), list):
                 by_idx = {}

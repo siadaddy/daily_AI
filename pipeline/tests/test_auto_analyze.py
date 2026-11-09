@@ -45,6 +45,25 @@ class SelectFairness(unittest.TestCase):
         self.assertEqual(len(aa.select_for_analysis(tesla, limit=15)), 15)
 
 
+class OpenAICall(unittest.TestCase):
+    def test_uses_openai_json_mode_and_never_gemini(self):
+        from unittest import mock
+        resp = mock.Mock()
+        resp.json.return_value = {"choices": [{"message": {"content": ' {"items": []} '}}]}
+        with mock.patch.dict(os.environ, {"OPENAI_API_KEY": "k"}), mock.patch.object(aa.requests, "post", return_value=resp) as post:
+            self.assertEqual(aa.ask_openai("p"), '{"items": []}')
+        url = post.call_args.args[0]
+        self.assertIn("api.openai.com", url)
+        self.assertEqual(post.call_args.kwargs["json"]["response_format"], {"type": "json_object"})
+        self.assertNotIn("gemini_client", open(aa.__file__, encoding="utf-8").read().split("def analyze_batch")[1])
+
+    def test_missing_key_raises(self):
+        from unittest import mock
+        with mock.patch.dict(os.environ, {"OPENAI_API_KEY": ""}):
+            with self.assertRaises(RuntimeError):
+                aa.ask_openai("p")
+
+
 class Parse(unittest.TestCase):
     def test_code_fence_and_chatter(self):
         self.assertEqual(aa.parse_llm_json('설명입니다\n```json\n{"items": []}\n```'), {"items": []})
