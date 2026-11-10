@@ -61,3 +61,7 @@ ai-crew/.env
 ai-crew/__pycache__/
 ai-crew/agents/__pycache__/
 ai-crew/utils/__pycache__/
+
+# python bytecode (모든 하위 폴더)
+**/__pycache__/
+*.pyc

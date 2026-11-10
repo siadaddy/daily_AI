@@ -1,6 +1,11 @@
 import { unstable_cache } from 'next/cache'
 import { createPublicClient } from '@/lib/supabase/public'
-import type { AutoArticle, AutoReport, CompetitorRow } from './types'
+import type {
+  AutoArticle,
+  AutoDigest,
+  AutoReport,
+  CompetitorRow,
+} from './types'
 
 /**
  * 자동차 인사이트 조회. 전부 익명(public) 클라이언트 + unstable_cache.
@@ -128,4 +133,26 @@ export const fetchAutoReports = unstable_cache(
   },
   ['auto-reports', 'v1'],
   { revalidate: 3600 }
+)
+
+/**
+ * 하루치 주제별 요약. 테이블이 없거나(SQL v2 미적용) 그날 요약이 아직 없으면 빈 배열 —
+ * 화면은 요약 없이 기사 목록만 보여준다.
+ */
+export const fetchAutoDigest = unstable_cache(
+  async (date: string): Promise<AutoDigest[]> => {
+    try {
+      const { data, error } = await createPublicClient()
+        .from('auto_digest')
+        .select('date,topic,headline,points,article_count')
+        .eq('date', date)
+      if (error) throw new Error(error.message)
+      return (data ?? []) as AutoDigest[]
+    } catch (e) {
+      console.error('[auto/query] 요약 조회 실패:', e)
+      return []
+    }
+  },
+  ['auto-digest', 'v1'],
+  { revalidate: 300 }
 )

@@ -1,11 +1,21 @@
 export type AutoTopic =
   | 'ev_aftersales'
+  | 'ev_industry'
   | 'import_market'
   | 'sdv'
   | 'ai_auto'
   | 'bmw_group'
   | 'regulation'
   | 'other'
+
+/** auto_digest 한 행 — 주제별(또는 'all') 오늘의 요약. 건수는 코드가 센 값이다. */
+export interface AutoDigest {
+  date: string
+  topic: AutoTopic | 'all'
+  headline: string
+  points: string[]
+  article_count: number
+}
 
 export type CompetitorItem = 'service_policy' | 'price' | 'campaign' | 'recall'
 

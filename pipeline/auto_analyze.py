@@ -30,6 +30,7 @@ from dotenv import load_dotenv
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from utils.auto_rules import BMW_GROUP, BRANDS, is_breaking, relevance_score, rule_importance, tag_brands  # noqa: E402
+from utils.news_common import dedupe_stories  # noqa: E402
 
 load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 
@@ -50,11 +51,26 @@ PER_BRAND_CAP = 10     # 타 브랜드 하나가 독점하지 못하게 거는 �
 MAX_BREAKING_PUSH = 5  # 하루 속보 푸시 상한 — 알림 피로 방지
 MIN_KEEP_IMPORTANCE = 2  # 1 = 무관 판정 → 저장하지 않는다
 
-TOPICS = ("ev_aftersales", "import_market", "sdv", "ai_auto", "bmw_group", "regulation", "other")
+TOPICS = ("ev_aftersales", "ev_industry", "import_market", "sdv", "ai_auto", "bmw_group", "regulation", "other")
+# 요약(다이제스트)을 만드는 주제 — 'other' 는 요약할 가치가 없다
+DIGEST_TOPICS = ("bmw_group", "regulation", "ev_aftersales", "ev_industry", "import_market", "sdv", "ai_auto")
+DIGEST_MIN_ARTICLES = 2   # 기사가 이만큼은 있어야 요약한다
+DIGEST_PER_TOPIC = 12     # 요약에 넣는 주제당 기사 수(중요도 순)
+DEDUPE_DAYS = 3           # 최근 며칠 안에 이미 저장한 사건은 다시 모으지 않는다
 COMPETITOR_ITEMS = ("service_policy", "price", "campaign", "recall")
 
 
 # ───────────────────────── 순수 함수 (테스트 대상) ─────────────────────────
+
+_SOURCE_RANK = {"trade": 3, "global": 2, "naver": 1, "google": 0, "gov": 3}
+
+
+def story_rank(a: dict) -> tuple:
+    """같은 사건 중 대표로 남길 기사의 우선순위: BMW 그룹 > 전문지·해외매체 > 요약이 긴 것(정보가 많다)."""
+    text = f"{a.get('title', '')} {a.get('summary', '')}"
+    in_group = bool(set(tag_brands(text)) & BMW_GROUP)
+    return (in_group, _SOURCE_RANK.get(a.get("source_type", ""), 0), len(a.get("summary") or ""))
+
 
 def select_for_analysis(articles: list[dict], limit: int = MAX_ANALYZE) -> list[dict]:
     """분석 대상 선별. 상한(limit)이 있으니 무엇을 먼저 채울지가 곧 편집 방침이다.
@@ -68,6 +84,8 @@ def select_for_analysis(articles: list[dict], limit: int = MAX_ANALYZE) -> list[
         text = f"{a.get('title', '')} {a.get('summary', '')}"
         brands = tag_brands(text)
         s = relevance_score(a.get("title", ""), a.get("summary", ""), a.get("topic_hint"))
+        if a.get("dup_count", 1) >= 3:  # 3개 매체 이상이 다룬 사건 — 코드가 정하는 중요도 신호
+            s += 1
         scored.append((s, a.get("published_at") or "", a, brands))
     scored.sort(key=lambda t: (t[0], t[1]), reverse=True)
 
@@ -108,7 +126,16 @@ def build_prompt(batch: list[dict]) -> str:
 
 규칙:
 - 제공된 제목·요약에 **있는 내용만** 쓰세요. 숫자·날짜·고유명사를 추측하거나 만들어내지 마세요. 정보가 부족하면 짧게 쓰세요.
-- topic 은 {list(TOPICS)} 중 하나. (ev_aftersales=전기차 정비·배터리·부품·서비스센터, import_market=수입차 판매·등록·경쟁사, sdv=소프트웨어 정의 차량·OTA·커넥티드, ai_auto=자동차×AI(정비 진단·고객응대·차량 내 AI), bmw_group=BMW·MINI·롤스로이스·한독모터스 관련, regulation=리콜·규제·정책·소비자 분쟁)
+- topic 은 {list(TOPICS)} 중 하나. 아래 순서대로 가장 먼저 맞는 것을 고르세요.
+  1) bmw_group: BMW·MINI·롤스로이스·한독모터스가 기사의 주인공(주어)인 경우
+  2) regulation: 리콜·결함·과징금·정부 정책·규제·보조금·관세·소비자 분쟁이 핵심인 경우
+  3) ev_aftersales: 정비·서비스센터·부품·보증·수리권·딜러 서비스 역량·배터리 진단/수리/재사용 기술이 핵심인 경우
+  4) ai_auto: AI가 핵심 소재인 경우(차량 내 AI·AI 정비/고객응대·자율주행·로보택시)
+  5) sdv: 소프트웨어 정의 차량·OTA·차량 OS·커넥티드가 핵심인 경우
+  6) ev_industry: 전기차·배터리 산업 동향(신차·가격·성능, 배터리 기술·공급망·투자, 충전 인프라, EV 판매 실적) — 서비스 관점이 아닌 시장·기술 소식
+  7) import_market: 수입차·경쟁사 판매·등록·점유율·전략(내연기관 포함)
+  8) other: 위에 해당하지 않는 것. 자동차 산업과 거리가 멀면 importance 1.
+  한 기사가 여러 주제에 걸치면 위 번호가 작은 쪽을 고르세요.
 - importance 는 1~5 정수. 1=자동차 서비스 기획과 무관(연예·레이싱 행사·타 산업), 2=참고, 3=알아둘 만함, 4=중요, 5=즉시 보고감.
 - summary_ko: 한국어 1~2문장 요약(120자 이내).
 - title_ko: 영어(EN) 기사만 자연스러운 한국어 제목으로 번역. 한국어(KO) 기사는 빈 문자열.
@@ -246,7 +273,7 @@ def to_row(article: dict, item: dict, today: str) -> dict:
 OPENAI_MODEL = "gpt-4o-mini"
 
 
-def ask_openai(prompt: str) -> str:
+def ask_openai(prompt: str, max_tokens: int = 4096) -> str:
     """자동차 분석 전용 LLM 호출.
 
     ⚠️ Gemini 를 쓰지 않는 이유: AI 뉴스레터 파이프라인(pipeline-daily)과 같은 Gemini 무료 키를 공유하면
@@ -263,7 +290,7 @@ def ask_openai(prompt: str) -> str:
             "model": OPENAI_MODEL,
             "messages": [{"role": "user", "content": prompt}],
             "temperature": 0.2,
-            "max_tokens": 4096,
+            "max_tokens": max_tokens,
             "response_format": {"type": "json_object"},
         },
         timeout=90,
@@ -291,6 +318,111 @@ def analyze_batch(batch: list[dict], use_llm: bool) -> list[dict]:
     return [fallback_item(a) for a in batch]
 
 
+def remap_topics_for_legacy_db(rows: list[dict]) -> list[dict]:
+    """auto_insight_v2.sql(토픽 제약 갱신) 적용 전 DB 에서도 저장이 깨지지 않게 새 주제를 옛 주제로 돌린다."""
+    return [{**r, "topic": "import_market" if r["topic"] == "ev_industry" else r["topic"]} for r in rows]
+
+
+def group_for_digest(rows: list[dict]) -> dict[str, list[dict]]:
+    """주제별로 중요도 상위 기사만. 기사가 DIGEST_MIN_ARTICLES 미만인 주제는 요약하지 않는다."""
+    by: dict[str, list[dict]] = {}
+    for r in rows:
+        if r.get("topic") in DIGEST_TOPICS:
+            by.setdefault(r["topic"], []).append(r)
+    out = {}
+    for t in DIGEST_TOPICS:
+        lst = sorted(by.get(t, []), key=lambda r: -int(r.get("importance") or 0))
+        if len(lst) >= DIGEST_MIN_ARTICLES:
+            out[t] = lst[:DIGEST_PER_TOPIC]
+    return out
+
+
+def build_digest_prompt(groups: dict[str, list[dict]]) -> str:
+    blocks = []
+    for topic, lst in groups.items():
+        lines = "\n".join(f"- {r['title']} :: {(r.get('summary_ko') or '')[:110]}" for r in lst)
+        blocks.append(f"[{topic}]\n{lines}")
+    return f"""당신은 수입차 브랜드 서비스본부 기획실 팀장에게 아침 브리핑을 올리는 보조입니다.
+아래는 오늘 수집된 자동차 뉴스를 주제별로 모은 것입니다. 같은 사건을 다룬 기사가 여러 개일 수 있으니 하나의 사건으로 묶어 쓰세요.
+반드시 JSON 만 출력합니다.
+
+규칙:
+- 제공된 제목·요약에 **있는 내용만** 쓰세요. 숫자·날짜·고유명사를 추측하거나 만들어내지 마세요.
+- 기사 건수는 쓰지 마세요(건수는 시스템이 따로 표시합니다).
+- 주제마다 headline(그 주제의 오늘 핵심을 한 문장, 60자 이내)과 points(핵심 사건 2~3개, 각 80자 이내, 사건 단위로)를 쓰세요.
+- 마지막에 "all" 키로 오늘 전체에서 가장 중요한 3가지를 points 로 쓰세요(headline 은 오늘의 한 줄 총평).
+- 해석은 단정하지 말고 사실 위주로 쓰세요.
+
+출력 형식:
+{{"topics":{{"bmw_group":{{"headline":"...","points":["...","..."]}},"all":{{"headline":"...","points":["...","...","..."]}}}}}}
+
+기사:
+{chr(10).join(blocks)}"""
+
+
+def normalize_digest(data: Optional[dict], groups: dict[str, list[dict]], counts: dict[str, int], total: int, today: str) -> list[dict]:
+    """LLM 요약을 검증해 저장 행으로. 건수는 코드가 채운다(LLM 값 사용 안 함)."""
+    topics = (data or {}).get("topics")
+    if not isinstance(topics, dict):
+        return []
+    out = []
+    for key in (*groups.keys(), "all"):
+        raw = topics.get(key)
+        if not isinstance(raw, dict):
+            continue
+        headline = str(raw.get("headline") or "").strip()[:120]
+        pts = raw.get("points")
+        points = [str(p).strip()[:140] for p in pts if str(p).strip()][:3] if isinstance(pts, list) else []
+        if not headline and not points:
+            continue
+        out.append({
+            "date": today, "topic": key, "headline": headline, "points": points,
+            "article_count": total if key == "all" else counts.get(key, 0),
+        })
+    return out
+
+
+def fetch_recent_titles(days: int = DEDUPE_DAYS) -> list[str]:
+    """최근 며칠 안에 저장한 기사 제목 — 어제 낸 사건을 오늘 또 내지 않기 위한 비교 대상. 실패하면 빈 목록."""
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return []
+    try:
+        from supabase import create_client
+        since = (datetime.now(_KST) - timedelta(days=days)).strftime("%Y-%m-%d")
+        res = (create_client(SUPABASE_URL, SUPABASE_KEY).table("auto_articles")
+               .select("title").gte("date", since).limit(2000).execute())
+        return [r["title"] for r in res.data or []]
+    except Exception as e:  # noqa: BLE001
+        print(f"  ⚠️  최근 제목 조회 실패 — 날짜 간 중복 제거 없이 진행: {e}")
+        return []
+
+
+def fetch_day_rows(day: str) -> list[dict]:
+    from supabase import create_client
+    res = (create_client(SUPABASE_URL, SUPABASE_KEY).table("auto_articles")
+           .select("title,summary_ko,topic,importance").eq("date", day).gte("importance", 2).limit(1000).execute())
+    return res.data or []
+
+
+def save_digest(items: list[dict]) -> None:
+    from supabase import create_client
+    create_client(SUPABASE_URL, SUPABASE_KEY).table("auto_digest").upsert(items, on_conflict="date,topic").execute()
+
+
+def make_digest(day_rows: list[dict], today: str) -> list[dict]:
+    """하루치 기사로 주제별 요약을 만든다. LLM 실패 시 빈 목록(화면은 요약 없이 기사만 보여준다)."""
+    groups = group_for_digest(day_rows)
+    if not groups:
+        return []
+    try:
+        data = parse_llm_json(ask_openai(build_digest_prompt(groups), max_tokens=3000))
+    except Exception as e:  # noqa: BLE001
+        print(f"  ⚠️  요약 생성 실패 — 이번엔 요약 없이: {e}")
+        return []
+    counts = {t: sum(1 for r in day_rows if r.get("topic") == t) for t in groups}
+    return normalize_digest(data, groups, counts, len(day_rows), today)
+
+
 def save_rows(rows: list[dict], competitor_rows: list[dict]) -> list[dict]:
     """이미 있는 링크는 건너뛰고 새 행만 insert. 새로 들어간 행을 돌려준다(속보 알림 대상 판별용)."""
     from supabase import create_client
@@ -302,7 +434,18 @@ def save_rows(rows: list[dict], competitor_rows: list[dict]) -> list[dict]:
         existing.update(x["link"] for x in res.data or [])
     new_rows = [r for r in rows if r["link"] not in existing]
     for i in range(0, len(new_rows), 100):
-        client.table("auto_articles").insert(new_rows[i:i + 100]).execute()
+        chunk = new_rows[i:i + 100]
+        try:
+            client.table("auto_articles").insert(chunk).execute()
+        except Exception as e:  # noqa: BLE001
+            if "topic_check" not in str(e) and "23514" not in str(e):
+                raise
+            print("  ⚠️  DB 의 topic 제약이 옛 버전입니다 — pipeline/sql/auto_insight_v2.sql 을 실행하세요. "
+                  "이번엔 새 주제(ev_industry)를 import_market 으로 저장합니다.")
+            chunk = remap_topics_for_legacy_db(chunk)
+            for r in new_rows[i:i + 100]:
+                r["topic"] = "import_market" if r["topic"] == "ev_industry" else r["topic"]
+            client.table("auto_articles").insert(chunk).execute()
     if competitor_rows:
         client.table("auto_competitor_log").upsert(
             competitor_rows, on_conflict="brand,item,source_link", ignore_duplicates=True
@@ -336,8 +479,13 @@ def main() -> int:
     with open(args.input, encoding="utf-8") as f:
         articles = json.load(f)["articles"]
 
-    selected = select_for_analysis(articles)
-    print(f"📥 수집 {len(articles)}건 → 분석 대상 {len(selected)}건 (상한 {MAX_ANALYZE})")
+    known = fetch_recent_titles()
+    unique = dedupe_stories(articles, rank=story_rank, known_titles=known)
+    multi = sum(1 for a in unique if a.get("dup_count", 1) >= 2)
+    print(f"🧹 같은 사건 정리: {len(articles)}건 → {len(unique)}건 "
+          f"(여러 매체가 다룬 사건 {multi}개 · 최근 {DEDUPE_DAYS}일 저장 제목 {len(known)}건과 대조)")
+    selected = select_for_analysis(unique)
+    print(f"📥 분석 대상 {len(selected)}건 (상한 {MAX_ANALYZE})")
 
     rows, competitor_rows = [], []
     for i in range(0, len(selected), BATCH_SIZE):
@@ -368,6 +516,11 @@ def main() -> int:
         for r in sorted(rows, key=lambda r: -r["importance"])[:12]:
             flag = "🚨" if r["is_breaking"] else "  "
             print(f" {flag} [{r['importance']}] {r['topic']:14} {r['title'][:60]}  {r['brands']}")
+        if not args.no_llm:
+            for d in make_digest(rows, TODAY):
+                print(f"\n 📝 [{d['topic']}] ({d['article_count']}건) {d['headline']}")
+                for pt in d["points"]:
+                    print(f"      · {pt}")
         return 0
 
     if not SUPABASE_URL or not SUPABASE_KEY:
@@ -383,6 +536,16 @@ def main() -> int:
         notify(f"🚨 {'/'.join(r['brands']) or '자동차'} 속보", f"{r['title']}\n{r['link']}")
     if push:
         print(f"🔔 속보 푸시 {len(push)}건")
+
+    # 주제별 요약: 오늘 저장된 기사 전체로 다시 만든다(하루 두 번 돌아도 최신 상태 유지)
+    if not args.no_llm:
+        try:
+            digest = make_digest(fetch_day_rows(TODAY), TODAY)
+            if digest:
+                save_digest(digest)
+                print(f"📝 주제별 요약 {len(digest)}개 저장")
+        except Exception as e:  # noqa: BLE001
+            print(f"  ⚠️  요약 저장 실패(기사 저장에는 영향 없음 — auto_insight_v2.sql 적용 여부 확인): {e}")
     return 0
 
 

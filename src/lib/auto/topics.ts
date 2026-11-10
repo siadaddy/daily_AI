@@ -9,6 +9,7 @@ import type {
 export const TOPIC_ORDER: AutoTopic[] = [
   'bmw_group',
   'ev_aftersales',
+  'ev_industry',
   'regulation',
   'import_market',
   'sdv',
@@ -19,6 +20,7 @@ export const TOPIC_ORDER: AutoTopic[] = [
 export const TOPIC_LABEL: Record<AutoTopic, string> = {
   bmw_group: 'BMW 그룹',
   ev_aftersales: 'EV 애프터세일즈',
+  ev_industry: '전기차 · 배터리 산업',
   regulation: '리콜 · 규제',
   import_market: '수입차 시장 · 경쟁사',
   sdv: '소프트웨어 정의 차량',
@@ -39,6 +41,10 @@ export const ITEM_LABEL: Record<CompetitorItem, string> = {
   campaign: '캠페인',
   recall: '리콜',
 }
+
+/** 한 섹션에서 먼저 보여 줄 기사 수 — 섹션 위의 AI 요약이 전체를 대신하고, 나머지는 접어 둔다. '기타'는 통째로 접는다. */
+export const SECTION_VISIBLE = 3
+export const SECTION_VISIBLE_FILTERED = 10
 
 export function isAutoTopic(value: string | undefined): value is AutoTopic {
   return TOPIC_ORDER.includes(value as AutoTopic)

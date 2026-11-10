@@ -6,7 +6,7 @@ import unittest
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
 from utils.auto_rules import is_breaking, relevance_score, tag_brands  # noqa: E402
-from utils.news_common import dedupe, normalize_url, strip_publisher_suffix, title_key  # noqa: E402
+from utils.news_common import dedupe, normalize_url, strip_publisher_suffix, tidy_source, title_key  # noqa: E402
 
 
 class TagBrands(unittest.TestCase):
@@ -40,6 +40,13 @@ class Relevance(unittest.TestCase):
 
     def test_aftermarket_english_kept(self):
         self.assertGreater(relevance_score("Bosch names its Shop of the Year, technician training"), 0)
+
+
+class Source(unittest.TestCase):
+    def test_url_shaped_source_becomes_domain(self):
+        self.assertEqual(tidy_source("https://www.2news.co.kr/"), "2news.co.kr")
+        self.assertEqual(tidy_source("한국경제"), "한국경제")
+        self.assertEqual(tidy_source(""), "")
 
 
 class NewBrands(unittest.TestCase):

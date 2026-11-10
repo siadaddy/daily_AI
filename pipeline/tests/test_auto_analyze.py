@@ -45,6 +45,97 @@ class SelectFairness(unittest.TestCase):
         self.assertEqual(len(aa.select_for_analysis(tesla, limit=15)), 15)
 
 
+class StoryDedupe(unittest.TestCase):
+    LG = [
+        "LG엔솔, 배터리 진단시간 7시간→10분…CES 2027 혁신상 수상",
+        "LG에너지솔루션, 배터리 진단 '7시간→10분'…CES 2027 혁신상 수상",
+        "\"7시간 걸리던 배터리 진단, 단 10분에\"…LG엔솔, CES 혁신상 수상",
+        "LG엔솔, 폐배터리 진단 시간 대폭 단축..CES 혁신상 수상 - 머니투데이",
+    ]
+
+    def test_same_event_different_headlines_collapse_to_one(self):
+        arts = [art(t, source_type="naver") for t in self.LG] + [art("BMW 5시리즈 리콜 발표")]
+        out = aa.dedupe_stories(arts, rank=aa.story_rank)
+        self.assertEqual(len(out), 2)
+        self.assertEqual(max(a["dup_count"] for a in out), 4)
+
+    def test_templated_titles_with_different_subjects_are_kept(self):
+        a = art("탄소나노튜브 도전재 시장 2035년 전망: 전기차 배터리 수요 증가")
+        b = art("전기차 진단 장비 시장 2035년 전망: 전기차 보유 대수 증가")
+        self.assertEqual(len(aa.dedupe_stories([a, b], rank=aa.story_rank)), 2)
+
+    def test_conflicting_numbers_are_different_stories(self):
+        self.assertEqual(len(aa.dedupe_stories([art("BMW 3종 리콜"), art("BMW 5종 리콜")], rank=aa.story_rank)), 2)
+
+    def test_story_already_saved_in_recent_days_is_dropped(self):
+        out = aa.dedupe_stories([art(self.LG[0])], rank=aa.story_rank, known_titles=[self.LG[1]])
+        self.assertEqual(out, [])
+
+    def test_bmw_group_article_is_the_representative(self):
+        bmw = art("BMW, 삼성SDI·LG엔솔 배터리 추가 공급계약…유럽·미국 시장 공략", source_type="google")
+        other = art("삼성SDI·LG엔솔, 6세대 배터리 공급사로 선정", source_type="trade", summary="요약이 아주 길어도")
+        out = aa.dedupe_stories([other, bmw], rank=aa.story_rank)
+        self.assertEqual(len(out), 1)
+        self.assertEqual(out[0]["title"], bmw["title"])
+
+    def test_widely_covered_story_gets_selection_boost(self):
+        wide = art("현대차 신형 전기차 공개 행사", dup_count=4)
+        single = art("기아 신형 전기차 공개 행사", dup_count=1)
+        out = aa.select_for_analysis([single, wide], limit=1)
+        self.assertEqual(out[0]["title"], wide["title"])
+
+
+class Digest(unittest.TestCase):
+    def rows(self, topic, n, imp=3):
+        return [{"title": f"{topic} 기사 {i}", "summary_ko": "요약", "topic": topic, "importance": imp - (i % 2)} for i in range(n)]
+
+    def test_topics_with_too_few_articles_are_not_summarized(self):
+        g = aa.group_for_digest(self.rows("sdv", 1) + self.rows("regulation", 3) + self.rows("other", 9))
+        self.assertEqual(list(g), ["regulation"])
+
+    def test_group_is_capped_and_sorted_by_importance(self):
+        g = aa.group_for_digest(self.rows("regulation", 30, imp=5))
+        self.assertEqual(len(g["regulation"]), aa.DIGEST_PER_TOPIC)
+        self.assertGreaterEqual(g["regulation"][0]["importance"], g["regulation"][-1]["importance"])
+
+    def test_counts_come_from_code_not_llm(self):
+        g = {"regulation": self.rows("regulation", 3)}
+        data = {"topics": {"regulation": {"headline": "리콜 잇따라", "points": ["a", "b"], "article_count": 999},
+                           "all": {"headline": "총평", "points": ["x"]}}}
+        out = aa.normalize_digest(data, g, {"regulation": 22}, 150, "2026-11-10")
+        by = {d["topic"]: d for d in out}
+        self.assertEqual(by["regulation"]["article_count"], 22)
+        self.assertEqual(by["all"]["article_count"], 150)
+
+    def test_invalid_digest_is_ignored(self):
+        self.assertEqual(aa.normalize_digest({"topics": "oops"}, {}, {}, 0, "d"), [])
+        self.assertEqual(aa.normalize_digest(None, {}, {}, 0, "d"), [])
+
+    def test_points_limited_to_three_and_blank_dropped(self):
+        g = {"sdv": self.rows("sdv", 2)}
+        data = {"topics": {"sdv": {"headline": "h", "points": ["1", "", "2", "3", "4"]}}}
+        self.assertEqual(aa.normalize_digest(data, g, {"sdv": 2}, 2, "d")[0]["points"], ["1", "2", "3"])
+
+    def test_prompt_forbids_counts_and_inventing(self):
+        p = aa.build_digest_prompt({"sdv": self.rows("sdv", 2)})
+        self.assertIn("건수는 쓰지 마세요", p)
+        self.assertIn("만들어내지 마세요", p)
+
+
+class Taxonomy(unittest.TestCase):
+    def test_ev_industry_is_a_topic_and_in_the_prompt(self):
+        self.assertIn("ev_industry", aa.TOPICS)
+        self.assertIn("ev_industry", aa.build_prompt([art("x")]))
+
+    def test_unknown_topic_falls_back_to_hint(self):
+        out = aa.normalize_item({"topic": "weird"}, art("x", topic_hint="ev_industry"))
+        self.assertEqual(out["topic"], "ev_industry")
+
+    def test_legacy_db_remap(self):
+        rows = [{"topic": "ev_industry"}, {"topic": "sdv"}]
+        self.assertEqual([r["topic"] for r in aa.remap_topics_for_legacy_db(rows)], ["import_market", "sdv"])
+
+
 class OpenAICall(unittest.TestCase):
     def test_uses_openai_json_mode_and_never_gemini(self):
         from unittest import mock

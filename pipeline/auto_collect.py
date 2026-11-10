@@ -26,7 +26,7 @@ from dotenv import load_dotenv
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from utils.news_common import (  # noqa: E402
-    clean_html, contains_any, dedupe, extract_source, is_excluded,
+    clean_html, contains_any, dedupe, extract_source, is_excluded, tidy_source,
     snippet, strip_publisher_suffix,
 )
 
@@ -116,7 +116,7 @@ def collect_google_news(cfg: dict, cutoff: datetime) -> list[dict]:
         if published and published < cutoff:
             continue
         raw_title = clean_html(e.get("title", ""))
-        source = (e.get("source") or {}).get("title") or extract_source(e.get("link", ""), "Google News")
+        source = tidy_source((e.get("source") or {}).get("title") or "") or extract_source(e.get("link", ""), "Google News")
         if not raw_title or not e.get("link"):
             continue
         items.append({

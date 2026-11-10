@@ -1,6 +1,12 @@
 import Link from 'next/link'
-import { fetchAutoArticles, fetchAutoDates } from '@/lib/auto/query'
 import {
+  fetchAutoArticles,
+  fetchAutoDates,
+  fetchAutoDigest,
+} from '@/lib/auto/query'
+import {
+  SECTION_VISIBLE,
+  SECTION_VISIBLE_FILTERED,
   TOPIC_LABEL,
   TOPIC_ORDER,
   brandCounts,
@@ -9,6 +15,7 @@ import {
   isAutoTopic,
   pickLead,
 } from '@/lib/auto/topics'
+import type { AutoDigest } from '@/lib/auto/types'
 import { AutoArticleItem } from './AutoArticleItem'
 import { autoHref } from './href'
 
@@ -40,6 +47,37 @@ function Chip({
   )
 }
 
+/** AI 가 쓴 주제별(또는 하루 전체) 요약. 건수는 코드가 센 값이고, 문장은 AI 가 쓴 것이라 라벨로 밝힌다. */
+function DigestBlock({ digest, label }: { digest: AutoDigest; label: string }) {
+  if (!digest.headline && digest.points.length === 0) return null
+  return (
+    <div className="flex max-w-3xl flex-col gap-2">
+      <p className="kicker kicker-accent">{label}</p>
+      {digest.headline && (
+        <p className="ed-display text-[1.0625rem] leading-snug">
+          {digest.headline}
+        </p>
+      )}
+      {digest.points.length > 0 && (
+        <ul className="flex flex-col gap-1.5">
+          {digest.points.map((pt, i) => (
+            <li key={i} className="flex gap-2 text-[0.875rem] leading-relaxed">
+              <span
+                aria-hidden="true"
+                className="font-[family-name:var(--font-mono)]"
+                style={{ color: 'var(--muted)' }}
+              >
+                ·
+              </span>
+              <span>{pt}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
 export async function AutoBriefing({
   date,
   topic,
@@ -61,7 +99,11 @@ export async function AutoBriefing({
     )
   }
 
-  const all = await fetchAutoArticles(selected)
+  const [all, digests] = await Promise.all([
+    fetchAutoArticles(selected),
+    fetchAutoDigest(selected),
+  ])
+  const digestOf = new Map(digests.map((d) => [d.topic, d]))
   const activeTopic = isAutoTopic(topic) ? topic : undefined
   const activeBrand =
     brand && all.some((r) => r.brands.includes(brand)) ? brand : undefined
@@ -90,6 +132,15 @@ export async function AutoBriefing({
           보고에 쓰기 전에 원문을 확인하세요.
         </p>
       </header>
+
+      {!filtering && digestOf.get('all') && (
+        <section aria-label="오늘의 총평">
+          <DigestBlock
+            digest={digestOf.get('all')!}
+            label="오늘의 총평 · AI 요약"
+          />
+        </section>
+      )}
 
       {dates.length > 1 && (
         <nav aria-label="날짜 선택" className="flex flex-wrap gap-2">
@@ -163,23 +214,48 @@ export async function AutoBriefing({
         </p>
       )}
 
-      {groups.map((g) => (
-        <section
-          key={g.topic}
-          aria-labelledby={`auto-${g.topic}`}
-          className="flex flex-col gap-5"
-        >
-          <div className="ed-section-head">
-            <h2 id={`auto-${g.topic}`} className="ed-section-title">
-              {TOPIC_LABEL[g.topic]}
-            </h2>
-            <span className="kicker">{g.rows.length}</span>
-          </div>
-          {g.rows.map((a) => (
-            <AutoArticleItem key={a.id} article={a} />
-          ))}
-        </section>
-      ))}
+      {groups.map((g) => {
+        const visible = activeTopic
+          ? SECTION_VISIBLE_FILTERED
+          : g.topic === 'other'
+            ? 0
+            : SECTION_VISIBLE
+        const head = g.rows.slice(0, visible)
+        const rest = g.rows.slice(visible)
+        // 브랜드 필터 중에는 주제 요약이 필터 결과와 어긋나므로 쓰지 않는다
+        const digest = activeBrand ? undefined : digestOf.get(g.topic)
+        return (
+          <section
+            key={g.topic}
+            aria-labelledby={`auto-${g.topic}`}
+            className="flex flex-col gap-5"
+          >
+            <div className="ed-section-head">
+              <h2 id={`auto-${g.topic}`} className="ed-section-title">
+                {TOPIC_LABEL[g.topic]}
+              </h2>
+              <span className="kicker">{g.rows.length}</span>
+            </div>
+            {digest && <DigestBlock digest={digest} label="AI 요약" />}
+            {head.map((a) => (
+              <AutoArticleItem key={a.id} article={a} />
+            ))}
+            {rest.length > 0 && (
+              <details className="flex flex-col gap-5">
+                <summary
+                  className="kicker cursor-pointer border-t border-[var(--rule)] pt-4 select-none hover:underline"
+                  style={{ color: 'var(--muted)' }}
+                >
+                  나머지 {rest.length}건 보기
+                </summary>
+                {rest.map((a) => (
+                  <AutoArticleItem key={a.id} article={a} />
+                ))}
+              </details>
+            )}
+          </section>
+        )
+      })}
     </div>
   )
 }

@@ -147,7 +147,7 @@
     {
       "q": "BYD 코리아 OR 비야디 한국",
       "lang": "ko",
-      "topic_hint": "import_market"
+      "topic_hint": "ev_industry"
     },
     {
       "q": "테슬라 서비스센터 OR 테슬라 AS",
@@ -157,12 +157,12 @@
     {
       "q": "전기차 신규등록 OR 전기차 판매 순위",
       "lang": "ko",
-      "topic_hint": "import_market"
+      "topic_hint": "ev_industry"
     },
     {
       "q": "중국 전기차 한국 진출 OR 샤오펑 OR 지커",
       "lang": "ko",
-      "topic_hint": "import_market"
+      "topic_hint": "ev_industry"
     },
     {
       "q": "전기차 리콜 OR 전기차 배터리 화재",
@@ -177,7 +177,7 @@
     {
       "q": "BYD OR NIO OR XPeng Europe service network",
       "lang": "en",
-      "topic_hint": "import_market"
+      "topic_hint": "ev_industry"
     },
     {
       "q": "EV recall battery",
@@ -249,7 +249,7 @@
     },
     {
       "q": "BYD 코리아",
-      "topic_hint": "import_market"
+      "topic_hint": "ev_industry"
     },
     {
       "q": "테슬라 서비스센터",
@@ -257,11 +257,11 @@
     },
     {
       "q": "전기차 신규등록",
-      "topic_hint": "import_market"
+      "topic_hint": "ev_industry"
     },
     {
       "q": "중국 전기차 한국",
-      "topic_hint": "import_market"
+      "topic_hint": "ev_industry"
     },
     {
       "q": "전기차 리콜 배터리",
