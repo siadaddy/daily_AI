@@ -364,6 +364,10 @@ def normalize_digest(data: Optional[dict], groups: dict[str, list[dict]], counts
     """LLM 요약을 검증해 저장 행으로. 건수는 코드가 채운다(LLM 값 사용 안 함)."""
     topics = (data or {}).get("topics")
     if not isinstance(topics, dict):
+        # 모델이 "topics" 래퍼 없이 {"bmw_group":{...},"all":{...}} 로 바로 줄 때도 받아준다
+        flat = {k: v for k, v in (data or {}).items() if isinstance(v, dict)}
+        topics = flat or None
+    if not isinstance(topics, dict):
         return []
     out = []
     for key in (*groups.keys(), "all"):
@@ -420,7 +424,10 @@ def make_digest(day_rows: list[dict], today: str) -> list[dict]:
         print(f"  ⚠️  요약 생성 실패 — 이번엔 요약 없이: {e}")
         return []
     counts = {t: sum(1 for r in day_rows if r.get("topic") == t) for t in groups}
-    return normalize_digest(data, groups, counts, len(day_rows), today)
+    out = normalize_digest(data, groups, counts, len(day_rows), today)
+    if not out:
+        print(f"  ⚠️  요약 응답을 읽지 못함 — 최상위 키: {list((data or {}).keys())[:8]}")
+    return out
 
 
 def save_rows(rows: list[dict], competitor_rows: list[dict]) -> list[dict]:
@@ -540,7 +547,9 @@ def main() -> int:
     # 주제별 요약: 오늘 저장된 기사 전체로 다시 만든다(하루 두 번 돌아도 최신 상태 유지)
     if not args.no_llm:
         try:
-            digest = make_digest(fetch_day_rows(TODAY), TODAY)
+            day_rows = fetch_day_rows(TODAY)
+            print(f"📝 요약 대상: 오늘 저장된 기사 {len(day_rows)}건")
+            digest = make_digest(day_rows, TODAY)
             if digest:
                 save_digest(digest)
                 print(f"📝 주제별 요약 {len(digest)}개 저장")

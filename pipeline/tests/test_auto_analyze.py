@@ -111,6 +111,12 @@ class Digest(unittest.TestCase):
         self.assertEqual(aa.normalize_digest({"topics": "oops"}, {}, {}, 0, "d"), [])
         self.assertEqual(aa.normalize_digest(None, {}, {}, 0, "d"), [])
 
+    def test_digest_without_topics_wrapper_is_accepted(self):
+        g = {"sdv": self.rows("sdv", 2)}
+        data = {"sdv": {"headline": "h", "points": ["1"]}, "all": {"headline": "총평", "points": ["x"]}}
+        out = aa.normalize_digest(data, g, {"sdv": 2}, 5, "d")
+        self.assertEqual({d["topic"] for d in out}, {"sdv", "all"})
+
     def test_points_limited_to_three_and_blank_dropped(self):
         g = {"sdv": self.rows("sdv", 2)}
         data = {"topics": {"sdv": {"headline": "h", "points": ["1", "", "2", "3", "4"]}}}
