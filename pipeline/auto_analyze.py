@@ -419,14 +419,17 @@ def make_digest(day_rows: list[dict], today: str) -> list[dict]:
     if not groups:
         return []
     try:
-        data = parse_llm_json(ask_openai(build_digest_prompt(groups), max_tokens=3000))
+        # 한글은 토큰을 많이 쓴다 — 주제 8개 요약이 3000토큰에서 잘려 파싱 실패했던 적이 있어 넉넉히 둔다
+        text = ask_openai(build_digest_prompt(groups), max_tokens=8000)
+        data = parse_llm_json(text)
     except Exception as e:  # noqa: BLE001
         print(f"  ⚠️  요약 생성 실패 — 이번엔 요약 없이: {e}")
         return []
     counts = {t: sum(1 for r in day_rows if r.get("topic") == t) for t in groups}
     out = normalize_digest(data, groups, counts, len(day_rows), today)
     if not out:
-        print(f"  ⚠️  요약 응답을 읽지 못함 — 최상위 키: {list((data or {}).keys())[:8]}")
+        head, tail = (text or "")[:150].replace("\n", " "), (text or "")[-150:].replace("\n", " ")
+        print(f"  ⚠️  요약 응답을 읽지 못함({len(text or '')}자, 최상위 키: {list((data or {}).keys())[:8]})\n     앞: {head}\n     뒤: {tail}")
     return out
 
 
