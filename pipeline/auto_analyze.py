@@ -149,6 +149,24 @@ def build_prompt(batch: list[dict]) -> str:
 {articles}"""
 
 
+def parse_json_object(text: str) -> Optional[dict]:
+    """키 구조를 따지지 않는 일반 JSON 객체 파서(요약용). 코드펜스·앞뒤 잡설은 걷어낸다. 못 읽으면 None.
+
+    parse_llm_json 은 {"items": [...]} 전용이라 다른 모양의 응답은 정상이어도 버린다 — 요약 응답에 쓰면 안 된다.
+    """
+    if not text:
+        return None
+    body = re.sub(r"```(?:json)?", "", text).strip()
+    for cand in (body, body[body.find("{"):body.rfind("}") + 1]):
+        try:
+            data = json.loads(cand)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(data, dict):
+            return data
+    return None
+
+
 def parse_llm_json(text: str) -> Optional[dict]:
     """LLM 응답에서 {"items": [...]} 를 복구한다. 못 읽으면 None.
 
@@ -421,7 +439,7 @@ def make_digest(day_rows: list[dict], today: str) -> list[dict]:
     try:
         # 한글은 토큰을 많이 쓴다 — 주제 8개 요약이 3000토큰에서 잘려 파싱 실패했던 적이 있어 넉넉히 둔다
         text = ask_openai(build_digest_prompt(groups), max_tokens=8000)
-        data = parse_llm_json(text)
+        data = parse_json_object(text)
     except Exception as e:  # noqa: BLE001
         print(f"  ⚠️  요약 생성 실패 — 이번엔 요약 없이: {e}")
         return []

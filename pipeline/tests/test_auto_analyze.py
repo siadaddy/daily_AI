@@ -111,6 +111,15 @@ class Digest(unittest.TestCase):
         self.assertEqual(aa.normalize_digest({"topics": "oops"}, {}, {}, 0, "d"), [])
         self.assertEqual(aa.normalize_digest(None, {}, {}, 0, "d"), [])
 
+    def test_digest_response_shape_is_parsed(self):
+        # items 키가 없는 정상 응답을 기사 분석용 파서가 버려서 요약이 한 번도 저장되지 못했다
+        text = '```json\n{"topics": {"sdv": {"headline": "h", "points": ["a", "b"]}}}\n```'
+        data = aa.parse_json_object(text)
+        self.assertEqual(data["topics"]["sdv"]["headline"], "h")
+        self.assertEqual(aa.parse_json_object('설명 {"topics": {}} 끝')["topics"], {})
+        self.assertIsNone(aa.parse_json_object("not json"))
+        self.assertIsNone(aa.parse_json_object(""))
+
     def test_digest_without_topics_wrapper_is_accepted(self):
         g = {"sdv": self.rows("sdv", 2)}
         data = {"sdv": {"headline": "h", "points": ["1"]}, "all": {"headline": "총평", "points": ["x"]}}
